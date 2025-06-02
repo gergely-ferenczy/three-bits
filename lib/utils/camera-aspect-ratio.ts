@@ -9,7 +9,7 @@ export function getCameraAspectRatio(
 ): number {
   let aspect;
   if (camera instanceof THREE.OrthographicCamera) {
-    aspect = camera.right / camera.top;
+    aspect = (camera.right - camera.left) / (camera.top - camera.bottom);
   } else if (camera instanceof THREE.PerspectiveCamera) {
     aspect = camera.aspect;
   } else {

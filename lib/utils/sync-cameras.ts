@@ -21,7 +21,8 @@ export function syncCameras(from: THREE.Camera, to: THREE.Camera, target: THREE.
     const oc = from;
     const pc = to;
     const distance =
-      (oc.top / oc.zoom / Math.tan(THREE.MathUtils.degToRad(0.5 * pc.fov))) * pc.zoom;
+      ((oc.top - oc.bottom) / 2 / oc.zoom / Math.tan(THREE.MathUtils.degToRad(0.5 * pc.fov))) *
+      pc.zoom;
     const cameraDir = oc.position.clone().sub(target).normalize();
     pc.position.copy(target).add(cameraDir.multiplyScalar(distance));
     pc.aspect = getCameraAspectRatio(from);

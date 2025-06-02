@@ -11,12 +11,14 @@ export default tsEslint.config(
     languageOptions: {
       parserOptions: {
         parser: '@typescript-eslint/parser',
-        projectService: true,
+        project: ['./tsconfig.json', './tsconfig.dev.json'],
       },
     },
     settings: {},
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 );

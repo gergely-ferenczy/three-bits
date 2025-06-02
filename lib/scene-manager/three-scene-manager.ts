@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
+import { ThreeEventDispatcher } from '../event-dispatcher/three-event-dispatcher';
 import { disposeObjectResources } from '../utils/dispose-object-resources';
 import { syncCameras } from '../utils/sync-cameras';
-import { ThreeEventDispatcher } from '../event-dispatcher/three-event-dispatcher';
 
 export class ThreeSceneManager {
   private scene: THREE.Scene;

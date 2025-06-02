@@ -1,4 +1,5 @@
 import { Vector2 } from 'three';
+
 import { ActivePointer } from '../../common/active-pointer';
 import { calculatePointerCoords } from '../../utils/calculate-pointer-coords';
 

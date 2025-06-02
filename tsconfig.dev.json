@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
-    "declarationDir": "dist/types",
     "lib": ["ESNext", "DOM"],
     "types": ["node"],
     "target": "ESNext",
@@ -11,7 +9,8 @@
     "pretty": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "strict": true
+    "strict": true,
+    "noEmit": true
   },
-  "include": ["lib/**/*"]
+  "include": ["test/**/*", "vite.config.ts"]
 }
