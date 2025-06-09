@@ -386,9 +386,17 @@ export class ThreeEventDispatcher {
     event.target = this.targetObjects[0];
     event.currentTarget = this.targetObjects[0];
     event.eventPhase = phase;
-    for (const globalListener of this.globalListeners) {
-      if (globalListener.type == event.type) {
-        globalListener.listener(event);
+
+    const captureEvent = phase === EventPhases.CAPTURING_PHASE;
+    const listenerEntries = this.globalListeners.filter((l) => {
+      const captureOption =
+        typeof l.options == 'boolean' ? l.options : (l.options?.capture ?? false);
+      return l.type === event.type && captureEvent == captureOption;
+    });
+
+    for (const listenerEntry of listenerEntries) {
+      if (listenerEntry.type == event.type) {
+        listenerEntry.listener(event);
       }
     }
   }

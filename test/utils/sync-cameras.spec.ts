@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { describe, expect, test } from 'vitest';
 
 import { getCameraAspectRatio, syncCameras } from '../../lib/utils';
-import '../helpers/to-be-close-to-vector';
+import '../test-helpers/to-be-close-to-vector';
+
 interface Case {
   orthographicCamera: THREE.OrthographicCamera;
   perspectiveCamera: THREE.PerspectiveCamera;

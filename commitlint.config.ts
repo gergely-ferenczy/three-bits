@@ -9,11 +9,6 @@ const Configuration: UserConfig = {
       RuleConfigSeverity.Error,
       'always',
       ['chore', 'ci', 'docs', 'feat', 'fix', 'perf', 'refactor', 'revert', 'style', 'test'],
-    ],
-    'subject-case': [
-      RuleConfigSeverity.Error,
-      'always',
-      ['lower-case']
     ]
   },
 
