@@ -33,6 +33,22 @@ interface StopPropagationRef {
   value: boolean;
 }
 
+/**
+ * Dispatches pointer and mouse events to {@link THREE.Object3D} instances in a
+ * Three.js scene.
+ *
+ * Handles event registration, propagation (capturing, bubbling, at-target),
+ * pointer capture, and intersection-based hit testing. Supports global and
+ * per-object event listeners, and manages pointer enter/leave/over/out events
+ * for interactive 3D objects.
+ *
+ * Usage:
+ *  - Instantiate with a DOM element and camera.
+ *  - Register event listeners on {@link THREE.Object3D} instances.
+ *  - When using animations, call `update()` on animation frames to refresh
+ *    pointer intersections.
+ *  - Use `dispose()` to remove all DOM event listeners when done.
+ */
 export class ThreeEventDispatcher {
   private handlers: { [key in HandlerEventType]: (ev: HTMLElementEventMap[key]) => void };
   private lastPointerEvent: PointerEvent | null;
@@ -71,6 +87,9 @@ export class ThreeEventDispatcher {
     this.domElement.addEventListener('wheel', this.handlers.wheel);
   }
 
+  /**
+   * Removes all DOM event listeners and cleans up resources.
+   */
   dispose() {
     this.domElement.removeEventListener('pointerdown', this.handlers.pointerdown);
     this.domElement.removeEventListener('pointerup', this.handlers.pointerup);
@@ -81,17 +100,36 @@ export class ThreeEventDispatcher {
     this.domElement.removeEventListener('wheel', this.handlers.wheel);
   }
 
+  /**
+   * Updates the raycaster intersections and hit box events.
+   *
+   * When using animations, call `update()` on animation frames to refresh
+   * pointer intersections.
+   */
   update() {
     this.updateIntersections();
     this.updateHitBoxEvents();
   }
 
+  /**
+   * Sets the camera used for raycasting.
+   *
+   * @param camera
+   */
   setCamera(camera: THREE.Camera) {
     this.camera = camera;
     this.updateIntersections();
     this.updateHitBoxEvents();
   }
 
+  /**
+   * Adds an event listener to a {@link THREE.Object3D}.
+   *
+   * @param object Object to attach the listener to.
+   * @param type Event type.
+   * @param listener Event handler function.
+   * @param options Optional event listener options (capture, once, signal).
+   */
   addEventListener<K extends keyof ThreeEventHandlersEventMap>(
     object: THREE.Object3D,
     type: K,
@@ -128,6 +166,14 @@ export class ThreeEventDispatcher {
     this.eventObjects = Array.from(this.events.keys());
   }
 
+  /**
+   * Removes an event listener from a {@link THREE.Object3D}.
+   *
+   * @param object Object to remove the listener from.
+   * @param type Event type.
+   * @param listener Event handler function.
+   * @param options Optional event listener options.
+   */
   removeEventListener<K extends keyof ThreeEventHandlersEventMap>(
     object: THREE.Object3D,
     type: K,
@@ -146,11 +192,23 @@ export class ThreeEventDispatcher {
     }
   }
 
+  /**
+   * Removes all event listeners from a {@link THREE.Object3D}.
+   *
+   * @param object Object to remove all listeners from.
+   */
   removeAllEventListeners(object: THREE.Object3D): void {
     this.events.delete(object);
     this.eventObjects = Array.from(this.events.keys());
   }
 
+  /**
+   * Adds a global event listener to the scene.
+   *
+   * @param type Event type.
+   * @param listener Event handler function.
+   * @param options Optional event listener options.
+   */
   addGlobalEventListener<K extends keyof ThreeEventHandlersEventMap>(
     type: K,
     listener: (ev: ThreeEventHandlersEventMap[K]) => void,
@@ -159,6 +217,13 @@ export class ThreeEventDispatcher {
     this.globalListeners.push({ type, listener: listener as ThreeEventListener, options });
   }
 
+  /**
+   * Removes a global event listener from the scene.
+   *
+   * @param type Event type.
+   * @param listener Event handler function.
+   * @param options Optional event listener options.
+   */
   removeGlobalEventListener<K extends keyof ThreeEventHandlersEventMap>(
     type: K,
     listener: (ev: ThreeEventHandlersEventMap[K]) => void,
@@ -169,11 +234,23 @@ export class ThreeEventDispatcher {
     );
   }
 
+  /**
+   * Sets pointer capture for a specific pointerId on a {@link THREE.Object3D}.
+   *
+   * @param object Object to capture the pointer.
+   * @param pointerId Pointer identifier.
+   */
   setPointerCapture(object: THREE.Object3D, pointerId: number): void {
     this.domElement.setPointerCapture(pointerId);
     this.pointerCaptures.set(pointerId, object);
   }
 
+  /**
+   * Releases pointer capture for a specific `pointerId` on a {@link THREE.Object3D}.
+   *
+   * @param object Object to release the pointer from.
+   * @param pointerId Pointer identifier.
+   */
   releasePointerCapture(object: THREE.Object3D, pointerId: number): void {
     if (this.pointerCaptures.get(pointerId) === object) {
       this.domElement.releasePointerCapture(pointerId);
@@ -181,6 +258,14 @@ export class ThreeEventDispatcher {
     }
   }
 
+  /**
+   * Checks if a {@link THREE.Object3D} has pointer capture for a given
+   * pointerId.
+   *
+   * @param object The object to check.
+   * @param pointerId The pointer identifier.
+   * @returns True if the object has pointer capture for the pointerId.
+   */
   hasPointerCapture(object: THREE.Object3D, pointerId: number): boolean {
     return this.pointerCaptures.get(pointerId) === object;
   }

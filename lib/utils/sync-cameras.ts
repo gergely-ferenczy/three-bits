@@ -2,6 +2,27 @@ import * as THREE from 'three';
 
 import { getCameraAspectRatio } from './camera-aspect-ratio';
 
+/**
+ * Synchronizes the position, orientation, and projection parameters between a
+ * {@link THREE.PerspectiveCamera} and an {@link THREE.OrthographicCamera}.
+ *
+ * When converting from a PerspectiveCamera to an OrthographicCamera, this
+ * function sets the orthographic camera's bounds, zoom, and position to match
+ * the perspective camera's view.
+ *
+ * When converting from an OrthographicCamera to a PerspectiveCamera, it sets
+ * the perspective camera's position and aspect ratio to match the orthographic
+ * camera's view at the given target point.
+ *
+ * @note If either `from` or `to` is an unknown type of camera, the function
+ * returns without any action.
+ *
+ * @param from Source camera which can be either a
+ *  {@link THREE.PerspectiveCamera} or an {@link THREE.OrthographicCamera}.
+ * @param to Destination camera which can be either a
+ *  {@link THREE.PerspectiveCamera} or an {@link THREE.OrthographicCamera}.
+ * @param target Point that the `from` source camera looks at.
+ */
 export function syncCameras(from: THREE.Camera, to: THREE.Camera, target: THREE.Vector3) {
   if (from instanceof THREE.PerspectiveCamera && to instanceof THREE.OrthographicCamera) {
     const pc = from;
