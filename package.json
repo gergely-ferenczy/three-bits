@@ -5,6 +5,10 @@
   "type": "module",
   "author": "Gergely Ferenczy",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gergely-ferenczy/three-bits.git"
+  },
   "keywords": [
     "three",
     "three.js",
@@ -26,13 +30,12 @@
     "format": "prettier --write .",
     "prepare": "husky"
   },
-  "types": "./dist/types/index.d.ts",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "engines": {
+    "node": ">=14"
+  },
   "exports": {
     "types": "./dist/types/index.d.ts",
-    "require": "./dist/index.cjs",
-    "import": "./dist/index.mjs"
+    "default": "./dist/index.js"
   },
   "sideEffects": false,
   "files": [

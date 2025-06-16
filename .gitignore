@@ -1,5 +1,7 @@
-node_modules
+coverage
 dist
+node_modules
+*.tgz
 
 # Editor directories and files
 .vscode/*

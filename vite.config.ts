@@ -4,12 +4,12 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   build: {
     minify: false,
-    target: 'es2018',
+    target: 'esnext',
     sourcemap: true,
     lib: {
-      formats: ['cjs', 'es'],
+      formats: ['es'],
       entry: 'lib/index.ts',
-      fileName: (format) => (format === 'es' ? '[name].mjs' : '[name].cjs'),
+      fileName: () => '[name].js',
     },
     rollupOptions: {
       external: (id: string) => !id.startsWith('.') && !path.isAbsolute(id),
