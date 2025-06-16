@@ -3,7 +3,7 @@ import tsEslint from 'typescript-eslint';
 
 export default tsEslint.config(
   {
-    ignores: ['eslint.config.js', 'eslint-import.config.js', 'dist/**'],
+    ignores: ['eslint.config.js', 'eslint-import.config.js', 'lint-staged.config.js', 'dist/**'],
   },
   eslint.configs.recommended,
   ...tsEslint.configs.recommendedTypeChecked,
@@ -19,7 +19,7 @@ export default tsEslint.config(
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off'
+      '@typescript-eslint/ban-ts-comment': 'off',
     },
   },
 );

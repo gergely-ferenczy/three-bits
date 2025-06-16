@@ -9,7 +9,7 @@ const Configuration: UserConfig = {
       RuleConfigSeverity.Error,
       'always',
       ['chore', 'ci', 'docs', 'feat', 'fix', 'perf', 'refactor', 'revert', 'style', 'test'],
-    ]
+    ],
   },
 
   defaultIgnores: false,
