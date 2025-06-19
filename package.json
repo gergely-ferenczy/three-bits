@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "author": "Gergely Ferenczy",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gergely-ferenczy/three-bits.git"
