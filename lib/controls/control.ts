@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 
 import { ControllableCamera } from '../common/controllable-camera';
+import { ControlEventType } from '../common/control-event-type';
+import { ControlEventListener } from '../common/control-event-listener';
 
 export interface Control {
   attach(domElement: HTMLElement): void;

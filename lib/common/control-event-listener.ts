@@ -1,1 +1,1 @@
-type ControlEventListener = () => void;
+export type ControlEventListener = () => void;

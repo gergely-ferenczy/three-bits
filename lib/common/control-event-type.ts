@@ -1,1 +1,1 @@
-type ControlEventType = 'start' | 'end' | 'change';
+export type ControlEventType = 'start' | 'end' | 'change';

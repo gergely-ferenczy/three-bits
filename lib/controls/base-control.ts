@@ -6,6 +6,8 @@ import { ControlFragment } from '../control-fagments/control-fragment';
 import { WheelHandler, WheelHandlerOptions } from './handlers/wheel-handler';
 import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
+import { ControlEventType } from '../common/control-event-type';
+import { ControlEventListener } from '../common/control-event-listener';
 
 export interface BaseControlOptions {
   pointerHandlerOptions: PointerHandlerOptions;

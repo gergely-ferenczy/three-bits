@@ -1,4 +1,6 @@
 export * from './common/camera-type';
+export * from './common/control-event-listener';
+export * from './common/control-event-type';
 export * from './common/mouse-button';
 export * from './common/touch-gesture';
 
