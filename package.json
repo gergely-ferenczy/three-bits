@@ -28,6 +28,7 @@
     "lint": "eslint .",
     "import-fix": "eslint . --no-inline-config --fix --config eslint-import.config.js",
     "format": "prettier --write .",
+    "prepack": "npm run build",
     "prepare": "husky"
   },
   "engines": {
