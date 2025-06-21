@@ -123,17 +123,17 @@ export abstract class BaseControl implements Control {
   }
 
   setTarget(target: THREE.Vector3, keepRelativeCameraPos = false) {
+    const newTarget = target.clone();
     for (const cf of this.controlFragmentMap.values()) {
-      cf.setTarget(target);
+      cf.setTarget(newTarget);
     }
     if (keepRelativeCameraPos) {
       const relativeCameraPos = this.camera.position.clone().sub(this.target);
-      this.target.copy(target);
-      this.camera.position.copy(target).add(relativeCameraPos);
+      this.camera.position.copy(newTarget).add(relativeCameraPos);
     } else {
-      this.target.copy(target);
       this.camera.lookAt(target);
     }
+    this.target = newTarget;
     this.dispatchAtomicEvent();
   }
 
@@ -184,10 +184,6 @@ export abstract class BaseControl implements Control {
 
   private handleInputChange(activePointers: ActivePointer[]) {
     if (!this.enabled) return;
-
-    // this.camera.position.copy(this.start.cameraPos);
-    // this.camera.zoom = this.start.cameraZoom;
-    // this.target.copy(this.start.target);
 
     for (const controlId of this.activeControls) {
       const controlFragment = this.controlFragmentMap.get(controlId);
