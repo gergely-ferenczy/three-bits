@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.1.3...v0.2.0) (2025-06-30)
+
+### Features
+
+- add separate speed and inversion config option for zoom control 96507c5
+
+### Bug Fixes
+
+- add missing export 049dd9e
+
 ## [0.1.3](https://github.com/gergely-ferenczy/three-bits/compare/v0.1.2...v0.1.3) (2025-06-21)
 
 ## [0.1.2](https://github.com/gergely-ferenczy/three-bits/compare/v0.1.1...v0.1.2) (2025-06-21)
