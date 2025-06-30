@@ -124,6 +124,14 @@ export abstract class BaseControl implements Control {
     return this.target.clone();
   }
 
+  /**
+   * Sets a new target point for the control, which is typically the point the
+   * camera orbits around or looks at.
+   *
+   * @param target The new target as a THREE.Vector3.
+   * @param keepRelativeCameraPos  Moves the camera so its position relative to
+   *  the target remains unchanged. [default=false]
+   */
   setTarget(target: THREE.Vector3, keepRelativeCameraPos = false) {
     const newTarget = target.clone();
     for (const cf of this.controlFragmentMap.values()) {
