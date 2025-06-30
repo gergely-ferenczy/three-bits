@@ -12,10 +12,12 @@ export interface BaseRotationControlOptions {
   inputMappings: { [key in MovementType]: ControlInput[] };
 }
 
+export type InputMappings = { [key in MovementType]: ControlInput[] };
+
 export interface PartialBaseRotationControlOptions {
   rotation?: Partial<FixedUpRotationFragmentOptions>;
   truck?: Partial<TruckFragmentOptions>;
   zoomOrDolly?: Partial<ZoomDollyFragmentOptions>;
-  inputMappings?: { [key in MovementType]: ControlInput[] };
+  inputMappings?: InputMappings;
   inverseWheel?: boolean;
 }

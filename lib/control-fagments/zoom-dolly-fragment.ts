@@ -12,7 +12,10 @@ const DefaultZoomDollyControlOptions: ZoomDollyFragmentOptions = {
   enabled: true,
   type: 'zoom',
   secondaryMotion: 'truck',
-  speed: 1,
+  scrollSpeed: 1,
+  pointerSpeed: 1,
+  invertScroll: false,
+  invertPointer: false,
   minDistance: 0,
   maxDistance: Infinity,
   minZoom: -Infinity,
@@ -23,7 +26,10 @@ export interface ZoomDollyFragmentOptions {
   enabled: boolean;
   type: 'zoom' | 'dolly' | 'zoomAndDolly';
   secondaryMotion: 'none' | 'truck' | 'orbit' | 'rotate';
-  speed: number;
+  scrollSpeed: number;
+  pointerSpeed: number;
+  invertScroll: boolean;
+  invertPointer: boolean;
   minDistance: number;
   maxDistance: number;
   minZoom: number;
@@ -105,7 +111,11 @@ export class ZoomDollyFragment implements ControlFragment {
     } else {
       delta = activePointers[0].delta.y;
     }
-    delta *= this.options.speed;
+    delta *= this.options.pointerSpeed;
+
+    if (this.options.invertPointer) {
+      delta *= -1;
+    }
 
     if (this.options.secondaryMotion == 'truck') {
       const coords = getStartCoordsFromActivePointers(activePointers);
@@ -128,6 +138,11 @@ export class ZoomDollyFragment implements ControlFragment {
     target: THREE.Vector3,
   ): void {
     this.updateStartValues([activePointer]);
+
+    delta *= this.options.scrollSpeed;
+    if (this.options.invertScroll) {
+      delta *= -1;
+    }
 
     if (this.options.secondaryMotion == 'truck') {
       this.zoomOrDollyAndTruck(activePointer.coords, delta, camera, target);
