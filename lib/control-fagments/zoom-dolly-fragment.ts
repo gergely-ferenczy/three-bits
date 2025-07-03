@@ -187,6 +187,7 @@ export class ZoomDollyFragment implements ControlFragment {
       camera.zoom *= zoomDelta;
       camera.updateProjectionMatrix();
       camera.position.add(dollyDelta);
+      camera.updateMatrixWorld();
     } else if (this.options.type == 'zoom') {
       const zoomDelta = this.zoom(delta);
       camera.zoom *= zoomDelta;
@@ -194,6 +195,7 @@ export class ZoomDollyFragment implements ControlFragment {
     } else if (this.options.type == 'dolly') {
       const dollyDelta = this.dolly(delta);
       camera.position.add(dollyDelta);
+      camera.updateMatrixWorld();
     }
   }
 
