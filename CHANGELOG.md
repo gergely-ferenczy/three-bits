@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1](https://github.com/gergely-ferenczy/three-bits/compare/v0.2.0...v0.2.1) (2025-07-03)
+
+### Bug Fixes
+
+- update camera matrix after position change in ZoomDollyFragment 6af838f
+
 ## [0.2.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.1.3...v0.2.0) (2025-06-30)
 
 ### Features
