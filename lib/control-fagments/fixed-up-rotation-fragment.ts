@@ -121,8 +121,9 @@ export class FixedUpRotationFragment implements ControlFragment {
     camera: ControllableCamera,
     target: THREE.Vector3,
   ): void {
-    const aspect = getCameraAspectRatio(this.camera);
+    if (!this.options.enabled) return;
 
+    const aspect = getCameraAspectRatio(this.camera);
     const deltaCoords = getDeltaCoordsFromActivePointers(activePointers);
     deltaCoords.x *= aspect;
     let horizontalAngleDelta = deltaCoords.x * this.options.speed;

@@ -137,6 +137,8 @@ export class ZoomDollyFragment implements ControlFragment {
     camera: ControllableCamera,
     target: THREE.Vector3,
   ): void {
+    if (!this.options.enabled) return;
+
     this.updateStartValues([activePointer]);
 
     delta *= this.options.scrollSpeed;

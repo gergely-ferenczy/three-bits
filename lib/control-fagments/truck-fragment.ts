@@ -160,6 +160,8 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
     camera: ControllableCamera,
     target: THREE.Vector3,
   ): void {
+    if (!this.options.enabled) return;
+
     if (this.options.mode == 'approximate') {
       this.handlePointerInputApproximate(activePointers, camera, target);
     } /* if (this.options.mode == 'exact') */ else {

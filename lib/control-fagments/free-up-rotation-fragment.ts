@@ -96,6 +96,8 @@ export class FreeUpRotationFragment implements ControlFragment {
     camera: ControllableCamera,
     target: THREE.Vector3,
   ): void {
+    if (!this.options.enabled) return;
+
     const aspect = getCameraAspectRatio(this.camera);
 
     const deltaCoords = getDeltaCoordsFromActivePointers(activePointers);
