@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2](https://github.com/gergely-ferenczy/three-bits/compare/v0.2.1...v0.2.2) (2025-07-06)
+
+### Bug Fixes
+
+- enable control fragment option 1cef099
+
 ## [0.2.1](https://github.com/gergely-ferenczy/three-bits/compare/v0.2.0...v0.2.1) (2025-07-03)
 
 ### Bug Fixes
