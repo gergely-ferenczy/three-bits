@@ -26,6 +26,4 @@ export * from './event-dispatcher/three-event-listener';
 export * from './event-dispatcher/three-event-types';
 export * from './event-dispatcher/three-event';
 
-export * from './scene-manager/three-scene-manager';
-
 export * as ThreeBitUtils from './utils';
