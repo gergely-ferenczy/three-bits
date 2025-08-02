@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.2.2...v0.3.0) (2025-08-02)
+
+### Features
+
+- remove SceneManager 4f379b1
+
+### Bug Fixes
+
+- event addition/removal handling and add regression tests 1eaa535
+
 ## [0.2.2](https://github.com/gergely-ferenczy/three-bits/compare/v0.2.1...v0.2.2) (2025-07-06)
 
 ### Bug Fixes
