@@ -7,7 +7,6 @@ import { ControllableCamera } from '../common/controllable-camera';
 import {
   getCoordsFromActivePointers,
   getDeltaCoordsFromActivePointers,
-  getStartCoordsFromActivePointers,
 } from '../common/internal/get-coords-from-active-pointers';
 import { calculatePointerTarget } from '../utils/calculate-pointer-target';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';

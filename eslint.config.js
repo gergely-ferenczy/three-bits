@@ -1,5 +1,6 @@
 import eslint from '@eslint/js';
 import tsEslint from 'typescript-eslint';
+import unusedImports from 'eslint-plugin-unused-imports';
 
 export default tsEslint.config(
   {
@@ -7,6 +8,16 @@ export default tsEslint.config(
   },
   eslint.configs.recommended,
   ...tsEslint.configs.recommendedTypeChecked,
+  {
+    // eslint-plugin-unused-imports not have a flat config
+    plugins: {
+      'unused-imports': unusedImports,
+    },
+    rules: {
+      'unused-imports/no-unused-vars': 'off',
+      'unused-imports/no-unused-imports': 'warn',
+    },
+  },
   {
     languageOptions: {
       parserOptions: {

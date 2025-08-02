@@ -3,9 +3,7 @@ import * as THREE from 'three';
 import { ControlFragment } from './control-fragment';
 import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
-import { clamp } from '../common/internal/clamp';
 import { getDeltaCoordsFromActivePointers } from '../common/internal/get-coords-from-active-pointers';
-import { calculateSphericalAngles } from '../utils/calculate-spherical-angles';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 
 const _v1 = new THREE.Vector3();
