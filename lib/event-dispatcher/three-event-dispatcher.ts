@@ -182,8 +182,16 @@ export class ThreeEventDispatcher {
   ): void {
     const eventState = this.events.get(object);
     if (eventState) {
+      const captureOption = typeof options == 'boolean' ? options : (options?.capture ?? false);
+
       eventState.listenerEntries = eventState.listenerEntries.filter(
-        (s) => !(s.type === type && s.listener === listener && s.options === options),
+        (s) =>
+          !(
+            s.type === type &&
+            s.listener === listener &&
+            (typeof s.options == 'boolean' ? s.options : (s.options?.capture ?? false)) ===
+              captureOption
+          ),
       );
       if (eventState.listenerEntries.length == 0) {
         this.events.delete(object);
@@ -229,7 +237,7 @@ export class ThreeEventDispatcher {
     listener: (ev: ThreeEventHandlersEventMap[K]) => void,
     options?: boolean | AddEventListenerOptions,
   ): void {
-    this.globalListeners.filter(
+    this.globalListeners = this.globalListeners.filter(
       (s) => !(s.type === type && s.listener === listener && s.options === options),
     );
   }
@@ -545,7 +553,10 @@ export class ThreeEventDispatcher {
     const listenerEntries = eventState.listenerEntries.filter((l) => {
       const captureOption =
         typeof l.options == 'boolean' ? l.options : (l.options?.capture ?? false);
-      return l.type === event.type && captureEvent == captureOption;
+      return (
+        l.type === event.type &&
+        (event.eventPhase === EventPhases.AT_TARGET || captureEvent == captureOption)
+      );
     });
 
     for (const listenerEntry of listenerEntries) {

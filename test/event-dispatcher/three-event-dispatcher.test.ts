@@ -31,6 +31,32 @@ interface Case {
   type: ThreeEventType;
 }
 
+test('global event handlers can be added/removed', () => {
+  const canvas = createCanvas();
+  const camera = new THREE.PerspectiveCamera();
+  camera.position.set(5, 0, 0);
+  camera.lookAt(0, 0, 0);
+  const eventDispatcher = new ThreeEventDispatcher(canvas, camera);
+
+  const testEventHandler = vi.fn().mockName('testEventHandler');
+  eventDispatcher.addGlobalEventListener('click', testEventHandler);
+
+  const simulatedEvent = new MouseEvent('click', {
+    bubbles: true,
+    cancelable: true,
+    clientX: canvas.clientWidth / 2,
+    clientY: canvas.clientHeight / 2,
+  });
+
+  canvas.dispatchEvent(simulatedEvent);
+  expect(testEventHandler).toHaveBeenCalledOnce();
+
+  eventDispatcher.removeGlobalEventListener('click', testEventHandler);
+  testEventHandler.mockClear();
+  canvas.dispatchEvent(simulatedEvent);
+  expect(testEventHandler).not.toHaveBeenCalledOnce();
+});
+
 describe('global event handlers fire', () => {
   test.each<Case>([
     { type: 'click' },
@@ -82,6 +108,114 @@ describe('global event handlers fire', () => {
     canvas.dispatchEvent(simulatedEvent);
 
     expect(testEventHandler).toHaveBeenCalledOnce();
+  });
+});
+
+describe('event handlers can be added/removed', () => {
+  test('single event on single object with no options', () => {
+    const canvas = createCanvas();
+    const camera = new THREE.PerspectiveCamera();
+    camera.position.set(5, 0, 0);
+    camera.lookAt(0, 0, 0);
+    const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    const eventDispatcher = new ThreeEventDispatcher(canvas, camera);
+
+    const testEventHandler = vi.fn().mockName('testEventHandler');
+    eventDispatcher.addEventListener(object, 'click', testEventHandler);
+
+    const pointerMoveEvent = new PointerEvent('pointermove', {
+      bubbles: true,
+      cancelable: true,
+      clientX: canvas.clientWidth / 2,
+      clientY: canvas.clientHeight / 2,
+    });
+    canvas.dispatchEvent(pointerMoveEvent);
+
+    const simulatedEvent = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      clientX: canvas.clientWidth / 2,
+      clientY: canvas.clientHeight / 2,
+    });
+
+    canvas.dispatchEvent(simulatedEvent);
+    expect(testEventHandler).toHaveBeenCalledOnce();
+
+    eventDispatcher.removeEventListener(object, 'click', testEventHandler);
+    testEventHandler.mockClear();
+    canvas.dispatchEvent(simulatedEvent);
+    expect(testEventHandler).not.toHaveBeenCalledOnce();
+  });
+
+  test('multiple events on multiple objects with options', () => {
+    const canvas = createCanvas();
+    const camera = new THREE.PerspectiveCamera();
+    camera.position.set(5, 0, 0);
+    camera.lookAt(0, 0, 0);
+    const objectA = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    const objectB = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    const eventDispatcher = new ThreeEventDispatcher(canvas, camera);
+
+    const testEventHandlerA1 = vi.fn().mockName('testEventHandlerA1');
+    const testEventHandlerA2 = vi.fn().mockName('testEventHandlerA2');
+    const testEventHandlerA3 = vi.fn().mockName('testEventHandlerA3');
+    const testEventHandlerB = vi.fn().mockName('testEventHandlerB');
+    eventDispatcher.addEventListener(objectA, 'click', testEventHandlerA1);
+    eventDispatcher.addEventListener(objectA, 'click', testEventHandlerA1, true);
+    eventDispatcher.addEventListener(objectA, 'click', testEventHandlerA2, false);
+    eventDispatcher.addEventListener(objectA, 'click', testEventHandlerA2, true);
+    eventDispatcher.addEventListener(objectA, 'click', testEventHandlerA3, { passive: true });
+    eventDispatcher.addEventListener(objectA, 'click', testEventHandlerA3);
+    eventDispatcher.addEventListener(objectB, 'click', testEventHandlerB);
+
+    const pointerMoveEvent = new PointerEvent('pointermove', {
+      bubbles: true,
+      cancelable: true,
+      clientX: canvas.clientWidth / 2,
+      clientY: canvas.clientHeight / 2,
+    });
+    canvas.dispatchEvent(pointerMoveEvent);
+
+    const simulatedEvent = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      clientX: canvas.clientWidth / 2,
+      clientY: canvas.clientHeight / 2,
+    });
+
+    const clearAllMocks = () => {
+      testEventHandlerA1.mockClear();
+      testEventHandlerA2.mockClear();
+      testEventHandlerA3.mockClear();
+      testEventHandlerB.mockClear();
+    };
+
+    const testCallCount = (a1: number, a2: number, a3: number, b: number) => {
+      clearAllMocks();
+      canvas.dispatchEvent(simulatedEvent);
+      expect(testEventHandlerA1).toHaveBeenCalledTimes(a1);
+      expect(testEventHandlerA2).toHaveBeenCalledTimes(a2);
+      expect(testEventHandlerA3).toHaveBeenCalledTimes(a3);
+      expect(testEventHandlerB).toHaveBeenCalledTimes(b);
+    };
+
+    canvas.dispatchEvent(simulatedEvent);
+    testCallCount(2, 2, 2, 1);
+
+    eventDispatcher.removeEventListener(objectA, 'click', testEventHandlerA1, false);
+    testCallCount(1, 2, 2, 1);
+
+    eventDispatcher.removeEventListener(objectA, 'click', testEventHandlerA1, true);
+    testCallCount(0, 2, 2, 1);
+
+    eventDispatcher.removeEventListener(objectA, 'click', testEventHandlerA2);
+    testCallCount(0, 1, 2, 1);
+
+    eventDispatcher.removeEventListener(objectA, 'click', testEventHandlerA2, true);
+    testCallCount(0, 0, 2, 1);
+
+    eventDispatcher.removeEventListener(objectA, 'click', testEventHandlerA3);
+    testCallCount(0, 0, 0, 1);
   });
 });
 
