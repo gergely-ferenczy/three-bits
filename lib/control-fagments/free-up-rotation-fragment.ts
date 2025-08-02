@@ -8,6 +8,8 @@ import { getDeltaCoordsFromActivePointers } from '../common/internal/get-coords-
 import { calculateSphericalAngles } from '../utils/calculate-spherical-angles';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 
+const _v1 = new THREE.Vector3();
+
 const DefaultRotationControlOptions: FreeUpRotationFragmentOptions = {
   enabled: true,
   invertHorizontal: false,
@@ -121,7 +123,7 @@ export class FreeUpRotationFragment implements ControlFragment {
     camera: ControllableCamera,
     target: THREE.Vector3,
   ): void {
-    const cameraDir = camera.getWorldDirection(new THREE.Vector3());
+    const cameraDir = camera.getWorldDirection(_v1);
     const horizontalDir = cameraDir.clone().cross(camera.up).normalize();
     const verticalDir = horizontalDir.clone().cross(cameraDir).normalize();
 

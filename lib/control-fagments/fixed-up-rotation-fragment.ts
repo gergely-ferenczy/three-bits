@@ -3,10 +3,12 @@ import * as THREE from 'three';
 import { ControlFragment } from './control-fragment';
 import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
-import { clamp } from '../common/internal/clamp';
 import { getDeltaCoordsFromActivePointers } from '../common/internal/get-coords-from-active-pointers';
 import { calculateSphericalAngles } from '../utils/calculate-spherical-angles';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
+
+const _q1 = new THREE.Quaternion();
+const _q2 = new THREE.Quaternion();
 
 const DefaultVerticalAxis = new THREE.Vector3(1, 0, 0);
 const DefaultHorizontalAxis = new THREE.Vector3(0, 1, 0);
@@ -196,14 +198,8 @@ export class FixedUpRotationFragment implements ControlFragment {
     const maxVerticalAngle = Math.min(this.options.maxVerticalAngle, AbsoluteMaxVerticalAngle);
     this.verticalAngle = THREE.MathUtils.clamp(verticalAngle, minVerticalAngle, maxVerticalAngle);
 
-    const horizontalQuaternion = new THREE.Quaternion().setFromAxisAngle(
-      DefaultHorizontalAxis,
-      -this.horizontalAngle,
-    );
-    const verticalQuaternion = new THREE.Quaternion().setFromAxisAngle(
-      DefaultVerticalAxis,
-      -this.verticalAngle,
-    );
+    const horizontalQuaternion = _q1.setFromAxisAngle(DefaultHorizontalAxis, -this.horizontalAngle);
+    const verticalQuaternion = _q2.setFromAxisAngle(DefaultVerticalAxis, -this.verticalAngle);
     const baseCameraPosition = DefaultDirectionAxis.clone().multiplyScalar(
       relativePosition.length(),
     );

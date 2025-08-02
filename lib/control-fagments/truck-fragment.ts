@@ -12,6 +12,8 @@ import {
 import { calculatePointerTarget } from '../utils/calculate-pointer-target';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 
+const _v1 = new THREE.Vector3();
+
 const DefaultTruckControlOptions: TruckFragmentOptions = {
   enabled: true,
   speed: 1,
@@ -105,7 +107,7 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
       if (this.options.lock instanceof THREE.Vector3) {
         panNormal = this.calculatePanLockNormal(this.options.lock);
       } else {
-        panNormal = this.camera.getWorldDirection(new THREE.Vector3());
+        panNormal = this.camera.getWorldDirection(_v1);
       }
       this.start.plane.setFromNormalAndCoplanarPoint(panNormal, this.target.clone());
     }
@@ -210,9 +212,10 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
     }
     const xDeltaLength = deltaCoords.x * scale;
     const yDeltaLength = deltaCoords.y * scale;
-    const positionDelta = new THREE.Vector3()
-      .add(this.start.approximate.xAxis.clone().multiplyScalar(xDeltaLength))
-      .add(this.start.approximate.yAxis.clone().multiplyScalar(yDeltaLength));
+    const positionDelta = _v1
+      .copy(this.start.approximate.xAxis)
+      .multiplyScalar(xDeltaLength)
+      .addScaledVector(this.start.approximate.yAxis, yDeltaLength);
 
     camera.position.add(positionDelta);
     target.add(positionDelta);

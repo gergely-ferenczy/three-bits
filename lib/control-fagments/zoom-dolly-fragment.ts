@@ -8,6 +8,10 @@ import { clampLength } from '../common/internal/clamp-length';
 import { getStartCoordsFromActivePointers } from '../common/internal/get-coords-from-active-pointers';
 import { calculatePointerTarget } from '../utils/calculate-pointer-target';
 
+const _v1 = new THREE.Vector3();
+const _v2 = new THREE.Vector3();
+const _q1 = new THREE.Quaternion();
+
 const DefaultZoomDollyControlOptions: ZoomDollyFragmentOptions = {
   enabled: true,
   type: 'zoom',
@@ -160,7 +164,7 @@ export class ZoomDollyFragment implements ControlFragment {
 
   updateStartValues(activePointers: ActivePointer[]) {
     if (this.options.secondaryMotion == 'truck') {
-      const panNormal = this.camera.getWorldDirection(new THREE.Vector3());
+      const panNormal = this.camera.getWorldDirection(_v1);
       this.start.plane.setFromNormalAndCoplanarPoint(panNormal, this.target.clone());
     } else if (
       this.options.secondaryMotion == 'orbit' ||
@@ -241,25 +245,19 @@ export class ZoomDollyFragment implements ControlFragment {
     target: THREE.Vector3,
   ): void {
     this.raycaster.setFromCamera(startCoords, camera);
-    const intersectionA = this.raycaster.ray.intersectSphere(
-      this.start.sphere,
-      new THREE.Vector3(),
-    );
+    const intersectionA = this.raycaster.ray.intersectSphere(this.start.sphere, _v1);
     this.zoomOrDolly(delta, camera, target);
 
     if (!intersectionA) return;
 
     this.raycaster.setFromCamera(startCoords, camera);
-    const intersectionB = this.raycaster.ray.intersectSphere(
-      this.start.sphere,
-      new THREE.Vector3(),
-    );
+    const intersectionB = this.raycaster.ray.intersectSphere(this.start.sphere, _v2);
     if (!intersectionB) return;
 
     const relativePosA = intersectionA.clone().sub(camera.position).normalize();
     const relativePosB = intersectionB.clone().sub(camera.position).normalize();
 
-    const quaternion = new THREE.Quaternion().setFromUnitVectors(relativePosB, relativePosA);
+    const quaternion = _q1.setFromUnitVectors(relativePosB, relativePosA);
 
     if (this.options.secondaryMotion == 'orbit') {
       const relativePosition = camera.position.clone().sub(target);
