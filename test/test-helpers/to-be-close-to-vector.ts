@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { expect } from 'vitest';
 
 import 'vitest';
-import { debugPrint } from '../../lib/utils';
+import { formatVector } from '../../lib/utils';
 
 interface ToBeCloseToVectorMatcher<R = unknown> {
   toBeCloseToVector: (expected: THREE.Vector3, epsilon?: number, numDigits?: number) => R;
@@ -31,9 +31,9 @@ expect.extend({
       pass,
       message: () =>
         `Expected vectors${this.isNot ? ' not' : ''} to be close within epsilon ${epsilon.toFixed(numDigits)}\n` +
-        `Actual:   ${debugPrint(actual, numDigits, padding)})\n` +
-        `Expected: ${debugPrint(expected, numDigits, padding)}\n` +
-        `Delta:    ${debugPrint(new THREE.Vector3(dx, dy, dz), numDigits, padding)}`,
+        `Actual:   ${formatVector(actual, numDigits, padding)})\n` +
+        `Expected: ${formatVector(expected, numDigits, padding)}\n` +
+        `Delta:    ${formatVector(new THREE.Vector3(dx, dy, dz), numDigits, padding)}`,
     };
   },
 });
