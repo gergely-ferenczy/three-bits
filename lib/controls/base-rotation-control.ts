@@ -14,13 +14,17 @@ import { ZoomDollyFragment } from '../control-fagments/zoom-dolly-fragment';
 const DefaultInputMappings = {
   rotate: [
     {
-      mouseButton: MouseButton.Auxiliary,
+      mouseButton: MouseButton.Primary,
       touchGesture: TouchGesture.One,
     },
   ],
   truck: [
     {
-      mouseButton: MouseButton.Auxiliary,
+      mouseButton: MouseButton.Secondary,
+      touchGesture: TouchGesture.Two,
+    },
+    {
+      mouseButton: MouseButton.Primary,
       touchGesture: TouchGesture.Two,
       modifiers: {
         ctrl: true,
@@ -30,6 +34,10 @@ const DefaultInputMappings = {
   zoomOrDolly: [
     {
       mouseButton: MouseButton.Auxiliary,
+      touchGesture: TouchGesture.Two,
+    },
+    {
+      mouseButton: MouseButton.Primary,
       touchGesture: TouchGesture.Two,
       modifiers: {
         shift: true,
