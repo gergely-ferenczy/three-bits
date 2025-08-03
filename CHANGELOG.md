@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.3.0...v0.4.0) (2025-08-03)
+
+### ⚠ BREAKING CHANGES
+
+- rename debugPrint and make padding auto adjust
+- change default input mapping
+
+### Features
+
+- add raycast based dynamic origin lock for FixedUpRotationFragment d0ddc81
+- change default input mapping e62b149
+- optimize Three.js object usage 4a2fd75
+- rename debugPrint and make padding auto adjust 861d32d
+
 ## [0.3.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.2.2...v0.3.0) (2025-08-02)
 
 ### Features
