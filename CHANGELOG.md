@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.4.0...v0.5.0) (2025-08-04)
+
+### Features
+
+- make visiblity check optional for dynamic origin handling 889a5f9
+
 ## [0.4.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.3.0...v0.4.0) (2025-08-03)
 
 ### ⚠ BREAKING CHANGES
