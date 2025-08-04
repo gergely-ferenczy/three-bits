@@ -33,7 +33,10 @@ export interface FixedUpRotationFragmentOptions {
   maxVerticalAngle: number;
   invertHorizontal: boolean;
   invertVertical: boolean;
-  targetScene?: THREE.Object3D | THREE.Object3D[];
+  dynamicOrigin?: {
+    source: THREE.Object3D | THREE.Object3D[];
+    useInvisible: boolean;
+  };
 }
 
 export class FixedUpRotationFragment implements ControlFragment {
@@ -98,14 +101,16 @@ export class FixedUpRotationFragment implements ControlFragment {
   updateStartValues(activePointers: ActivePointer[]) {
     if (this.orbit) {
       let originSet = false;
-      if (this.options.targetScene) {
+      if (this.options.dynamicOrigin) {
+        const source = this.options.dynamicOrigin.source;
+        const useInvisible = this.options.dynamicOrigin.useInvisible;
         const coords = activePointers[0].coords;
         _raycaster.setFromCamera(coords, this.camera);
-        const intersections = Array.isArray(this.options.targetScene)
-          ? _raycaster.intersectObjects(this.options.targetScene)
-          : _raycaster.intersectObject(this.options.targetScene);
+        const intersections = Array.isArray(source)
+          ? _raycaster.intersectObjects(source)
+          : _raycaster.intersectObject(source);
         for (const i of intersections) {
-          if (i.object.visible) {
+          if (i.object.visible || useInvisible) {
             this.origin = i.point;
             originSet = true;
             break;
