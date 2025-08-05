@@ -15,13 +15,13 @@ const AbsoluteMaxVerticalAngle = Math.PI / 2 - 1e-8;
 
 const DefaultRotationControlOptions: FixedUpRotationFragmentOptions = {
   enabled: true,
-  invertHorizontal: false,
-  invertVertical: false,
+  speed: 1,
   maxHorizontalAngle: Infinity,
   minHorizontalAngle: -Infinity,
   maxVerticalAngle: Math.PI,
   minVerticalAngle: -Math.PI,
-  speed: 1,
+  invertHorizontal: false,
+  invertVertical: false,
 };
 
 export interface FixedUpRotationFragmentOptions {

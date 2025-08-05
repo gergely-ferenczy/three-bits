@@ -7,6 +7,9 @@ import { getDeltaCoordsFromActivePointers } from '../common/internal/get-coords-
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 
 const _v1 = new THREE.Vector3();
+const _v2 = new THREE.Vector3();
+const _v3 = new THREE.Vector3();
+const _raycaster = new THREE.Raycaster();
 
 const DefaultRotationControlOptions: FreeUpRotationFragmentOptions = {
   enabled: true,
@@ -20,6 +23,10 @@ export interface FreeUpRotationFragmentOptions {
   speed: number;
   invertHorizontal: boolean;
   invertVertical: boolean;
+  dynamicOrigin?: {
+    source: THREE.Object3D | THREE.Object3D[];
+    useInvisible: boolean;
+  };
 }
 
 export interface FreeUpRotationFragmentStartValues {
@@ -35,11 +42,9 @@ export class FreeUpRotationFragment implements ControlFragment {
 
   private target: THREE.Vector3;
 
+  private origin: THREE.Vector3;
+
   private options: FreeUpRotationFragmentOptions;
-
-  private horizontalAngle = 0;
-
-  private verticalAngle = 0;
 
   private start: FreeUpRotationFragmentStartValues = {
     camera: null!,
@@ -55,14 +60,14 @@ export class FreeUpRotationFragment implements ControlFragment {
     this.active = false;
     this.camera = camera;
     this.target = target;
+    this.origin = target;
     this.options = { ...DefaultRotationControlOptions, ...options };
   }
 
   updateOptions(options: Partial<FreeUpRotationFragmentOptions>) {
     for (const key in options) {
-      // @ts-expect-error ...
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      this.options[key] = options[key];
+      const k = key as keyof FreeUpRotationFragmentOptions;
+      (this.options[k] as any) = options[k];
     }
   }
 
@@ -83,6 +88,27 @@ export class FreeUpRotationFragment implements ControlFragment {
   }
 
   updateStartValues(activePointers: ActivePointer[]) {
+    let originSet = false;
+    if (this.options.dynamicOrigin) {
+      const source = this.options.dynamicOrigin.source;
+      const useInvisible = this.options.dynamicOrigin.useInvisible;
+      const coords = activePointers[0].coords;
+      _raycaster.setFromCamera(coords, this.camera);
+      const intersections = Array.isArray(source)
+        ? _raycaster.intersectObjects(source)
+        : _raycaster.intersectObject(source);
+      for (const i of intersections) {
+        if (i.object.visible || useInvisible) {
+          this.origin = i.point;
+          originSet = true;
+          break;
+        }
+      }
+    }
+    if (!originSet) {
+      this.origin = this.target;
+    }
+
     this.updateStartValuesInner();
   }
 
@@ -122,10 +148,10 @@ export class FreeUpRotationFragment implements ControlFragment {
     target: THREE.Vector3,
   ): void {
     const cameraDir = camera.getWorldDirection(_v1);
-    const horizontalDir = cameraDir.clone().cross(camera.up).normalize();
-    const verticalDir = horizontalDir.clone().cross(cameraDir).normalize();
+    const horizontalDir = _v2.copy(cameraDir).cross(camera.up).normalize();
+    const verticalDir = _v3.copy(horizontalDir).cross(cameraDir).normalize();
 
-    camera.up = verticalDir;
+    camera.up.copy(verticalDir);
     camera.position
       .applyAxisAngle(verticalDir, -horizontalAngleDelta)
       .applyAxisAngle(horizontalDir, -verticalAngleDelta);

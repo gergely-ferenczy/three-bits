@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { describe, expect, test, vi } from 'vitest';
+
 import { ThreeEventDispatcher } from '../../lib/event-dispatcher/three-event-dispatcher';
 import { ThreeEventType } from '../../lib/event-dispatcher/three-event-types';
 
