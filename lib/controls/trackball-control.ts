@@ -14,13 +14,17 @@ import { ZoomDollyFragment } from '../control-fagments/zoom-dolly-fragment';
 const DefaultInputMappings = {
   rotate: [
     {
-      mouseButton: MouseButton.Auxiliary,
+      mouseButton: MouseButton.Primary,
       touchGesture: TouchGesture.One,
     },
   ],
   truck: [
     {
-      mouseButton: MouseButton.Auxiliary,
+      mouseButton: MouseButton.Secondary,
+      touchGesture: TouchGesture.Two,
+    },
+    {
+      mouseButton: MouseButton.Primary,
       touchGesture: TouchGesture.Two,
       modifiers: {
         ctrl: true,
@@ -30,6 +34,10 @@ const DefaultInputMappings = {
   zoomOrDolly: [
     {
       mouseButton: MouseButton.Auxiliary,
+      touchGesture: TouchGesture.Two,
+    },
+    {
+      mouseButton: MouseButton.Primary,
       touchGesture: TouchGesture.Two,
       modifiers: {
         shift: true,
@@ -106,9 +114,6 @@ export class TrackballControl extends BaseControl {
         delta: new THREE.Vector2(),
       },
     ];
-
-    this.rotationFragment.updateStartValues(dummyPointers);
-    this.rotationFragment.handleRotationAction(0, 0, this.camera, this.target);
 
     this.zoomDollyFragment.updateStartValues(dummyPointers);
     this.zoomDollyFragment.zoomOrDolly(0, this.camera, this.target);

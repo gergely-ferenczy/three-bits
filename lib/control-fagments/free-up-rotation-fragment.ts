@@ -151,9 +151,22 @@ export class FreeUpRotationFragment implements ControlFragment {
     const horizontalDir = _v2.copy(cameraDir).cross(camera.up).normalize();
     const verticalDir = _v3.copy(horizontalDir).cross(cameraDir).normalize();
 
-    camera.up.copy(verticalDir);
-    camera.position
+    const newCameraPosition = _v1
+      .copy(camera.position)
+      .sub(this.origin)
       .applyAxisAngle(verticalDir, -horizontalAngleDelta)
-      .applyAxisAngle(horizontalDir, -verticalAngleDelta);
+      .applyAxisAngle(horizontalDir, -verticalAngleDelta)
+      .add(this.origin);
+
+    camera.up.copy(verticalDir);
+    camera.position.copy(newCameraPosition);
+
+    const newTargetPosition = _v1
+      .copy(target)
+      .sub(this.origin)
+      .applyAxisAngle(verticalDir, -horizontalAngleDelta)
+      .applyAxisAngle(horizontalDir, -verticalAngleDelta)
+      .add(this.origin);
+    target.copy(newTargetPosition);
   }
 }
