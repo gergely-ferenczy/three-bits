@@ -11,6 +11,7 @@ const Configuration: UserConfig = {
       'always',
       ['chore', 'ci', 'docs', 'feat', 'fix', 'perf', 'refactor', 'revert', 'style', 'test'],
     ],
+    'subject-case': [RuleConfigSeverity.Disabled],
   },
 
   defaultIgnores: false,
