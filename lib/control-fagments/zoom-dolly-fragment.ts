@@ -111,7 +111,14 @@ export class ZoomDollyFragment implements ControlFragment {
 
     let delta;
     if (activePointers.length == 2) {
-      delta = activePointers[0].delta.clone().sub(activePointers[1].delta).length();
+      const prevLength = activePointers[0].coords.clone().sub(activePointers[1].coords).length();
+      const length = activePointers[0].coords
+        .clone()
+        .add(activePointers[0].delta)
+        .sub(activePointers[1].coords.clone().add(activePointers[1].delta))
+        .length();
+
+      delta = prevLength - length;
     } else {
       delta = activePointers[0].delta.y;
     }

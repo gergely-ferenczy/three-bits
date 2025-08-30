@@ -200,9 +200,9 @@ export abstract class BaseControl implements Control {
       if (!controlFragment || !controlFragment.handlePointerInput) continue;
 
       controlFragment.handlePointerInput(activePointers, this.camera, this.target);
+      this.camera.lookAt(this.target);
+      this.camera.updateProjectionMatrix();
     }
-    this.camera.lookAt(this.target);
-    this.camera.updateProjectionMatrix();
 
     this.dispatchEvent('change');
   }
