@@ -16,7 +16,6 @@ export default tsEslint.config(
       parserOptions: {
         parser: '@typescript-eslint/parser',
         project: ['./tsconfig.json', './tsconfig.dev.json'],
-        // projectService: true,
       },
     },
     plugins: importEslint.flatConfigs.recommended.plugins,
@@ -32,11 +31,11 @@ export default tsEslint.config(
         'warn',
         {
           groups: ['builtin', 'external', ['parent', 'sibling', 'index', 'object', 'type']],
-          'newlines-between': 'always',
           alphabetize: {
             order: 'asc',
             orderImportKind: 'asc',
           },
+          'newlines-between': 'ignore',
         },
       ],
     },

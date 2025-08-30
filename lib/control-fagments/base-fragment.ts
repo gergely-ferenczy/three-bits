@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import { ControllableCamera } from '../common/controllable-camera';
 
 export abstract class BaseFragment {

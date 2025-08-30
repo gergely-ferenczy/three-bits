@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import { Control } from './control';
 import { PointerHandler, PointerHandlerOptions } from './handlers/pointer-handler';
 import { ControlFragment } from '../control-fagments/control-fragment';

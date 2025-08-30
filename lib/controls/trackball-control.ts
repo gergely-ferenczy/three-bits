@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import { BaseControl, BaseControlOptions } from './base-control';
 import { PartialTrackballControlOptions } from './trackball-control-options';
 import { ActivePointer } from '../common/active-pointer';

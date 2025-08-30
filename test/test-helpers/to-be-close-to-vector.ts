@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { expect } from 'vitest';
-
 import 'vitest';
 import { formatVector } from '../../lib/utils';
 

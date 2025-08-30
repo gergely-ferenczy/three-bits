@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import { EventPhases } from './event-phases';
 import { ThreeEventHandlersEventMap } from './internal/three-event-handlers-event-map';
 import { Writable } from './internal/writable';

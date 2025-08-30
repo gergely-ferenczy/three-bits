@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { describe, expect, test } from 'vitest';
-
 import { getCameraAspectRatio, syncCameras } from '../../lib/utils';
 import '../test-helpers/to-be-close-to-vector';
 

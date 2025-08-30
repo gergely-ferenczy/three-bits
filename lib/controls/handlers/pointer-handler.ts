@@ -1,5 +1,4 @@
 import { Vector2 } from 'three';
-
 import { ActivePointer } from '../../common/active-pointer';
 import { ControlInput } from '../../common/control-input';
 import { TouchGesture } from '../../common/touch-gesture';

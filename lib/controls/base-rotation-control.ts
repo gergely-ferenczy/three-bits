@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import { BaseControl, BaseControlOptions } from './base-control';
 import { PartialBaseRotationControlOptions } from './base-rotation-control-options';
 import { ActivePointer } from '../common/active-pointer';

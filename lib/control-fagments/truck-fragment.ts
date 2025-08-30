@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import { BaseFragment } from './base-fragment';
 import { ControlFragment } from './control-fragment';
 import { ActivePointer } from '../common/active-pointer';

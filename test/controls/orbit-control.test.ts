@@ -1,6 +1,5 @@
 import { PerspectiveCamera, Vector3 } from 'three';
 import { beforeEach, describe, expect, test } from 'vitest';
-
 import { ControllableCamera } from '../../lib/common/controllable-camera';
 import { OrbitControl } from '../../lib/controls/orbit-control';
 

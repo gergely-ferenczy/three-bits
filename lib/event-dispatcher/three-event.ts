@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import { ThreeEventType } from './three-event-types';
 
 /**

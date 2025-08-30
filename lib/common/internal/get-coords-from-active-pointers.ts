@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import { ActivePointer } from '../active-pointer';
 
 export function getCoordsFromActivePointers(activePointers: ActivePointer[]): THREE.Vector2 {

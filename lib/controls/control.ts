@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import { ControlEventListener } from '../common/control-event-listener';
 import { ControlEventType } from '../common/control-event-type';
 import { ControllableCamera } from '../common/controllable-camera';

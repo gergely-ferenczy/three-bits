@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
 
