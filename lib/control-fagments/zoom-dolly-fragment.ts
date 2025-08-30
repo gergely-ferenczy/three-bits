@@ -5,6 +5,8 @@ import { ControllableCamera } from '../common/controllable-camera';
 import { clamp } from '../common/internal/clamp';
 import { clampLength } from '../common/internal/clamp-length';
 import { getStartCoordsFromActivePointers } from '../common/internal/get-coords-from-active-pointers';
+import { getInvert } from '../common/internal/getInvert';
+import { getSpeed } from '../common/internal/getSpeed';
 import { calculatePointerTarget } from '../utils/calculate-pointer-target';
 
 const _v1 = new THREE.Vector3();

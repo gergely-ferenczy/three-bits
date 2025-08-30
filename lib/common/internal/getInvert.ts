@@ -1,4 +1,4 @@
-function getInvert(
+export function getInvert(
   invertOption: boolean | { pointer: boolean; touch: boolean },
   type: 'pointer' | 'touch',
 ): boolean {

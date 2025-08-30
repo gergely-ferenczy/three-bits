@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { ControlFragment } from './control-fragment';
 import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
+import { getInvert } from '../common/internal/getInvert';
+import { getSpeed } from '../common/internal/getSpeed';
 import { calculateSphericalAngles } from '../utils/calculate-spherical-angles';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 

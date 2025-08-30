@@ -3,6 +3,8 @@ import { ControlFragment } from './control-fragment';
 import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
 import { getDeltaCoordsFromActivePointers } from '../common/internal/get-coords-from-active-pointers';
+import { getInvert } from '../common/internal/getInvert';
+import { getSpeed } from '../common/internal/getSpeed';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 
 const _v1 = new THREE.Vector3();
@@ -112,15 +114,18 @@ export class FreeUpRotationFragment implements ControlFragment {
 
     const aspect = getCameraAspectRatio(this.camera);
     const speed = getSpeed(this.options.speed, activePointers[0].type);
+    console.log('speed', speed);
+    const invertHorizontal = getInvert(this.options.invertHorizontal, activePointers[0].type);
+    const invertVertical = getInvert(this.options.invertVertical, activePointers[0].type);
     const deltaCoords = getDeltaCoordsFromActivePointers(activePointers);
     deltaCoords.x *= aspect;
     let horizontalAngleDelta = deltaCoords.x * 2 * speed;
     let verticalAngleDelta = deltaCoords.y * 2 * speed;
 
-    if (this.options.invertHorizontal) {
+    if (invertHorizontal) {
       horizontalAngleDelta *= -1;
     }
-    if (!this.options.invertVertical) {
+    if (!invertVertical) {
       verticalAngleDelta *= -1;
     }
 

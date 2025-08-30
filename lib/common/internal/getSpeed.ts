@@ -1,4 +1,4 @@
-function getSpeed(
+export function getSpeed(
   speedOption: number | { pointer: number; touch: number },
   type: 'pointer' | 'touch',
 ): number {
