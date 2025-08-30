@@ -20,9 +20,9 @@ const DefaultRotationControlOptions: FreeUpRotationFragmentOptions = {
 
 export interface FreeUpRotationFragmentOptions {
   enabled: boolean;
-  speed: number;
-  invertHorizontal: boolean;
-  invertVertical: boolean;
+  speed: number | { pointer: number; touch: number };
+  invertHorizontal: boolean | { pointer: boolean; touch: boolean };
+  invertVertical: boolean | { pointer: boolean; touch: boolean };
   dynamicOrigin?: {
     source: THREE.Object3D | THREE.Object3D[];
     useInvisible: boolean;
@@ -112,11 +112,11 @@ export class FreeUpRotationFragment implements ControlFragment {
     if (!this.options.enabled) return;
 
     const aspect = getCameraAspectRatio(this.camera);
-
+    const speed = getSpeed(this.options.speed, activePointers[0].type);
     const deltaCoords = getDeltaCoordsFromActivePointers(activePointers);
     deltaCoords.x *= aspect;
-    let horizontalAngleDelta = deltaCoords.x * 2 * this.options.speed;
-    let verticalAngleDelta = deltaCoords.y * 2 * this.options.speed;
+    let horizontalAngleDelta = deltaCoords.x * 2 * speed;
+    let verticalAngleDelta = deltaCoords.y * 2 * speed;
 
     if (this.options.invertHorizontal) {
       horizontalAngleDelta *= -1;

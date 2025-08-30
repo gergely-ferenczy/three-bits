@@ -5,4 +5,5 @@ export interface ActivePointer {
   startCoords: THREE.Vector2;
   coords: THREE.Vector2;
   delta: THREE.Vector2;
+  type: 'pointer' | 'touch';
 }

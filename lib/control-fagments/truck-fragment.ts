@@ -23,7 +23,7 @@ const DefaultTruckControlOptions: TruckFragmentOptions = {
 
 export interface TruckFragmentOptions {
   enabled: boolean;
-  speed: number;
+  speed: number | { pointer: number; touch: number };
   lock: THREE.Plane | THREE.Vector3 | null;
   mode: 'exact' | 'approximate';
   maxDistance: number;
@@ -186,10 +186,11 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
 
     if (!intersection) return;
 
+    const speed = getSpeed(this.options.speed, activePointers[0].type);
     const positionDelta = intersection
       .clone()
       .sub(this.start.exact.pointerTarget)
-      .multiplyScalar(-this.options.speed);
+      .multiplyScalar(-speed);
     this.start.exact.pointerTarget.copy(intersection);
 
     camera.position.add(positionDelta);
@@ -205,7 +206,8 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
     const deltaCoords = getDeltaCoordsFromActivePointers(activePointers);
     deltaCoords.x *= aspect;
 
-    let scale = this.options.speed / camera.zoom;
+    const speed = getSpeed(this.options.speed, activePointers[0].type);
+    let scale = speed / camera.zoom;
     if (this.camera instanceof THREE.PerspectiveCamera) {
       scale *= this.start.approximate.distance / 2;
     }

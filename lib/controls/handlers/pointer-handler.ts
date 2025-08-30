@@ -93,6 +93,7 @@ export class PointerHandler {
       coords: coords,
       startCoords: coords.clone(),
       delta: new Vector2(),
+      type: event.pointerType === 'touch' ? 'touch' : 'pointer',
     });
 
     if (this.activePointers.length == 1) {
@@ -159,9 +160,7 @@ export class PointerHandler {
     let activeControlsChanged = false;
     for (const controlId in this.options.inputMappings) {
       const inputMapping = this.options.inputMappings[controlId];
-      const inputActive = inputMapping
-        .map((i) => this.isInputActive(event, i))
-        .reduce((prev, curr) => prev || curr, false);
+      const inputActive = inputMapping.some((i) => this.isInputActive(event, i));
 
       if (inputActive) {
         if (!this.activeControls.has(controlId)) {

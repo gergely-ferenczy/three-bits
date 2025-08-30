@@ -26,13 +26,13 @@ const DefaultRotationControlOptions: FixedUpRotationFragmentOptions = {
 
 export interface FixedUpRotationFragmentOptions {
   enabled: boolean;
-  speed: number;
+  speed: number | { pointer: number; touch: number };
   minHorizontalAngle: number;
   maxHorizontalAngle: number;
   minVerticalAngle: number;
   maxVerticalAngle: number;
-  invertHorizontal: boolean;
-  invertVertical: boolean;
+  invertHorizontal: boolean | { pointer: boolean; touch: boolean };
+  invertVertical: boolean | { pointer: boolean; touch: boolean };
   dynamicOrigin?: {
     source: THREE.Object3D | THREE.Object3D[];
     useInvisible: boolean;
@@ -130,25 +130,6 @@ export class FixedUpRotationFragment implements ControlFragment {
     this.verticalAngle = angles.verticalAngle;
   }
 
-  private calculateRelativePosition(): THREE.Vector3 {
-    return this.orbit
-      ? this.camera.position.clone().sub(this.target)
-      : this.target.clone().sub(this.camera.position);
-  }
-
-  private calculateAngles(relativePosition: THREE.Vector3): {
-    verticalAngle: number;
-    horizontalAngle: number;
-  } {
-    // Translated relative position
-    const trp = _v3.copy(relativePosition).applyMatrix4(this.rotationBasis);
-    const sphericalAngles = calculateSphericalAngles(trp);
-    return {
-      verticalAngle: sphericalAngles.verticalAngle,
-      horizontalAngle: sphericalAngles.horizontalAngle,
-    };
-  }
-
   handlePointerInput(
     activePointers: ActivePointer[],
     camera: ControllableCamera,
@@ -156,24 +137,27 @@ export class FixedUpRotationFragment implements ControlFragment {
   ): void {
     if (!this.options.enabled) return;
 
+    const speed = getSpeed(this.options.speed, activePointers[0].type);
+    const invertHorizontal = getInvert(this.options.invertHorizontal, activePointers[0].type);
+    const invertVertical = getInvert(this.options.invertVertical, activePointers[0].type);
     const aspect = getCameraAspectRatio(this.camera);
     const deltaCoords = _v2.copy(activePointers[0].delta);
     deltaCoords.x *= aspect;
-    let horizontalAngleDelta = deltaCoords.x * this.options.speed;
-    let verticalAngleDelta = deltaCoords.y * this.options.speed;
+    let horizontalAngleDelta = deltaCoords.x * speed;
+    let verticalAngleDelta = deltaCoords.y * speed;
 
     if (this.orbit) {
-      if (this.options.invertHorizontal) {
+      if (invertHorizontal) {
         horizontalAngleDelta *= -1;
       }
-      if (!this.options.invertVertical) {
+      if (!invertVertical) {
         verticalAngleDelta *= -1;
       }
     } else {
-      if (!this.options.invertHorizontal) {
+      if (!invertHorizontal) {
         horizontalAngleDelta *= -1;
       }
-      if (!this.options.invertVertical) {
+      if (!invertVertical) {
         verticalAngleDelta *= -1;
       }
     }
@@ -194,6 +178,53 @@ export class FixedUpRotationFragment implements ControlFragment {
 
   getRotationBasis() {
     return this.rotationBasis;
+  }
+
+  getHorizontalAngle() {
+    return this.horizontalAngle;
+  }
+
+  setHorizontalAngle(angle: number) {
+    const relativePosition = this.calculateRelativePosition();
+    const angles = this.calculateAngles(relativePosition);
+    const { cameraDelta, targetDelta } = this.rotateTo(angles.verticalAngle, angle);
+
+    this.camera.position.add(cameraDelta);
+    this.target.add(targetDelta);
+    this.camera.lookAt(this.target);
+  }
+
+  getVerticalAngle() {
+    return this.verticalAngle;
+  }
+
+  setVerticalAngle(angle: number) {
+    const relativePosition = this.calculateRelativePosition();
+    const angles = this.calculateAngles(relativePosition);
+    const { cameraDelta, targetDelta } = this.rotateTo(angle, angles.horizontalAngle);
+
+    this.camera.position.add(cameraDelta);
+    this.target.add(targetDelta);
+    this.camera.lookAt(this.target);
+  }
+
+  private calculateRelativePosition(): THREE.Vector3 {
+    return this.orbit
+      ? this.camera.position.clone().sub(this.target)
+      : this.target.clone().sub(this.camera.position);
+  }
+
+  private calculateAngles(relativePosition: THREE.Vector3): {
+    verticalAngle: number;
+    horizontalAngle: number;
+  } {
+    // Translated relative position
+    const trp = _v3.copy(relativePosition).applyMatrix4(this.rotationBasis);
+    const sphericalAngles = calculateSphericalAngles(trp);
+    return {
+      verticalAngle: sphericalAngles.verticalAngle,
+      horizontalAngle: sphericalAngles.horizontalAngle,
+    };
   }
 
   private rotateBy(
@@ -264,33 +295,5 @@ export class FixedUpRotationFragment implements ControlFragment {
     const targetRotationDelta = newRelativeTargetPos.sub(relativeTargetPos);
 
     return { cameraDelta: cameraRotationDelta, targetDelta: targetRotationDelta };
-  }
-
-  getHorizontalAngle() {
-    return this.horizontalAngle;
-  }
-
-  setHorizontalAngle(angle: number) {
-    const relativePosition = this.calculateRelativePosition();
-    const angles = this.calculateAngles(relativePosition);
-    const { cameraDelta, targetDelta } = this.rotateTo(angles.verticalAngle, angle);
-
-    this.camera.position.add(cameraDelta);
-    this.target.add(targetDelta);
-    this.camera.lookAt(this.target);
-  }
-
-  getVerticalAngle() {
-    return this.verticalAngle;
-  }
-
-  setVerticalAngle(angle: number) {
-    const relativePosition = this.calculateRelativePosition();
-    const angles = this.calculateAngles(relativePosition);
-    const { cameraDelta, targetDelta } = this.rotateTo(angle, angles.horizontalAngle);
-
-    this.camera.position.add(cameraDelta);
-    this.target.add(targetDelta);
-    this.camera.lookAt(this.target);
   }
 }

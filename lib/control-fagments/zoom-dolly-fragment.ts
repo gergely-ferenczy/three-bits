@@ -16,10 +16,8 @@ const DefaultZoomDollyControlOptions: ZoomDollyFragmentOptions = {
   enabled: true,
   type: 'zoom',
   secondaryMotion: 'truck',
-  scrollSpeed: 1,
-  pointerSpeed: 1,
-  invertScroll: false,
-  invertPointer: false,
+  speed: 1,
+  invert: false,
   minDistance: 0,
   maxDistance: Infinity,
   minZoom: -Infinity,
@@ -30,10 +28,8 @@ export interface ZoomDollyFragmentOptions {
   enabled: boolean;
   type: 'zoom' | 'dolly' | 'zoomAndDolly';
   secondaryMotion: 'none' | 'truck' | 'orbit' | 'rotate';
-  scrollSpeed: number;
-  pointerSpeed: number;
-  invertScroll: boolean;
-  invertPointer: boolean;
+  speed: number | { pointer: number; touch: number; scroll: number };
+  invert: boolean | { pointer: boolean; touch: boolean; scroll: number };
   minDistance: number;
   maxDistance: number;
   minZoom: number;
@@ -109,6 +105,7 @@ export class ZoomDollyFragment implements ControlFragment {
   ): void {
     if (!this.options.enabled) return;
 
+    const speed = getSpeed(this.options.speed, activePointers[0].type);
     let delta;
     if (activePointers.length == 2) {
       const prevLength = activePointers[0].coords.clone().sub(activePointers[1].coords).length();
@@ -122,9 +119,10 @@ export class ZoomDollyFragment implements ControlFragment {
     } else {
       delta = activePointers[0].delta.y;
     }
-    delta *= this.options.pointerSpeed;
+    delta *= speed;
 
-    if (this.options.invertPointer) {
+    const invert = getInvert(this.options.invert, activePointers[0].type);
+    if (invert) {
       delta *= -1;
     }
 
@@ -152,8 +150,12 @@ export class ZoomDollyFragment implements ControlFragment {
 
     this.updateStartValues([activePointer]);
 
-    delta *= this.options.scrollSpeed;
-    if (this.options.invertScroll) {
+    const speed =
+      typeof this.options.speed === 'number' ? this.options.speed : this.options.speed.scroll;
+    const invert =
+      typeof this.options.invert === 'boolean' ? this.options.invert : this.options.invert.scroll;
+    delta *= speed;
+    if (invert) {
       delta *= -1;
     }
 

@@ -59,6 +59,7 @@ export class WheelHandler {
       coords: coords,
       startCoords: coords.clone(),
       delta: new Vector2(),
+      type: 'pointer',
     };
     this.onChange(this.options.inverse ? wheelDelta : -wheelDelta, activePointer);
   }

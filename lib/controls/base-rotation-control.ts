@@ -116,6 +116,7 @@ export class BaseRotationControl extends BaseControl {
         coords: new THREE.Vector2(),
         startCoords: new THREE.Vector2(),
         delta: new THREE.Vector2(),
+        type: 'pointer',
       },
     ];
 
