@@ -46,12 +46,6 @@ export class FreeUpRotationFragment implements ControlFragment {
 
   private options: FreeUpRotationFragmentOptions;
 
-  private start: FreeUpRotationFragmentStartValues = {
-    camera: null!,
-    target: new THREE.Vector3(),
-    pointerTarget: new THREE.Vector3(),
-  };
-
   constructor(
     camera: ControllableCamera,
     target: THREE.Vector3,
@@ -108,13 +102,6 @@ export class FreeUpRotationFragment implements ControlFragment {
     if (!originSet) {
       this.origin = this.target;
     }
-
-    this.updateStartValuesInner();
-  }
-
-  private updateStartValuesInner() {
-    this.start.target.copy(this.target);
-    this.start.camera = this.camera.clone();
   }
 
   handlePointerInput(
