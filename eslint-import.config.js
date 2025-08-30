@@ -26,10 +26,6 @@ export default tsEslint.config(
       'import/parsers': {
         '@typescript-eslint/parser': TypeScriptExtensions,
       },
-      'import/resolver': {
-        typescript: true,
-        node: true,
-      },
     },
     rules: {
       'import/order': [
