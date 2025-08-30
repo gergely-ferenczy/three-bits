@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.1](https://github.com/gergely-ferenczy/three-bits/compare/v0.7.0...v0.7.1) (2025-08-30)
+
+### Bug Fixes
+
+- import mistakes introduced in the last release 84e0086
+
 ## [0.7.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.6.0...v0.7.0) (2025-08-30)
 
 ### Features
