@@ -135,24 +135,24 @@ export class FreeUpRotationFragment implements ControlFragment {
     target: THREE.Vector3,
   ): void {
     const cameraDir = camera.getWorldDirection(_v1);
-    const horizontalDir = _v2.copy(cameraDir).cross(camera.up).normalize();
-    const verticalDir = _v3.copy(horizontalDir).cross(cameraDir).normalize();
+    const verticalDir = _v2.copy(cameraDir).cross(camera.up).normalize();
+    const horizontalDir = _v3.copy(verticalDir).cross(cameraDir).normalize();
 
     const newCameraPosition = _v1
       .copy(camera.position)
       .sub(this.origin)
-      .applyAxisAngle(verticalDir, -horizontalAngleDelta)
-      .applyAxisAngle(horizontalDir, -verticalAngleDelta)
+      .applyAxisAngle(verticalDir, -verticalAngleDelta)
+      .applyAxisAngle(horizontalDir, -horizontalAngleDelta)
       .add(this.origin);
 
-    camera.up.copy(verticalDir);
+    camera.up.copy(horizontalDir);
     camera.position.copy(newCameraPosition);
 
     const newTargetPosition = _v1
       .copy(target)
       .sub(this.origin)
-      .applyAxisAngle(verticalDir, -horizontalAngleDelta)
-      .applyAxisAngle(horizontalDir, -verticalAngleDelta)
+      .applyAxisAngle(verticalDir, -verticalAngleDelta)
+      .applyAxisAngle(horizontalDir, -horizontalAngleDelta)
       .add(this.origin);
     target.copy(newTargetPosition);
   }
