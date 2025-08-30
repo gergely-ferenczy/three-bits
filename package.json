@@ -1,7 +1,7 @@
 {
   "name": "three-bits",
   "description": "Utilities for Three.js",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "type": "module",
   "author": "Gergely Ferenczy",
   "license": "GPL-3.0-only",

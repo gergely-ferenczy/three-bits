@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.6.0...v0.7.0) (2025-08-30)
+
+### Features
+
+- add new speed and invert options to all control fragments 75b82f8
+
+### Bug Fixes
+
+- FreeUpRotationFragment angle calculations 28fab31
+- multitouch handling in ZoomDollyFragment a24d6ae
+
 ## [0.6.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.5.0...v0.6.0) (2025-08-05)
 
 ### Features
