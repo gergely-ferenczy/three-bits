@@ -68,13 +68,13 @@ export class BaseRotationControl extends BaseControl {
     };
     super(camera, target, controlFragmentMap, baseControlOptions);
 
-    this.rotationFragment = new FixedUpRotationFragment(camera, target, orbit, options?.rotation);
+    this.rotationFragment = new FixedUpRotationFragment(orbit, options?.rotation);
     controlFragmentMap.set('rotate', this.rotationFragment);
 
-    this.truckFragment = new TruckFragment(camera, target, options?.truck);
+    this.truckFragment = new TruckFragment(options?.truck);
     controlFragmentMap.set('truck', this.truckFragment);
 
-    this.zoomDollyFragment = new ZoomDollyFragment(camera, target, options?.zoomOrDolly);
+    this.zoomDollyFragment = new ZoomDollyFragment(options?.zoomOrDolly);
     controlFragmentMap.set('zoomOrDolly', this.zoomDollyFragment);
   }
 
@@ -119,10 +119,10 @@ export class BaseRotationControl extends BaseControl {
       },
     ];
 
-    this.rotationFragment.updateStartValues(dummyPointers);
+    this.rotationFragment.updateStartValues(dummyPointers, this.camera, this.target);
     this.rotationFragment.handleRotationAction(0, 0, this.camera, this.target);
 
-    this.zoomDollyFragment.updateStartValues(dummyPointers);
+    this.zoomDollyFragment.updateStartValues(dummyPointers, this.camera, this.target);
     this.zoomDollyFragment.zoomOrDolly(0, this.camera, this.target);
 
     this.camera.lookAt(this.target);
@@ -134,7 +134,7 @@ export class BaseRotationControl extends BaseControl {
   }
 
   setHorizontalAngle(angle: number) {
-    this.rotationFragment.setHorizontalAngle(angle);
+    this.rotationFragment.setHorizontalAngle(angle, this.camera, this.target);
     this.dispatchAtomicEvent();
   }
 
@@ -143,7 +143,7 @@ export class BaseRotationControl extends BaseControl {
   }
 
   setVerticalAngle(angle: number) {
-    this.rotationFragment.setVerticalAngle(angle);
+    this.rotationFragment.setVerticalAngle(angle, this.camera, this.target);
     this.dispatchAtomicEvent();
   }
 }

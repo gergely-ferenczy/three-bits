@@ -2,6 +2,7 @@ export * from './common/camera-type';
 export * from './common/control-event-listener';
 export * from './common/control-event-type';
 export * from './common/control-input';
+export * from './common/input-mappings';
 export * from './common/mouse-button';
 export * from './common/touch-gesture';
 
@@ -14,7 +15,6 @@ export * from './controls/trackball-control';
 export * from './controls/handlers/pointer-handler';
 export * from './controls/handlers/wheel-handler';
 
-export * from './control-fagments/base-fragment';
 export * from './control-fagments/control-fragment';
 export * from './control-fagments/fixed-up-rotation-fragment';
 export * from './control-fagments/truck-fragment';

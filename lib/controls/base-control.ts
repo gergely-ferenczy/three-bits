@@ -133,9 +133,6 @@ export abstract class BaseControl implements Control {
    */
   setTarget(target: THREE.Vector3, keepRelativeCameraPos = false) {
     const newTarget = target.clone();
-    for (const cf of this.controlFragmentMap.values()) {
-      cf.setTarget(newTarget);
-    }
     if (keepRelativeCameraPos) {
       const relativeCameraPos = this.camera.position.clone().sub(this.target);
       this.camera.position.copy(newTarget).add(relativeCameraPos);
@@ -152,9 +149,6 @@ export abstract class BaseControl implements Control {
 
   setCamera(camera: ControllableCamera) {
     this.camera = camera;
-    for (const cf of this.controlFragmentMap.values()) {
-      cf.setCamera(camera);
-    }
   }
 
   enable() {
@@ -182,10 +176,7 @@ export abstract class BaseControl implements Control {
 
     for (const [conrtolId, controlFragment] of this.controlFragmentMap.entries()) {
       if (activeControls.has(conrtolId)) {
-        controlFragment.setActive(true);
-        controlFragment.updateStartValues(activePointers);
-      } else {
-        controlFragment.setActive(false);
+        controlFragment.updateStartValues(activePointers, this.camera, this.target);
       }
     }
     this.activeControls = new Set(activeControls);

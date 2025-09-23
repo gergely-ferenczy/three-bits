@@ -64,13 +64,13 @@ export class TrackballControl extends BaseControl {
     };
     super(camera, target, controlFragmentMap, baseControlOptions);
 
-    this.rotationFragment = new FreeUpRotationFragment(camera, target, options?.rotation);
+    this.rotationFragment = new FreeUpRotationFragment(options?.rotation);
     controlFragmentMap.set('rotate', this.rotationFragment);
 
-    this.truckFragment = new TruckFragment(camera, target, options?.truck);
+    this.truckFragment = new TruckFragment(options?.truck);
     controlFragmentMap.set('truck', this.truckFragment);
 
-    this.zoomDollyFragment = new ZoomDollyFragment(camera, target, options?.zoomOrDolly);
+    this.zoomDollyFragment = new ZoomDollyFragment(options?.zoomOrDolly);
     controlFragmentMap.set('zoomOrDolly', this.zoomDollyFragment);
   }
 
@@ -115,7 +115,7 @@ export class TrackballControl extends BaseControl {
       },
     ];
 
-    this.zoomDollyFragment.updateStartValues(dummyPointers);
+    this.zoomDollyFragment.updateStartValues(dummyPointers, this.camera, this.target);
     this.zoomDollyFragment.zoomOrDolly(0, this.camera, this.target);
 
     this.camera.lookAt(this.target);

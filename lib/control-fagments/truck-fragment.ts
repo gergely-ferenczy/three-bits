@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { BaseFragment } from './base-fragment';
 import { ControlFragment } from './control-fragment';
 import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
@@ -11,7 +10,8 @@ import { getSpeed } from '../common/internal/getSpeed';
 import { calculatePointerTarget } from '../utils/calculate-pointer-target';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 
-const _v1 = new THREE.Vector3();
+const _v3a = new THREE.Vector3();
+const _v3b = new THREE.Vector3();
 
 const DefaultTruckControlOptions: TruckFragmentOptions = {
   enabled: true,
@@ -42,7 +42,7 @@ export interface TruckFragmentStartValues {
   };
 }
 
-export class TruckFragment extends BaseFragment implements ControlFragment {
+export class TruckFragment implements ControlFragment {
   private options: TruckFragmentOptions;
 
   private start: TruckFragmentStartValues = {
@@ -60,12 +60,7 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
 
   private raycaster: THREE.Raycaster;
 
-  constructor(
-    camera: ControllableCamera,
-    target: THREE.Vector3,
-    options?: Partial<TruckFragmentOptions>,
-  ) {
-    super(camera, target);
+  constructor(options?: Partial<TruckFragmentOptions>) {
     this.options = { ...DefaultTruckControlOptions, ...options };
     this.raycaster = new THREE.Raycaster();
     this.raycaster.far = this.options.maxDistance;
@@ -80,13 +75,17 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
     this.raycaster.far = this.options.maxDistance;
   }
 
-  updateStartValues(activePointers: ActivePointer[]) {
-    this.start.camera = this.camera.clone();
+  updateStartValues(
+    activePointers: ActivePointer[],
+    camera: ControllableCamera,
+    target: THREE.Vector3,
+  ) {
+    this.start.camera = camera.clone();
 
     if (this.options.mode == 'approximate') {
-      this.updateStartValuesApproximate();
-    } /* if (this.options.mode == 'exact') */ else {
-      this.updateStartValuesExact(activePointers);
+      this.updateStartValuesApproximate(camera, target);
+    } else {
+      this.updateStartValuesExact(activePointers, camera, target);
     }
   }
 
@@ -98,17 +97,27 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
     return this.options;
   }
 
-  private updateStartValuesExact(activePointers: ActivePointer[]) {
+  private updateStartValuesExact(
+    activePointers: ActivePointer[],
+    camera: ControllableCamera,
+    target: THREE.Vector3,
+  ) {
     if (this.options.lock instanceof THREE.Plane) {
       this.start.plane = this.options.lock;
     } else {
       let panNormal;
       if (this.options.lock instanceof THREE.Vector3) {
-        panNormal = this.calculatePanLockNormal(this.options.lock);
+        const lockVector = _v3a.copy(this.options.lock);
+        panNormal = _v3a
+          .copy(this.options.lock)
+          .clone()
+          .cross(camera.position.clone().sub(target))
+          .cross(lockVector)
+          .normalize();
       } else {
-        panNormal = this.camera.getWorldDirection(_v1);
+        panNormal = camera.getWorldDirection(_v3a);
       }
-      this.start.plane.setFromNormalAndCoplanarPoint(panNormal, this.target.clone());
+      this.start.plane.setFromNormalAndCoplanarPoint(panNormal, target);
     }
 
     const coords = getCoordsFromActivePointers(activePointers);
@@ -124,8 +133,8 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
     }
   }
 
-  private updateStartValuesApproximate() {
-    const relativeTargetPos = this.target.clone().sub(this.camera.position);
+  private updateStartValuesApproximate(camera: ControllableCamera, target: THREE.Vector3) {
+    const relativeTargetPos = _v3a.copy(target).sub(camera.position);
 
     if (this.options.lock instanceof THREE.Plane) {
       this.start.approximate.xAxis
@@ -138,20 +147,17 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
         .normalize();
       this.start.plane.copy(this.options.lock);
     } else if (this.options.lock instanceof THREE.Vector3) {
-      const normal = this.options.lock.clone().cross(relativeTargetPos).cross(this.options.lock);
-      this.start.approximate.xAxis.copy(this.camera.up).cross(relativeTargetPos).normalize();
+      const normal = _v3b.copy(this.options.lock).cross(relativeTargetPos).cross(this.options.lock);
+      this.start.approximate.xAxis.copy(camera.up).cross(relativeTargetPos).normalize();
       this.start.approximate.yAxis.copy(this.start.approximate.xAxis).cross(normal).normalize();
-      this.start.plane.setFromNormalAndCoplanarPoint(normal, this.target.clone());
+      this.start.plane.setFromNormalAndCoplanarPoint(normal, target);
     } else {
-      this.start.approximate.xAxis.copy(this.camera.up).cross(relativeTargetPos).normalize();
+      this.start.approximate.xAxis.copy(camera.up).cross(relativeTargetPos).normalize();
       this.start.approximate.yAxis
         .copy(this.start.approximate.xAxis)
         .cross(relativeTargetPos)
         .normalize();
-      this.start.plane.setFromNormalAndCoplanarPoint(
-        relativeTargetPos.clone(),
-        this.target.clone(),
-      );
+      this.start.plane.setFromNormalAndCoplanarPoint(relativeTargetPos, target);
     }
     this.start.approximate.distance = relativeTargetPos.length();
   }
@@ -187,8 +193,8 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
     if (!intersection) return;
 
     const speed = getSpeed(this.options.speed, activePointers[0].type);
-    const positionDelta = intersection
-      .clone()
+    const positionDelta = _v3a
+      .copy(intersection)
       .sub(this.start.exact.pointerTarget)
       .multiplyScalar(-speed);
     this.start.exact.pointerTarget.copy(intersection);
@@ -202,31 +208,23 @@ export class TruckFragment extends BaseFragment implements ControlFragment {
     camera: ControllableCamera,
     target: THREE.Vector3,
   ): void {
-    const aspect = getCameraAspectRatio(this.camera);
+    const aspect = getCameraAspectRatio(camera);
     const deltaCoords = getDeltaCoordsFromActivePointers(activePointers);
     deltaCoords.x *= aspect;
 
     const speed = getSpeed(this.options.speed, activePointers[0].type);
     let scale = speed / camera.zoom;
-    if (this.camera instanceof THREE.PerspectiveCamera) {
+    if (camera instanceof THREE.PerspectiveCamera) {
       scale *= this.start.approximate.distance / 2;
     }
     const xDeltaLength = deltaCoords.x * scale;
     const yDeltaLength = deltaCoords.y * scale;
-    const positionDelta = _v1
+    const positionDelta = _v3a
       .copy(this.start.approximate.xAxis)
       .multiplyScalar(xDeltaLength)
       .addScaledVector(this.start.approximate.yAxis, yDeltaLength);
 
     camera.position.add(positionDelta);
     target.add(positionDelta);
-  }
-
-  private calculatePanLockNormal(lockVector: THREE.Vector3) {
-    return lockVector
-      .clone()
-      .cross(this.camera.position.clone().sub(this.target))
-      .cross(lockVector)
-      .normalize();
   }
 }

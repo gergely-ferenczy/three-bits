@@ -9,8 +9,12 @@ import { getInvert } from '../common/internal/getInvert';
 import { getSpeed } from '../common/internal/getSpeed';
 import { calculatePointerTarget } from '../utils/calculate-pointer-target';
 
-const _v1 = new THREE.Vector3();
-const _v2 = new THREE.Vector3();
+const _v2a = new THREE.Vector2();
+const _v2b = new THREE.Vector2();
+const _v3b = new THREE.Vector3();
+const _v3a = new THREE.Vector3();
+const _v3c = new THREE.Vector3();
+const _v3d = new THREE.Vector3();
 const _q1 = new THREE.Quaternion();
 
 const DefaultZoomDollyControlOptions: ZoomDollyFragmentOptions = {
@@ -45,12 +49,6 @@ export interface ZoomDollyFragmentStartValues {
 }
 
 export class ZoomDollyFragment implements ControlFragment {
-  private active: boolean;
-
-  private camera: ControllableCamera;
-
-  private target: THREE.Vector3;
-
   private options: ZoomDollyFragmentOptions;
 
   private raycaster: THREE.Raycaster;
@@ -62,14 +60,7 @@ export class ZoomDollyFragment implements ControlFragment {
     sphere: new THREE.Sphere(),
   };
 
-  constructor(
-    camera: ControllableCamera,
-    target: THREE.Vector3,
-    options?: Partial<ZoomDollyFragmentOptions>,
-  ) {
-    this.active = false;
-    this.camera = camera;
-    this.target = target;
+  constructor(options?: Partial<ZoomDollyFragmentOptions>) {
     this.options = { ...DefaultZoomDollyControlOptions, ...options };
     this.raycaster = new THREE.Raycaster();
   }
@@ -80,23 +71,6 @@ export class ZoomDollyFragment implements ControlFragment {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       this.options[key] = options[key];
     }
-    this.raycaster.far = 1000 / this.camera.zoom;
-  }
-
-  isActive() {
-    return this.active;
-  }
-
-  setActive(active: boolean) {
-    this.active = active;
-  }
-
-  setTarget(target: THREE.Vector3): void {
-    this.target = target;
-  }
-
-  setCamera(camera: ControllableCamera): void {
-    this.camera = camera;
   }
 
   handlePointerInput(
@@ -106,20 +80,25 @@ export class ZoomDollyFragment implements ControlFragment {
   ): void {
     if (!this.options.enabled) return;
 
+    this.updateStartValues(activePointers, camera, target);
+
     const speed = getSpeed(this.options.speed, activePointers[0].type);
     let delta;
     if (activePointers.length == 2) {
-      const prevLength = activePointers[0].coords.clone().sub(activePointers[1].coords).length();
-      const length = activePointers[0].coords
-        .clone()
+      const prevLength = _v2a.copy(activePointers[0].coords).sub(activePointers[1].coords).length();
+      const length = _v2a
+        .copy(activePointers[0].coords)
         .add(activePointers[0].delta)
-        .sub(activePointers[1].coords.clone().add(activePointers[1].delta))
+        .sub(_v2b.copy(activePointers[1].coords).add(activePointers[1].delta))
         .length();
 
       delta = prevLength - length;
     } else {
       delta = activePointers[0].delta.y;
     }
+
+    if (delta === 0.0) return;
+
     delta *= speed;
 
     const invert = getInvert(this.options.invert, activePointers[0].type);
@@ -149,7 +128,7 @@ export class ZoomDollyFragment implements ControlFragment {
   ): void {
     if (!this.options.enabled) return;
 
-    this.updateStartValues([activePointer]);
+    this.updateStartValues([activePointer], camera, target);
 
     const speed =
       typeof this.options.speed === 'number' ? this.options.speed : this.options.speed.scroll;
@@ -172,28 +151,32 @@ export class ZoomDollyFragment implements ControlFragment {
     }
   }
 
-  updateStartValues(activePointers: ActivePointer[]) {
+  updateStartValues(
+    activePointers: ActivePointer[],
+    camera: ControllableCamera,
+    target: THREE.Vector3,
+  ): void {
+    this.raycaster.far = 1000 / camera.zoom; // TODO: check if necessary
+
     if (this.options.secondaryMotion == 'truck') {
-      const panNormal = this.camera.getWorldDirection(_v1);
-      this.start.plane.setFromNormalAndCoplanarPoint(panNormal, this.target.clone());
+      const panNormal = camera.getWorldDirection(_v3a);
+      this.start.plane.setFromNormalAndCoplanarPoint(panNormal, target);
     } else if (
       this.options.secondaryMotion == 'orbit' ||
       this.options.secondaryMotion == 'rotate'
     ) {
-      this.start.sphere.center.copy(this.camera.position);
-      if (this.camera instanceof THREE.OrthographicCamera) {
-        const a = (this.camera.top - this.camera.bottom) / 2 / this.camera.zoom;
-        const b = (this.camera.right - this.camera.left) / 2 / this.camera.zoom;
+      this.start.sphere.center.copy(camera.position);
+      if (camera instanceof THREE.OrthographicCamera) {
+        const a = (camera.top - camera.bottom) / 2 / camera.zoom;
+        const b = (camera.right - camera.left) / 2 / camera.zoom;
         this.start.sphere.radius = Math.sqrt(a ** 2 + b ** 2);
-      } else {
-        this.start.sphere.radius = 1;
       }
     }
     if (this.options.type == 'zoomAndDolly' || this.options.type == 'zoom') {
-      this.start.zoom = this.camera.zoom;
+      this.start.zoom = camera.zoom;
     }
     if (this.options.type == 'zoomAndDolly' || this.options.type == 'dolly') {
-      this.start.relativeTarget.copy(this.target).sub(this.camera.position);
+      this.start.relativeTarget.copy(target).sub(camera.position);
     }
   }
 
@@ -243,7 +226,7 @@ export class ZoomDollyFragment implements ControlFragment {
 
     if (!intersectionB) return;
 
-    const truckDelta = intersectionA.clone().sub(intersectionB);
+    const truckDelta = intersectionA.sub(intersectionB);
     camera.position.add(truckDelta);
     target.add(truckDelta);
   }
@@ -254,31 +237,35 @@ export class ZoomDollyFragment implements ControlFragment {
     camera: ControllableCamera,
     target: THREE.Vector3,
   ): void {
+    if (camera instanceof THREE.PerspectiveCamera) {
+      this.start.sphere.radius = camera.position.distanceTo(target);
+    }
+
     this.raycaster.setFromCamera(startCoords, camera);
-    const intersectionA = this.raycaster.ray.intersectSphere(this.start.sphere, _v1);
+    const intersectionA = this.raycaster.ray.intersectSphere(this.start.sphere, _v3a);
     this.zoomOrDolly(delta, camera, target);
 
     if (!intersectionA) return;
 
     this.raycaster.setFromCamera(startCoords, camera);
-    const intersectionB = this.raycaster.ray.intersectSphere(this.start.sphere, _v2);
+    const intersectionB = this.raycaster.ray.intersectSphere(this.start.sphere, _v3b);
     if (!intersectionB) return;
 
-    const relativePosA = intersectionA.clone().sub(camera.position).normalize();
-    const relativePosB = intersectionB.clone().sub(camera.position).normalize();
+    const relativePosA = intersectionA.sub(camera.position).normalize();
+    const relativePosB = intersectionB.sub(camera.position).normalize();
 
     const quaternion = _q1.setFromUnitVectors(relativePosB, relativePosA);
 
-    if (this.options.secondaryMotion == 'orbit') {
-      const relativePosition = camera.position.clone().sub(target);
+    if (this.options.secondaryMotion === 'orbit') {
+      const relativePosition = _v3a.copy(camera.position).sub(target);
       camera.position.copy(target).add(relativePosition.applyQuaternion(quaternion));
     } else {
-      const relativePosition = target.clone().sub(camera.position);
+      const relativePosition = _v3a.copy(target).sub(camera.position);
       target.copy(camera.position).add(relativePosition.applyQuaternion(quaternion));
     }
   }
 
-  private zoom(delta: number) {
+  private zoom(delta: number): number {
     const deltaMultiplier = delta > 0 ? 1 / (1 + delta) : 1 - delta;
     const newZoom = this.start.zoom * deltaMultiplier;
     const clampedZoom = THREE.MathUtils.clamp(newZoom, this.options.minZoom, this.options.maxZoom);
@@ -288,13 +275,13 @@ export class ZoomDollyFragment implements ControlFragment {
     return zoomDelta;
   }
 
-  private dolly(delta: number) {
+  private dolly(delta: number): THREE.Vector3 {
     const deltaMultiplier = delta > 0 ? 1 + delta : 1 / (1 - delta);
-    const newRelativeTarget = this.start.relativeTarget
-      .clone()
+    const newRelativeTarget = _v3c
+      .copy(this.start.relativeTarget)
       .multiplyScalar(deltaMultiplier)
       .clampLength(this.options.minDistance, this.options.maxDistance);
-    const dollyDelta = this.start.relativeTarget.clone().sub(newRelativeTarget);
+    const dollyDelta = _v3d.copy(this.start.relativeTarget).sub(newRelativeTarget);
     this.start.relativeTarget.copy(newRelativeTarget);
 
     return dollyDelta;
@@ -311,8 +298,8 @@ export class ZoomDollyFragment implements ControlFragment {
     });
 
     let dollyClampRatio = 1;
-    const newRelativeTarget = this.start.relativeTarget
-      .clone()
+    const newRelativeTarget = _v3c
+      .copy(this.start.relativeTarget)
       .multiplyScalar(dollyDeltaMultiplier);
     clampLength(newRelativeTarget, this.options.minDistance, this.options.maxDistance, (value) => {
       dollyClampRatio = value.length() / newRelativeTarget.length();
@@ -332,7 +319,7 @@ export class ZoomDollyFragment implements ControlFragment {
     const zoomDelta = clampedZoom / this.start.zoom;
     this.start.zoom = clampedZoom;
 
-    const dollyDelta = this.start.relativeTarget.clone().sub(clampedRelativeTarget);
+    const dollyDelta = _v3c.copy(this.start.relativeTarget).sub(clampedRelativeTarget);
     this.start.relativeTarget.copy(clampedRelativeTarget);
 
     return { dollyDelta, zoomDelta };
