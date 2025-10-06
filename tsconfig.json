@@ -13,5 +13,5 @@
     "isolatedModules": true,
     "strict": true
   },
-  "include": ["lib/**/*", "examples/**/*"]
+  "include": ["lib/**/*"]
 }

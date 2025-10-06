@@ -11,5 +11,11 @@
     "strict": true,
     "noEmit": true
   },
-  "include": ["test/**/*", "vite.config.ts", "vitest.config.ts", "commitlint.config.ts"]
+  "include": [
+    "test/**/*",
+    "examples/**/*",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "commitlint.config.ts"
+  ]
 }
