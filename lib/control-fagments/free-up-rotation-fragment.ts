@@ -88,7 +88,6 @@ export class FreeUpRotationFragment implements ControlFragment {
 
     const aspect = getCameraAspectRatio(camera);
     const speed = getSpeed(this.options.speed, activePointers[0].type);
-    console.log('speed', speed);
     const invertHorizontal = getInvert(this.options.invertHorizontal, activePointers[0].type);
     const invertVertical = getInvert(this.options.invertVertical, activePointers[0].type);
     const deltaCoords = getDeltaCoordsFromActivePointers(activePointers);

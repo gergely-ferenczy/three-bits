@@ -4,8 +4,8 @@ import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
 import { getInvert } from '../common/internal/getInvert';
 import { getSpeed } from '../common/internal/getSpeed';
-import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 import { calculateSphericalAngles } from '../utils';
+import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 
 const _v3a = new THREE.Vector3();
 const _v3b = new THREE.Vector3();
