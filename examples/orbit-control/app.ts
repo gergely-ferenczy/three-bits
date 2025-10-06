@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import { OrbitControl, OrbitControlOptions, ThreeBitUtils } from '../../lib';
 
-let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
+let perspectiveCamera: THREE.PerspectiveCamera;
+let orthographicCamera: THREE.OrthographicCamera;
+let activeCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
 let scene: THREE.Scene;
 let renderer: THREE.WebGLRenderer;
 
@@ -18,15 +20,13 @@ function init() {
 
   scene = new THREE.Scene();
 
-  camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight);
-  // camera = new THREE.OrthographicCamera();
-  // camera.zoom = 0.2
+  perspectiveCamera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight);
+  perspectiveCamera.position.set(-15, 6, 12);
+  perspectiveCamera.lookAt(0, 0, 0);
 
-  camera.position.set(-15, 6, 12);
-  camera.lookAt(0, 0, 0);
+  orthographicCamera = new THREE.OrthographicCamera();
 
-  // @ts-expect-error
-  window.camera = camera;
+  activeCamera = perspectiveCamera;
 
   const controlOptions: Omit<OrbitControlOptions, 'inputMappings'> = {
     rotation: {
@@ -63,7 +63,7 @@ function init() {
     },
   };
 
-  const control = new OrbitControl(camera, controlOptions);
+  const control = new OrbitControl(activeCamera, controlOptions);
   control.attach(renderer.domElement);
   control.addEventListener('change', render);
 
@@ -126,6 +126,22 @@ function init() {
     '90°': (3 / 6) * Math.PI,
   };
 
+  const cameraOptions: { type: 'orthographic' | 'perspective' } = { type: 'perspective' };
+  const cameraFolder = gui.addFolder('Camera');
+  cameraFolder.add(cameraOptions, 'type', ['perspective', 'orthographic']).onChange((value) => {
+    if (value === 'orthographic') {
+      ThreeBitUtils.syncCameras(perspectiveCamera, orthographicCamera, control.getTarget());
+      control.setCamera(orthographicCamera);
+      activeCamera = orthographicCamera;
+      render();
+    } else {
+      ThreeBitUtils.syncCameras(orthographicCamera, perspectiveCamera, control.getTarget());
+      control.setCamera(perspectiveCamera);
+      activeCamera = perspectiveCamera;
+      render();
+    }
+  });
+
   const rotationFolder = gui.addFolder('Rotation');
   rotationFolder.add(controlOptions.rotation, 'enabled').onChange(updateControl);
   rotationFolder.add(controlOptions.rotation, 'speed' as any, 0.1, 10, 0.1).onChange(updateControl);
@@ -177,8 +193,8 @@ function init() {
 }
 
 function onWindowResize() {
-  ThreeBitUtils.updateCameraAspectRatio(camera, window.innerWidth, window.innerHeight);
-  camera.updateProjectionMatrix();
+  ThreeBitUtils.updateCameraAspectRatio(activeCamera, window.innerWidth, window.innerHeight);
+  activeCamera.updateProjectionMatrix();
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -186,5 +202,5 @@ function onWindowResize() {
 }
 
 function render() {
-  renderer.render(scene, camera);
+  renderer.render(scene, activeCamera);
 }
