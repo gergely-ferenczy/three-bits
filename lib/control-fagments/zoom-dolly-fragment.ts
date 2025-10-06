@@ -41,7 +41,7 @@ export interface ZoomDollyFragmentOptions {
   maxZoom: number;
 }
 
-export interface ZoomDollyFragmentStartValues {
+export interface ZoomDollyFragmentState {
   zoom: number;
   relativeTarget: THREE.Vector3;
   plane: THREE.Plane;
@@ -53,7 +53,7 @@ export class ZoomDollyFragment implements ControlFragment {
 
   private raycaster: THREE.Raycaster;
 
-  private start: ZoomDollyFragmentStartValues = {
+  private state: ZoomDollyFragmentState = {
     zoom: 1,
     relativeTarget: new THREE.Vector3(),
     plane: new THREE.Plane(),
@@ -160,23 +160,23 @@ export class ZoomDollyFragment implements ControlFragment {
 
     if (this.options.secondaryMotion == 'truck') {
       const panNormal = camera.getWorldDirection(_v3a);
-      this.start.plane.setFromNormalAndCoplanarPoint(panNormal, target);
+      this.state.plane.setFromNormalAndCoplanarPoint(panNormal, target);
     } else if (
       this.options.secondaryMotion == 'orbit' ||
       this.options.secondaryMotion == 'rotate'
     ) {
-      this.start.sphere.center.copy(camera.position);
+      this.state.sphere.center.copy(camera.position);
       if (camera instanceof THREE.OrthographicCamera) {
         const a = (camera.top - camera.bottom) / 2 / camera.zoom;
         const b = (camera.right - camera.left) / 2 / camera.zoom;
-        this.start.sphere.radius = Math.sqrt(a ** 2 + b ** 2);
+        this.state.sphere.radius = Math.sqrt(a ** 2 + b ** 2);
       }
     }
     if (this.options.type == 'zoomAndDolly' || this.options.type == 'zoom') {
-      this.start.zoom = camera.zoom;
+      this.state.zoom = camera.zoom;
     }
     if (this.options.type == 'zoomAndDolly' || this.options.type == 'dolly') {
-      this.start.relativeTarget.copy(target).sub(camera.position);
+      this.state.relativeTarget.copy(target).sub(camera.position);
     }
   }
 
@@ -207,7 +207,7 @@ export class ZoomDollyFragment implements ControlFragment {
     this.raycaster.setFromCamera(startCoords, camera);
     const intersectionA = calculatePointerTarget(
       camera,
-      this.start.plane,
+      this.state.plane,
       this.raycaster.ray,
       this.raycaster.far,
     );
@@ -219,7 +219,7 @@ export class ZoomDollyFragment implements ControlFragment {
     this.raycaster.setFromCamera(startCoords, camera);
     const intersectionB = calculatePointerTarget(
       camera,
-      this.start.plane,
+      this.state.plane,
       this.raycaster.ray,
       this.raycaster.far,
     );
@@ -238,17 +238,17 @@ export class ZoomDollyFragment implements ControlFragment {
     target: THREE.Vector3,
   ): void {
     if (camera instanceof THREE.PerspectiveCamera) {
-      this.start.sphere.radius = camera.position.distanceTo(target);
+      this.state.sphere.radius = camera.position.distanceTo(target);
     }
 
     this.raycaster.setFromCamera(startCoords, camera);
-    const intersectionA = this.raycaster.ray.intersectSphere(this.start.sphere, _v3a);
+    const intersectionA = this.raycaster.ray.intersectSphere(this.state.sphere, _v3a);
     this.zoomOrDolly(delta, camera, target);
 
     if (!intersectionA) return;
 
     this.raycaster.setFromCamera(startCoords, camera);
-    const intersectionB = this.raycaster.ray.intersectSphere(this.start.sphere, _v3b);
+    const intersectionB = this.raycaster.ray.intersectSphere(this.state.sphere, _v3b);
     if (!intersectionB) return;
 
     const relativePosA = intersectionA.sub(camera.position).normalize();
@@ -267,10 +267,10 @@ export class ZoomDollyFragment implements ControlFragment {
 
   private zoom(delta: number): number {
     const deltaMultiplier = delta > 0 ? 1 / (1 + delta) : 1 - delta;
-    const newZoom = this.start.zoom * deltaMultiplier;
+    const newZoom = this.state.zoom * deltaMultiplier;
     const clampedZoom = THREE.MathUtils.clamp(newZoom, this.options.minZoom, this.options.maxZoom);
-    const zoomDelta = clampedZoom / this.start.zoom;
-    this.start.zoom = clampedZoom;
+    const zoomDelta = clampedZoom / this.state.zoom;
+    this.state.zoom = clampedZoom;
 
     return zoomDelta;
   }
@@ -278,11 +278,11 @@ export class ZoomDollyFragment implements ControlFragment {
   private dolly(delta: number): THREE.Vector3 {
     const deltaMultiplier = delta > 0 ? 1 + delta : 1 / (1 - delta);
     const newRelativeTarget = _v3c
-      .copy(this.start.relativeTarget)
+      .copy(this.state.relativeTarget)
       .multiplyScalar(deltaMultiplier)
       .clampLength(this.options.minDistance, this.options.maxDistance);
-    const dollyDelta = _v3d.copy(this.start.relativeTarget).sub(newRelativeTarget);
-    this.start.relativeTarget.copy(newRelativeTarget);
+    const dollyDelta = _v3d.copy(this.state.relativeTarget).sub(newRelativeTarget);
+    this.state.relativeTarget.copy(newRelativeTarget);
 
     return dollyDelta;
   }
@@ -292,14 +292,14 @@ export class ZoomDollyFragment implements ControlFragment {
     const dollyDeltaMultiplier = delta > 0 ? 1 + delta : 1 / (1 - delta);
 
     let zoomClampRatio = 1;
-    const newZoom = this.start.zoom * zoomDeltaMultiplier;
+    const newZoom = this.state.zoom * zoomDeltaMultiplier;
     clamp(newZoom, this.options.minZoom, this.options.maxZoom, (value) => {
       zoomClampRatio = newZoom / value;
     });
 
     let dollyClampRatio = 1;
     const newRelativeTarget = _v3c
-      .copy(this.start.relativeTarget)
+      .copy(this.state.relativeTarget)
       .multiplyScalar(dollyDeltaMultiplier);
     clampLength(newRelativeTarget, this.options.minDistance, this.options.maxDistance, (value) => {
       dollyClampRatio = value.length() / newRelativeTarget.length();
@@ -316,11 +316,11 @@ export class ZoomDollyFragment implements ControlFragment {
       clampedRelativeTarget = newRelativeTarget.multiplyScalar(dollyClampRatio);
     }
 
-    const zoomDelta = clampedZoom / this.start.zoom;
-    this.start.zoom = clampedZoom;
+    const zoomDelta = clampedZoom / this.state.zoom;
+    this.state.zoom = clampedZoom;
 
-    const dollyDelta = _v3c.copy(this.start.relativeTarget).sub(clampedRelativeTarget);
-    this.start.relativeTarget.copy(clampedRelativeTarget);
+    const dollyDelta = _v3c.copy(this.state.relativeTarget).sub(clampedRelativeTarget);
+    this.state.relativeTarget.copy(clampedRelativeTarget);
 
     return { dollyDelta, zoomDelta };
   }

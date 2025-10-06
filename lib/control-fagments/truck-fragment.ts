@@ -29,7 +29,7 @@ export interface TruckFragmentOptions {
   maxDistance: number;
 }
 
-export interface TruckFragmentStartValues {
+export interface TruckFragmentState {
   plane: THREE.Plane;
   camera: ControllableCamera;
   exact: {
@@ -45,7 +45,7 @@ export interface TruckFragmentStartValues {
 export class TruckFragment implements ControlFragment {
   private options: TruckFragmentOptions;
 
-  private start: TruckFragmentStartValues = {
+  private state: TruckFragmentState = {
     plane: new THREE.Plane(),
     camera: null!,
     exact: {
@@ -80,7 +80,7 @@ export class TruckFragment implements ControlFragment {
     camera: ControllableCamera,
     target: THREE.Vector3,
   ) {
-    this.start.camera = camera.clone();
+    this.state.camera = camera.clone();
 
     if (this.options.mode == 'approximate') {
       this.updateStartValuesApproximate(camera, target);
@@ -90,7 +90,7 @@ export class TruckFragment implements ControlFragment {
   }
 
   getTruckPlane() {
-    return this.start.plane;
+    return this.state.plane;
   }
 
   getOptions() {
@@ -103,7 +103,7 @@ export class TruckFragment implements ControlFragment {
     target: THREE.Vector3,
   ) {
     if (this.options.lock instanceof THREE.Plane) {
-      this.start.plane = this.options.lock;
+      this.state.plane = this.options.lock;
     } else {
       let panNormal;
       if (this.options.lock instanceof THREE.Vector3) {
@@ -117,19 +117,19 @@ export class TruckFragment implements ControlFragment {
       } else {
         panNormal = camera.getWorldDirection(_v3a);
       }
-      this.start.plane.setFromNormalAndCoplanarPoint(panNormal, target);
+      this.state.plane.setFromNormalAndCoplanarPoint(panNormal, target);
     }
 
     const coords = getCoordsFromActivePointers(activePointers);
-    this.raycaster.setFromCamera(coords, this.start.camera);
+    this.raycaster.setFromCamera(coords, this.state.camera);
     const pointerTarget = calculatePointerTarget(
-      this.start.camera,
-      this.start.plane,
+      this.state.camera,
+      this.state.plane,
       this.raycaster.ray,
       this.raycaster.far,
     );
     if (pointerTarget) {
-      this.start.exact.pointerTarget = pointerTarget;
+      this.state.exact.pointerTarget = pointerTarget;
     }
   }
 
@@ -137,29 +137,29 @@ export class TruckFragment implements ControlFragment {
     const relativeTargetPos = _v3a.copy(target).sub(camera.position);
 
     if (this.options.lock instanceof THREE.Plane) {
-      this.start.approximate.xAxis
+      this.state.approximate.xAxis
         .copy(this.options.lock.normal)
         .cross(relativeTargetPos)
         .normalize();
-      this.start.approximate.yAxis
+      this.state.approximate.yAxis
         .copy(this.options.lock.normal)
-        .cross(this.start.approximate.xAxis)
+        .cross(this.state.approximate.xAxis)
         .normalize();
-      this.start.plane.copy(this.options.lock);
+      this.state.plane.copy(this.options.lock);
     } else if (this.options.lock instanceof THREE.Vector3) {
       const normal = _v3b.copy(this.options.lock).cross(relativeTargetPos).cross(this.options.lock);
-      this.start.approximate.xAxis.copy(camera.up).cross(relativeTargetPos).normalize();
-      this.start.approximate.yAxis.copy(this.start.approximate.xAxis).cross(normal).normalize();
-      this.start.plane.setFromNormalAndCoplanarPoint(normal, target);
+      this.state.approximate.xAxis.copy(camera.up).cross(relativeTargetPos).normalize();
+      this.state.approximate.yAxis.copy(this.state.approximate.xAxis).cross(normal).normalize();
+      this.state.plane.setFromNormalAndCoplanarPoint(normal, target);
     } else {
-      this.start.approximate.xAxis.copy(camera.up).cross(relativeTargetPos).normalize();
-      this.start.approximate.yAxis
-        .copy(this.start.approximate.xAxis)
+      this.state.approximate.xAxis.copy(camera.up).cross(relativeTargetPos).normalize();
+      this.state.approximate.yAxis
+        .copy(this.state.approximate.xAxis)
         .cross(relativeTargetPos)
         .normalize();
-      this.start.plane.setFromNormalAndCoplanarPoint(relativeTargetPos, target);
+      this.state.plane.setFromNormalAndCoplanarPoint(relativeTargetPos, target);
     }
-    this.start.approximate.distance = relativeTargetPos.length();
+    this.state.approximate.distance = relativeTargetPos.length();
   }
 
   handlePointerInput(
@@ -182,10 +182,10 @@ export class TruckFragment implements ControlFragment {
     target: THREE.Vector3,
   ): void {
     const coords = getCoordsFromActivePointers(activePointers);
-    this.raycaster.setFromCamera(coords, this.start.camera);
+    this.raycaster.setFromCamera(coords, this.state.camera);
     const intersection = calculatePointerTarget(
-      this.start.camera,
-      this.start.plane,
+      this.state.camera,
+      this.state.plane,
       this.raycaster.ray,
       this.raycaster.far,
     );
@@ -195,9 +195,9 @@ export class TruckFragment implements ControlFragment {
     const speed = getSpeed(this.options.speed, activePointers[0].type);
     const positionDelta = _v3a
       .copy(intersection)
-      .sub(this.start.exact.pointerTarget)
+      .sub(this.state.exact.pointerTarget)
       .multiplyScalar(-speed);
-    this.start.exact.pointerTarget.copy(intersection);
+    this.state.exact.pointerTarget.copy(intersection);
 
     camera.position.add(positionDelta);
     target.add(positionDelta);
@@ -215,14 +215,14 @@ export class TruckFragment implements ControlFragment {
     const speed = getSpeed(this.options.speed, activePointers[0].type);
     let scale = speed / camera.zoom;
     if (camera instanceof THREE.PerspectiveCamera) {
-      scale *= this.start.approximate.distance / 2;
+      scale *= this.state.approximate.distance / 2;
     }
     const xDeltaLength = deltaCoords.x * scale;
     const yDeltaLength = deltaCoords.y * scale;
     const positionDelta = _v3a
-      .copy(this.start.approximate.xAxis)
+      .copy(this.state.approximate.xAxis)
       .multiplyScalar(xDeltaLength)
-      .addScaledVector(this.start.approximate.yAxis, yDeltaLength);
+      .addScaledVector(this.state.approximate.yAxis, yDeltaLength);
 
     camera.position.add(positionDelta);
     target.add(positionDelta);
