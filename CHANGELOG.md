@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.3](https://github.com/gergely-ferenczy/three-bits/compare/v0.7.2...v0.7.3) (2025-10-06)
+
+### Bug Fixes
+
+- type generation issue introduced by the 'examples' folder db0bab0
+
 ## [0.7.2](https://github.com/gergely-ferenczy/three-bits/compare/v0.7.1...v0.7.2) (2025-10-06)
 
 ### Bug Fixes
