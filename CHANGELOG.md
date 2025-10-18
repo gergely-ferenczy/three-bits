@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.4](https://github.com/gergely-ferenczy/three-bits/compare/v0.7.3...v0.7.4) (2025-10-18)
+
+### Bug Fixes
+
+- handling of over/out events applied on group objects 9220b60
+
 ## [0.7.3](https://github.com/gergely-ferenczy/three-bits/compare/v0.7.2...v0.7.3) (2025-10-06)
 
 ### Bug Fixes
