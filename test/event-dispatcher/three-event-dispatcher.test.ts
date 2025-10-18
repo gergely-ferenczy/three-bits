@@ -517,6 +517,78 @@ describe('pointer enter/leave', () => {
     expect(leaveB).toHaveBeenCalledOnce();
   });
 
+  test('object group with enter/leave events only on group object', () => {
+    const width = 200;
+    const height = 200;
+
+    const canvas = createCanvas(width, height);
+    const camera = new THREE.OrthographicCamera(-2, 2, 2, -2);
+    camera.position.set(5, 0, 0);
+    camera.lookAt(0, 0, 0);
+    const group = new THREE.Group();
+    group.name = 'Group';
+    const objectA = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    objectA.name = 'A';
+    objectA.position.z = -0.6;
+    objectA.updateMatrixWorld();
+    const objectB = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    objectB.name = 'B';
+    objectB.position.x = -0.1;
+    objectB.position.z = 0.6;
+    objectB.updateMatrixWorld();
+    group.add(objectA, objectB);
+
+    const eventDispatcher = new ThreeEventDispatcher(canvas, camera);
+
+    const enterGroup = vi.fn().mockName('enterGroup');
+    eventDispatcher.addEventListener(group, 'pointerenter', enterGroup);
+    const leaveGroup = vi.fn().mockName('leaveGroup');
+    eventDispatcher.addEventListener(group, 'pointerleave', leaveGroup);
+
+    const clearAllMocks = () => {
+      enterGroup.mockClear();
+      leaveGroup.mockClear();
+    };
+
+    // Enter object A
+    canvas.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        cancelable: true,
+        clientX: 110,
+        clientY: 100,
+      }),
+    );
+    expect(enterGroup).toHaveBeenCalledOnce();
+    expect(leaveGroup).not.toHaveBeenCalled();
+
+    // Enter object B while leaving object A
+    clearAllMocks();
+    canvas.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        cancelable: true,
+        clientX: 90,
+        clientY: 100,
+      }),
+    );
+    expect(enterGroup).not.toHaveBeenCalled();
+    expect(leaveGroup).not.toHaveBeenCalled();
+
+    // Leave object B
+    clearAllMocks();
+    canvas.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        cancelable: true,
+        clientX: 40,
+        clientY: 100,
+      }),
+    );
+    expect(enterGroup).not.toHaveBeenCalled();
+    expect(leaveGroup).toHaveBeenCalledOnce();
+  });
+
   test('object group with two non-overlapping objects', () => {
     const width = 200;
     const height = 200;
@@ -964,5 +1036,77 @@ describe('pointer out/over', () => {
     expect(outA).not.toHaveBeenCalled();
     expect(outB).toHaveBeenCalledOnce();
     expect(outB).toHaveBeenCalledBefore(outGroup);
+  });
+
+  test('object group with over/out events only on group object', () => {
+    const width = 200;
+    const height = 200;
+
+    const canvas = createCanvas(width, height);
+    const camera = new THREE.OrthographicCamera(-2, 2, 2, -2);
+    camera.position.set(5, 0, 0);
+    camera.lookAt(0, 0, 0);
+    const group = new THREE.Group();
+    group.name = 'Group';
+    const objectA = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    objectA.name = 'A';
+    objectA.position.z = -0.6;
+    objectA.updateMatrixWorld();
+    const objectB = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    objectB.name = 'B';
+    objectB.position.x = -0.1;
+    objectB.position.z = 0.6;
+    objectB.updateMatrixWorld();
+    group.add(objectA, objectB);
+
+    const eventDispatcher = new ThreeEventDispatcher(canvas, camera);
+
+    const overGroup = vi.fn().mockName('overGroup');
+    eventDispatcher.addEventListener(group, 'pointerover', overGroup);
+    const outGroup = vi.fn().mockName('outGroup');
+    eventDispatcher.addEventListener(group, 'pointerout', outGroup);
+
+    const clearAllMocks = () => {
+      overGroup.mockClear();
+      outGroup.mockClear();
+    };
+
+    // Move over object A
+    canvas.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        cancelable: true,
+        clientX: 110,
+        clientY: 100,
+      }),
+    );
+    expect(overGroup).toHaveBeenCalledOnce();
+    expect(outGroup).not.toHaveBeenCalled();
+
+    // Move over B while moving out of object A
+    clearAllMocks();
+    canvas.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        cancelable: true,
+        clientX: 90,
+        clientY: 100,
+      }),
+    );
+    expect(overGroup).toHaveBeenCalledOnce();
+    expect(outGroup).toHaveBeenCalledOnce();
+
+    // Leave object B
+    clearAllMocks();
+    canvas.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        cancelable: true,
+        clientX: 40,
+        clientY: 100,
+      }),
+    );
+    expect(overGroup).not.toHaveBeenCalled();
+    expect(outGroup).toHaveBeenCalledOnce();
   });
 });

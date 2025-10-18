@@ -51,8 +51,10 @@ interface StopPropagationRef {
 export class ThreeEventDispatcher {
   private handlers: { [key in HandlerEventType]: (ev: HTMLElementEventMap[key]) => void };
   private lastPointerEvent: PointerEvent | null;
+  private domElement: HTMLElement;
+  private camera: THREE.Camera;
+  private raycaster: THREE.Raycaster;
 
-  private raycaster = new THREE.Raycaster();
   private targetIntersections = new Array<THREE.Intersection>();
   private targetObjects = new Array<THREE.Object3D>();
   private eventObjects = new Array<THREE.Object3D>();
@@ -61,10 +63,11 @@ export class ThreeEventDispatcher {
   private pointerCaptures = new Map<number, THREE.Object3D>();
 
   // TODO add missing stopimmediatepropagation events
-  constructor(
-    private domElement: HTMLElement,
-    private camera: THREE.Camera,
-  ) {
+  constructor(domElement: HTMLElement, camera: THREE.Camera, raycaster?: THREE.Raycaster) {
+    this.domElement = domElement;
+    this.camera = camera;
+    this.raycaster = raycaster ?? new THREE.Raycaster();
+
     this.handlers = {
       pointerdown: this.handlePointerDown.bind(this),
       pointermove: this.handlePointerMove.bind(this),
@@ -293,8 +296,7 @@ export class ThreeEventDispatcher {
     this.targetIntersections = this.raycaster
       .intersectObjects(this.eventObjects)
       .filter((i) => i.object.visible);
-    this.targetObjects = this.targetIntersections.map((i) => i.object);
-    this.targetObjects = [...new Set(this.targetObjects)];
+    this.targetObjects = [...new Set(this.targetIntersections.map((i) => i.object))];
   }
 
   private updatePointerEnterLeaveEvents(): void {
@@ -320,22 +322,30 @@ export class ThreeEventDispatcher {
   private updatePointerOverOutEvents(): void {
     if (!this.lastPointerEvent) return;
 
-    const stopPropagationRef = { value: false };
-    let overObject = null;
-    let overObjectEventState = null;
+    const stopPropagationRef: StopPropagationRef = { value: false };
+    let overObject: THREE.Object3D | null = null;
+    let overObjectEventState: ObjectEventState | undefined;
 
     const captureObject = this.pointerCaptures.get(this.lastPointerEvent.pointerId);
     if (captureObject) {
       overObject = captureObject;
       overObjectEventState = this.events.get(captureObject);
     } else {
+      // Traverse through all target objects and for each target object, traverse up
+      // the object tree until the root object (scene) to find all possible event
+      // object matches.
       for (const { object } of this.targetIntersections) {
-        const eventState = this.events.get(object);
-        if (eventState) {
-          overObject = object;
-          overObjectEventState = eventState;
-          break;
+        let objectItr: THREE.Object3D | null = object;
+        while (objectItr) {
+          const eventState = this.events.get(objectItr);
+          if (eventState) {
+            overObject = object;
+            overObjectEventState = eventState;
+            break;
+          }
+          objectItr = objectItr.parent;
         }
+        if (overObject) break;
       }
     }
 
