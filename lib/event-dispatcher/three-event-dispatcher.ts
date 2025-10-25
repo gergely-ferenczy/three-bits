@@ -68,11 +68,12 @@ export class ThreeEventDispatcher {
     this.camera = camera;
     this.raycaster = raycaster ?? new THREE.Raycaster();
 
+    const pointerEventHandler = this.handlePointerEvent.bind(this);
     this.handlers = {
-      pointerdown: this.handlePointerDown.bind(this),
-      pointermove: this.handlePointerMove.bind(this),
-      pointerup: this.handlePointerUp.bind(this),
-      pointercancel: this.handlePointerCancel.bind(this),
+      pointerdown: pointerEventHandler,
+      pointermove: pointerEventHandler,
+      pointerup: pointerEventHandler,
+      pointercancel: pointerEventHandler,
       click: this.handleClick.bind(this),
       dblclick: this.handleDblClick.bind(this),
       wheel: this.handleWheel.bind(this),
@@ -281,8 +282,8 @@ export class ThreeEventDispatcher {
   }
 
   private updateHitBoxEvents() {
-    this.updatePointerEnterLeaveEvents();
     this.updatePointerOverOutEvents();
+    this.updatePointerEnterLeaveEvents();
   }
 
   private updateIntersections(): void {
@@ -406,28 +407,10 @@ export class ThreeEventDispatcher {
     this.handleEvent(threeEvent);
   }
 
-  private handlePointerDown(ev: PointerEvent): void {
-    this.lastPointerEvent = ev;
-    this.handleBaseEvent(ev);
-    this.updateHitBoxEvents();
-  }
-
-  private handlePointerUp(ev: PointerEvent): void {
-    this.lastPointerEvent = ev;
-    this.handleBaseEvent(ev);
-    this.updateHitBoxEvents();
-  }
-
-  private handlePointerMove(ev: PointerEvent): void {
+  private handlePointerEvent(ev: PointerEvent): void {
     this.lastPointerEvent = ev;
     this.update();
     this.handleBaseEvent(ev);
-  }
-
-  private handlePointerCancel(ev: PointerEvent): void {
-    this.lastPointerEvent = ev;
-    this.handleBaseEvent(ev);
-    this.updateHitBoxEvents();
   }
 
   private handleClick(ev: MouseEvent): void {

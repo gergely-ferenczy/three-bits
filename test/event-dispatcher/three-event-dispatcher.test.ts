@@ -74,14 +74,6 @@ describe('global event handlers fire', () => {
     const testEventHandler = vi.fn().mockName('testEventHandler');
     eventDispatcher.addGlobalEventListener(type, testEventHandler);
 
-    const pointerMoveEvent = new PointerEvent('pointermove', {
-      bubbles: true,
-      cancelable: true,
-      clientX: canvas.clientWidth / 2,
-      clientY: canvas.clientHeight / 2,
-    });
-    canvas.dispatchEvent(pointerMoveEvent);
-
     let simulatedEvent: Event;
     if (type == 'wheel') {
       simulatedEvent = new WheelEvent(type, {
@@ -123,7 +115,7 @@ describe('event handlers can be added/removed', () => {
     const testEventHandler = vi.fn().mockName('testEventHandler');
     eventDispatcher.addEventListener(object, 'click', testEventHandler);
 
-    const pointerMoveEvent = new PointerEvent('pointermove', {
+    const pointerMoveEvent = new PointerEvent('pointerdown', {
       bubbles: true,
       cancelable: true,
       clientX: canvas.clientWidth / 2,
