@@ -26,4 +26,6 @@ export * from './event-dispatcher/three-event-listener';
 export * from './event-dispatcher/three-event-types';
 export * from './event-dispatcher/three-event';
 
+export * from './transform-tool/transform-tool';
+
 export * as ThreeBitUtils from './utils';
