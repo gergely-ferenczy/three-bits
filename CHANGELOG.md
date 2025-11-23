@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.0](///compare/v0.7.4...v0.8.0) (2025-11-23)
+
+### Features
+
+- add transform tool 99b4b53
+
+### Bug Fixes
+
+- touch event handling logic 9537b07
+
 ## [0.7.4](https://github.com/gergely-ferenczy/three-bits/compare/v0.7.3...v0.7.4) (2025-10-18)
 
 ### Bug Fixes
