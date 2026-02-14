@@ -5,10 +5,10 @@ import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
 import { MouseButton } from '../common/mouse-button';
 import { TouchGesture } from '../common/touch-gesture';
-import { ControlFragment } from '../control-fagments/control-fragment';
-import { FreeUpRotationFragment } from '../control-fagments/free-up-rotation-fragment';
-import { TruckFragment } from '../control-fagments/truck-fragment';
-import { ZoomDollyFragment } from '../control-fagments/zoom-dolly-fragment';
+import { ControlFragment } from '../control-fragments/control-fragment';
+import { FreeUpRotationFragment } from '../control-fragments/free-up-rotation-fragment';
+import { TruckFragment } from '../control-fragments/truck-fragment';
+import { ZoomDollyFragment } from '../control-fragments/zoom-dolly-fragment';
 
 const DefaultInputMappings = {
   rotate: [

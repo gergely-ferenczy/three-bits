@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Control } from './control';
 import { PointerHandler, PointerHandlerOptions } from './handlers/pointer-handler';
-import { ControlFragment } from '../control-fagments/control-fragment';
+import { ControlFragment } from '../control-fragments/control-fragment';
 import { WheelHandler, WheelHandlerOptions } from './handlers/wheel-handler';
 import { ActivePointer } from '../common/active-pointer';
 import { ControlEventListener } from '../common/control-event-listener';

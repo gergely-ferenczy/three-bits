@@ -15,10 +15,10 @@ export * from './controls/trackball-control';
 export * from './controls/handlers/pointer-handler';
 export * from './controls/handlers/wheel-handler';
 
-export * from './control-fagments/control-fragment';
-export * from './control-fagments/fixed-up-rotation-fragment';
-export * from './control-fagments/truck-fragment';
-export * from './control-fagments/zoom-dolly-fragment';
+export * from './control-fragments/control-fragment';
+export * from './control-fragments/fixed-up-rotation-fragment';
+export * from './control-fragments/truck-fragment';
+export * from './control-fragments/zoom-dolly-fragment';
 
 export * from './event-dispatcher/event-phases';
 export * from './event-dispatcher/three-event-dispatcher';

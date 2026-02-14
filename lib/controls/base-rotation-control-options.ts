@@ -1,8 +1,8 @@
 import { ControlInput } from '../common/control-input';
 import { InputMappings } from '../common/input-mappings';
-import { FixedUpRotationFragmentOptions } from '../control-fagments/fixed-up-rotation-fragment';
-import { TruckFragmentOptions } from '../control-fagments/truck-fragment';
-import { ZoomDollyFragmentOptions } from '../control-fagments/zoom-dolly-fragment';
+import { FixedUpRotationFragmentOptions } from '../control-fragments/fixed-up-rotation-fragment';
+import { TruckFragmentOptions } from '../control-fragments/truck-fragment';
+import { ZoomDollyFragmentOptions } from '../control-fragments/zoom-dolly-fragment';
 
 export type MovementType = 'rotate' | 'truck' | 'zoomOrDolly';
 
