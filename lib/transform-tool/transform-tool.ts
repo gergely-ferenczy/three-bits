@@ -9,6 +9,7 @@ import { ThreeEvent } from '../event-dispatcher/three-event';
 import { ThreeEventDispatcher } from '../event-dispatcher/three-event-dispatcher';
 import { ThreeEventListener } from '../event-dispatcher/three-event-listener';
 
+const TransformToolName = 'TransformTool';
 const DefaultScale = 150;
 const DefaultArrowDir = new THREE.Vector3(1, 0, 0);
 const DefaultArrowFaceDir = new THREE.Vector3(0, 1, 0);
@@ -29,22 +30,22 @@ const _m2 = new THREE.Matrix4();
 
 export interface TransformToolOptions {
   /** Fill color of all elements. Default is `#ffffff`. */
-  color: THREE.ColorRepresentation;
+  color?: THREE.ColorRepresentation;
 
   /** Outline color of all elements. Default is `#202020`. */
-  outlineColor: THREE.ColorRepresentation;
+  outlineColor?: THREE.ColorRepresentation;
 
   /** Fill color of an element with active hover state. Default is `#40e0d0`. */
-  highlightColor: THREE.ColorRepresentation;
+  highlightColor?: THREE.ColorRepresentation;
 
   /** Inner width of all elements. Default is `1.5`. */
-  lineWidth: number;
+  lineWidth?: number;
 
   /** Outline width of all elements. Default is `1`. */
-  outlineLineWidth: number;
+  outlineLineWidth?: number;
 
   /** Relative scale. Default is `1`. */
-  scale: number;
+  scale?: number;
 
   /**
    * All elements are rendered with materials whose `depthTest` property is set
@@ -54,7 +55,7 @@ export interface TransformToolOptions {
    * use renderOrder values for its internal materials in the range of
    * `[baseRenderOrder, baseRenderOrder + 2]`. Default is `0`.
    */
-  baseRenderOrder: number;
+  baseRenderOrder?: number;
 
   /** An object you want to the tool to attach to. Default is `undefined`. */
   target?: THREE.Object3D;
@@ -68,8 +69,8 @@ export interface TransformToolOptions {
 
   /**
    * The maximum distance a single translation action is allowed to move the
-   * tool or its target. A trnaslation action is considered to be a single
-   * continous pointer action. Default is `undefined`.
+   * tool or its target. A translation action is considered to be a single
+   * continuous pointer action. Default is `undefined`.
    */
   maxDistance?: number;
 
@@ -99,10 +100,22 @@ export interface TransformToolOptions {
   ) => void;
 
   /** Called when the tool's appearance, position or rotation has changed. */
-  onRequestRender?: () => void;
+  onRequestRender: () => void;
 }
 
-const DefaultOptions: TransformToolOptions = {
+type OptionalOptions =
+  | 'target'
+  | 'maxDistance'
+  | 'autoUpdate'
+  | 'disableTranslation'
+  | 'disableRotation'
+  | 'onPositionChange'
+  | 'onRotationChange';
+
+type TransformToolOptionsInternal = Required<Omit<TransformToolOptions, OptionalOptions>> &
+  Pick<TransformToolOptions, OptionalOptions>;
+
+const DefaultOptions: TransformToolOptionsInternal = {
   color: '#ffffff',
   outlineColor: '#202020',
   highlightColor: '#40e0d0',
@@ -111,11 +124,15 @@ const DefaultOptions: TransformToolOptions = {
   scale: 1,
   baseRenderOrder: 0,
   autoUpdate: true,
+  onRequestRender: undefined!,
 };
 
-export class TransformTool extends THREE.Object3D {
+export class TransformTool {
+  layers: THREE.Layers;
+
+  private root: THREE.Group;
   private eventDispatcher: ThreeEventDispatcher;
-  private options: TransformToolOptions;
+  private options: TransformToolOptionsInternal;
   private parts: {
     xTranslateArrow: THREE.Object3D | null;
     yTranslateArrow: THREE.Object3D | null;
@@ -143,13 +160,13 @@ export class TransformTool extends THREE.Object3D {
   private hiddenLineMaterial: LineMaterial;
   private hiddenPlaneMaterial: THREE.MeshBasicMaterial;
 
-  constructor(eventDispatcher: ThreeEventDispatcher, options?: Partial<TransformToolOptions>) {
-    super();
-    this.name = 'TransformTool';
+  constructor(eventDispatcher: ThreeEventDispatcher, options: TransformToolOptions) {
+    const root = new THREE.Group();
+    root.name = TransformToolName;
     this.eventDispatcher = eventDispatcher;
     this.options = { ...DefaultOptions, ...options };
 
-    this.inverseMatrixWorld = this.matrixWorld.clone().invert();
+    this.inverseMatrixWorld = root.matrixWorld.clone().invert();
     this.pointerActionsDisabled = false;
     this.globalPointerDownHandler = () => {
       this.pointerActionsDisabled = true;
@@ -195,7 +212,8 @@ export class TransformTool extends THREE.Object3D {
       colorWrite: false,
     });
 
-    const origin = this.createOriginObject();
+    const origin = this.createOrigin();
+    root.add(origin);
 
     this.parts = {
       xTranslateArrow: null,
@@ -213,22 +231,22 @@ export class TransformTool extends THREE.Object3D {
       !this.options.disableTranslation ||
       (typeof this.options.disableTranslation !== 'boolean' && !this.options.disableTranslation.x)
     ) {
-      this.parts.xTranslateArrow = this.createTranslateArrowObject('x', new THREE.Vector3(1, 0, 0));
-      this.add(this.parts.xTranslateArrow);
+      this.parts.xTranslateArrow = this.createTranslateArrow('x', new THREE.Vector3(1, 0, 0));
+      root.add(this.parts.xTranslateArrow);
     }
     if (
       !this.options.disableTranslation ||
       (typeof this.options.disableTranslation !== 'boolean' && !this.options.disableTranslation.y)
     ) {
-      this.parts.xTranslateArrow = this.createTranslateArrowObject('y', new THREE.Vector3(0, 1, 0));
-      this.add(this.parts.xTranslateArrow);
+      this.parts.xTranslateArrow = this.createTranslateArrow('y', new THREE.Vector3(0, 1, 0));
+      root.add(this.parts.xTranslateArrow);
     }
     if (
       !this.options.disableTranslation ||
       (typeof this.options.disableTranslation !== 'boolean' && !this.options.disableTranslation.z)
     ) {
-      this.parts.xTranslateArrow = this.createTranslateArrowObject('z', new THREE.Vector3(0, 0, 1));
-      this.add(this.parts.xTranslateArrow);
+      this.parts.xTranslateArrow = this.createTranslateArrow('z', new THREE.Vector3(0, 0, 1));
+      root.add(this.parts.xTranslateArrow);
     }
 
     if (
@@ -237,8 +255,8 @@ export class TransformTool extends THREE.Object3D {
         !this.options.disableTranslation.x &&
         !this.options.disableTranslation.y)
     ) {
-      this.parts.xySidePlane = this.createSidePlaneObject(new THREE.Vector3(0, 0, 1));
-      this.add(this.parts.xySidePlane);
+      this.parts.xySidePlane = this.createSidePlane(new THREE.Vector3(0, 0, 1));
+      root.add(this.parts.xySidePlane);
     }
     if (
       !this.options.disableTranslation ||
@@ -246,8 +264,8 @@ export class TransformTool extends THREE.Object3D {
         !this.options.disableTranslation.x &&
         !this.options.disableTranslation.z)
     ) {
-      this.parts.xzSidePlane = this.createSidePlaneObject(new THREE.Vector3(0, 1, 0));
-      this.add(this.parts.xzSidePlane);
+      this.parts.xzSidePlane = this.createSidePlane(new THREE.Vector3(0, 1, 0));
+      root.add(this.parts.xzSidePlane);
     }
     if (
       !this.options.disableTranslation ||
@@ -255,37 +273,41 @@ export class TransformTool extends THREE.Object3D {
         !this.options.disableTranslation.y &&
         !this.options.disableTranslation.z)
     ) {
-      this.parts.yzSidePlane = this.createSidePlaneObject(new THREE.Vector3(1, 0, 0));
-      this.add(this.parts.yzSidePlane);
+      this.parts.yzSidePlane = this.createSidePlane(new THREE.Vector3(1, 0, 0));
+      root.add(this.parts.yzSidePlane);
     }
 
     if (
       !this.options.disableRotation ||
       (typeof this.options.disableRotation !== 'boolean' && !this.options.disableRotation.x)
     ) {
-      this.parts.xRotateArrow = this.createRotateArrowObject('x', new THREE.Vector3(1, 0, 0));
-      this.add(this.parts.xRotateArrow);
+      this.parts.xRotateArrow = this.createRotateArrow('x', new THREE.Vector3(1, 0, 0));
+      root.add(this.parts.xRotateArrow);
     }
     if (
       !this.options.disableRotation ||
       (typeof this.options.disableRotation !== 'boolean' && !this.options.disableRotation.y)
     ) {
-      this.parts.yRotateArrow = this.createRotateArrowObject('y', new THREE.Vector3(0, -1, 0));
-      this.add(this.parts.yRotateArrow);
+      this.parts.yRotateArrow = this.createRotateArrow('y', new THREE.Vector3(0, -1, 0));
+      root.add(this.parts.yRotateArrow);
     }
     if (
       !this.options.disableRotation ||
       (typeof this.options.disableRotation !== 'boolean' && !this.options.disableRotation.z)
     ) {
-      this.parts.zRotateArrow = this.createRotateArrowObject('z', new THREE.Vector3(0, 0, -1));
-      this.add(this.parts.zRotateArrow);
+      this.parts.zRotateArrow = this.createRotateArrow('z', new THREE.Vector3(0, 0, -1));
+      root.add(this.parts.zRotateArrow);
     }
 
-    this.add(origin);
+    const originalUpdateMatrixWorld = root.updateMatrixWorld.bind(root);
+    root.updateMatrixWorld = (force?: boolean) => {
+      originalUpdateMatrixWorld(force);
+      this.inverseMatrixWorld.copy(root.matrixWorld).invert();
+    };
 
-    const originalLayers = this.layers;
-    const self = this; // eslint-disable-line @typescript-eslint/no-this-alias
-    this.layers = new Proxy(originalLayers, {
+    this.root = root;
+
+    this.layers = new Proxy(new THREE.Layers(), {
       get(target, propertyKey, receiver) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const value = Reflect.get(target, propertyKey, receiver);
@@ -295,9 +317,7 @@ export class TransformTool extends THREE.Object3D {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const result = Reflect.apply(value, target, args);
 
-            self.traverse((child) => {
-              if (self === child) return;
-
+            root.traverse((child) => {
               const childLayers = child.layers;
               // @ts-expect-error
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -315,7 +335,16 @@ export class TransformTool extends THREE.Object3D {
     });
   }
 
+  attach(object: THREE.Object3D) {
+    object.add(this.root);
+  }
+
+  detach() {
+    this.root.removeFromParent();
+  }
+
   dispose() {
+    this.detach();
     this.eventDispatcher.removeGlobalEventListener('pointerdown', this.globalPointerDownHandler);
     this.eventDispatcher.removeGlobalEventListener('pointerup', this.globalPointerUpHandler);
     this.innerMaterial.dispose();
@@ -325,7 +354,7 @@ export class TransformTool extends THREE.Object3D {
     this.hitboxPlaneMaterial.dispose();
     this.hiddenLineMaterial.dispose();
     this.hiddenPlaneMaterial.dispose();
-    this.traverse((object) => {
+    this.root.traverse((object) => {
       this.eventDispatcher.removeAllEventListeners(object);
       if (object.name == 'hitbox') {
         const hitbox = object as THREE.Mesh;
@@ -334,9 +363,8 @@ export class TransformTool extends THREE.Object3D {
     });
   }
 
-  override updateMatrixWorld(force?: boolean): void {
-    super.updateMatrixWorld(force);
-    this.inverseMatrixWorld.copy(this.matrixWorld).invert();
+  get transformObject(): THREE.Object3D {
+    return this.root;
   }
 
   private calculateObjectScale(
@@ -355,13 +383,13 @@ export class TransformTool extends THREE.Object3D {
     return scale;
   }
 
-  private createOriginObject() {
+  private createOrigin() {
     const circleSegments = 16;
     const circleSegmentAngle = (Math.PI * 2) / circleSegments;
     const circleRadius = 0.08;
 
     const originGroup = new THREE.Group();
-    originGroup.name = 'origin';
+    originGroup.name = `${TransformToolName}-Origin`;
 
     const positions = new Float32Array((circleSegments + 1) * 3);
     for (let i = 0; i < circleSegments + 1; i++) {
@@ -407,7 +435,7 @@ export class TransformTool extends THREE.Object3D {
     return originGroup;
   }
 
-  private createTranslateArrowObject(dir: 'x' | 'y' | 'z', axis: THREE.Vector3) {
+  private createTranslateArrow(dir: 'x' | 'y' | 'z', axis: THREE.Vector3) {
     const ass = 0.1; // arrow shaft start
     const ase = 0.72; // arrow shaft end
     const ahw = 0.16; // arrow head width
@@ -422,7 +450,7 @@ export class TransformTool extends THREE.Object3D {
     ];
 
     const arrowGroup = new THREE.Group();
-    arrowGroup.name = `translate-arrow-${dir}`;
+    arrowGroup.name = `${TransformToolName}-TranslateArrow-${dir}`;
 
     const lineSegmentsGeometry = new LineSegmentsGeometry();
     lineSegmentsGeometry.setPositions(positions);
@@ -466,7 +494,7 @@ export class TransformTool extends THREE.Object3D {
     ) => {
       originalBeforeRender(renderer);
 
-      const worldRotation = _q1.setFromRotationMatrix(this.matrixWorld);
+      const worldRotation = _q1.setFromRotationMatrix(this.root.matrixWorld);
       const inverseWorldRotation = _q2.copy(worldRotation).invert();
       const rotatedAxis = _v1.copy(axis).applyQuaternion(worldRotation);
       const viewDir = this.getViewDirection(camera, arrowGroup, _v2);
@@ -512,12 +540,12 @@ export class TransformTool extends THREE.Object3D {
       pointerMoveHandler,
       (event) => {
         const intersection = event.intersections.find((i) => i.object === hitbox)!;
-        const target = this.options.target ?? this;
+        const target = this.getTarget();
         objectStartPos.copy(target.position);
         intersectionStartPos.copy(intersection.point);
 
         const cameraDir = event.camera.position.clone().sub(outerLine.position).normalize();
-        const worldRotation = new THREE.Quaternion().setFromRotationMatrix(this.matrixWorld);
+        const worldRotation = new THREE.Quaternion().setFromRotationMatrix(this.root.matrixWorld);
         startAxis.copy(axis).applyQuaternion(worldRotation);
         const startNormal = _v1.copy(startAxis).cross(cameraDir).cross(startAxis).normalize();
         startPlane.setFromNormalAndCoplanarPoint(startNormal, intersectionStartPos);
@@ -528,7 +556,7 @@ export class TransformTool extends THREE.Object3D {
     return arrowGroup;
   }
 
-  private createRotateArrowObject(dir: 'x' | 'y' | 'z', axis: THREE.Vector3) {
+  private createRotateArrow(dir: 'x' | 'y' | 'z', axis: THREE.Vector3) {
     const asa = THREE.MathUtils.degToRad(15); // arrow shaft angle
     const asr = 1; // arrow shaft radius
     const ass = 6; // arrow shaft segments
@@ -587,7 +615,7 @@ export class TransformTool extends THREE.Object3D {
     }
 
     const arrowGroup = new THREE.Group();
-    arrowGroup.name = `rotate-arrow-${dir}`;
+    arrowGroup.name = `${TransformToolName}-RotateArrow-${dir}`;
     arrowGroup.quaternion.setFromUnitVectors(DefaultArrowDir, axis);
 
     const lineSegmentsGeometry = new LineSegmentsGeometry();
@@ -628,7 +656,7 @@ export class TransformTool extends THREE.Object3D {
       camera: THREE.Camera,
     ) => {
       originalBeforeRender(renderer);
-      const worldRotation = _q1.setFromRotationMatrix(this.matrixWorld);
+      const worldRotation = _q1.setFromRotationMatrix(this.root.matrixWorld);
       const rotatedAxis = _v1.copy(axis).applyQuaternion(worldRotation).normalize();
       const viewDir = this.getViewDirection(camera, arrowGroup, _v2);
       const viewAngle = rotatedAxis.angleTo(viewDir);
@@ -671,9 +699,9 @@ export class TransformTool extends THREE.Object3D {
       pointerMoveHandler,
       (event) => {
         const intersection = event.intersections.find((i) => i.object === hitbox)!;
-        this.getWorldPosition(startOrigin);
+        this.root.getWorldPosition(startOrigin);
         intersectionStartPos.copy(intersection.point).sub(startOrigin);
-        const target = this.options.target ?? this;
+        const target = this.getTarget();
         startPosition.copy(target.position);
         startRotation.copy(target.quaternion);
         startNormal.copy(axis).applyQuaternion(target.quaternion);
@@ -686,7 +714,7 @@ export class TransformTool extends THREE.Object3D {
     return arrowGroup;
   }
 
-  private createSidePlaneObject(normal: THREE.Vector3): THREE.Object3D {
+  private createSidePlane(normal: THREE.Vector3): THREE.Object3D {
     const s = 0.175;
 
     // prettier-ignore
@@ -698,6 +726,7 @@ export class TransformTool extends THREE.Object3D {
     const offset = 0.2;
 
     const sidePlaneGroup = new THREE.Group();
+    sidePlaneGroup.name = `${TransformToolName}-SidePlane`;
     sidePlaneGroup.quaternion.setFromUnitVectors(normal, new THREE.Vector3(0, 0, 1));
     sidePlaneGroup.position
       .set(s + offset, s + offset, 0)
@@ -749,7 +778,7 @@ export class TransformTool extends THREE.Object3D {
       camera: THREE.Camera,
     ) => {
       originalBeforeRender(renderer);
-      const worldRotation = _q1.setFromRotationMatrix(this.matrixWorld);
+      const worldRotation = _q1.setFromRotationMatrix(this.root.matrixWorld);
       const rotatedNormal = _v1.copy(normal).applyQuaternion(worldRotation);
       const viewDir = this.getViewDirection(camera, sidePlaneGroup, _v2);
       const viewAngle = rotatedNormal.angleTo(viewDir);
@@ -789,10 +818,10 @@ export class TransformTool extends THREE.Object3D {
       pointerMoveHandler,
       (event) => {
         const intersection = event.intersections.find((i) => i.object === hitbox)!;
-        const target = this.options.target ?? this;
+        const target = this.getTarget();
         objectStartPos.copy(target.position);
         intersectionStartPos.copy(intersection.point);
-        const worldRotation = _q1.setFromRotationMatrix(this.matrixWorld);
+        const worldRotation = _q1.setFromRotationMatrix(this.root.matrixWorld);
         const rotatedNormal = _v1.copy(normal).applyQuaternion(worldRotation);
         startPlane.setFromNormalAndCoplanarPoint(rotatedNormal, intersectionStartPos);
       },
@@ -899,6 +928,10 @@ export class TransformTool extends THREE.Object3D {
     }
   }
 
+  private getTarget() {
+    return this.options.target ?? this.root;
+  }
+
   private applyRotationChange(
     startPosition: THREE.Vector3,
     startRotation: THREE.Quaternion,
@@ -906,8 +939,7 @@ export class TransformTool extends THREE.Object3D {
     offset: THREE.Vector3,
   ) {
     if (this.options.autoUpdate) {
-      const target = this.options.target ?? this;
-
+      const target = this.getTarget();
       target.position.set(0, 0, 0);
       target.quaternion.copy(startRotation);
       const transform = _m1.makeTranslation(offset);
@@ -923,7 +955,7 @@ export class TransformTool extends THREE.Object3D {
 
   private applyPositionChange(startPosition: THREE.Vector3, positionDelta: THREE.Vector3) {
     if (this.options.autoUpdate) {
-      const target = this.options.target ?? this;
+      const target = this.getTarget();
       target.position.copy(startPosition).add(positionDelta);
       this.options.onRequestRender?.();
     }
