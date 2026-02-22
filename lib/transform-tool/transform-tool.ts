@@ -127,7 +127,33 @@ const DefaultOptions: TransformToolOptionsInternal = {
   onRequestRender: undefined!,
 };
 
+/**
+ * A visual 3D transformation tool that provides interactive controls for
+ * translating and rotating objects. The tool displays arrows for translation
+ * along axes, arc handles for rotation around axes,
+ *
+ * and planar controls for translation within planes. It automatically adjusts
+ * its visual scale based on camera distance and hides elements that would be
+ * hard to interact with from the current view angle.
+ *
+ * @example
+ * ```typescript
+ * const eventDispatcher = new ThreeEventDispatcher(scene, camera, renderer.domElement);
+ * const transformTool = new TransformTool(eventDispatcher, {
+ *   onRequestRender: () => renderer.render(scene, camera),
+ *   target: myObject3D
+ * });
+ * transformTool.attach(myObject3D);
+ * ```
+ */
 export class TransformTool {
+  /**
+   * Layers configuration for the transform tool.
+   *
+   * This is a proxy around a THREE.Layers instance that automatically propagates
+   * layer changes to all 3D elements of the tool. You can use this to control
+   * which cameras render the tool by setting or toggling layer membership.
+   */
   layers: THREE.Layers;
 
   private root: THREE.Group;
@@ -160,6 +186,12 @@ export class TransformTool {
   private hiddenLineMaterial: LineMaterial;
   private hiddenPlaneMaterial: THREE.MeshBasicMaterial;
 
+  /**
+   * Creates a new TransformTool instance.
+   *
+   * @param eventDispatcher - A {@link ThreeEventDispatcher} instance that handles 3D pointer events
+   * @param options - Configuration options for the transform tool
+   */
   constructor(eventDispatcher: ThreeEventDispatcher, options: TransformToolOptions) {
     const root = new THREE.Group();
     root.name = TransformToolName;
@@ -335,14 +367,38 @@ export class TransformTool {
     });
   }
 
+  /**
+   * Attaches the transform tool to a 3D object.
+   *
+   * This adds the tool's visual representation as a child of the specified object.
+   * The tool will follow the object's transformations.
+   *
+   * @param object - The {@link THREE.Object3D} to attach the tool to
+   */
   attach(object: THREE.Object3D) {
     object.add(this.root);
   }
 
+  /**
+   * Detaches the transform tool from its current parent.
+   *
+   * This removes the tool's visual representation from the scene graph.
+   * The tool can be reattached later using the `attach` method.
+   */
   detach() {
     this.root.removeFromParent();
   }
 
+  /**
+   * Disposes of the transform tool and cleans up all resources.
+   *
+   * This method:
+   * - Detaches the tool from its parent
+   * - Removes all event listeners
+   * - Disposes of all materials and geometries
+   *
+   * After calling this method, the tool instance cannot be used anymore.
+   */
   dispose() {
     this.detach();
     this.eventDispatcher.removeGlobalEventListener('pointerdown', this.globalPointerDownHandler);
@@ -363,6 +419,14 @@ export class TransformTool {
     });
   }
 
+  /**
+   * Gets the root {@link THREE.Object3D} that represents the transform tool.
+   *
+   * This object contains all the visual elements of the tool and can be added
+   * to a scene or another object to make the tool visible.
+   *
+   * @returns The root {@link THREE.Object3D} of the transform tool
+   */
   get transformObject(): THREE.Object3D {
     return this.root;
   }
