@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.8.0...v0.9.0) (2026-02-22)
+
+### Features
+
+- separate transform tool class from root 3D object 408a0db
+
+### Bug Fixes
+
+- control-fragments folder name 899cb0e
+
 ## [0.8.0](///compare/v0.7.4...v0.8.0) (2025-11-23)
 
 ### Features
