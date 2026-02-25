@@ -131,15 +131,13 @@ function init() {
   cameraFolder.add(cameraOptions, 'type', ['perspective', 'orthographic']).onChange((value) => {
     if (value === 'orthographic') {
       ThreeBitUtils.syncCameras(perspectiveCamera, orthographicCamera, control.getTarget());
-      control.setCamera(orthographicCamera);
       activeCamera = orthographicCamera;
-      render();
     } else {
       ThreeBitUtils.syncCameras(orthographicCamera, perspectiveCamera, control.getTarget());
-      control.setCamera(perspectiveCamera);
       activeCamera = perspectiveCamera;
-      render();
     }
+    control.setCamera(activeCamera);
+    render();
   });
 
   const rotationFolder = gui.addFolder('Rotation');
