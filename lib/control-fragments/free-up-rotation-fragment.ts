@@ -63,9 +63,16 @@ export class FreeUpRotationFragment implements ControlFragment {
       const useInvisible = !!this.options.dynamicOrigin.useInvisible;
       const coords = activePointers[0].coords;
       _raycaster.setFromCamera(coords, camera);
-      this.origin = findDynamicTarget(_raycaster, source, useInvisible) ?? target;
+      const dynamicOrigin = findDynamicTarget(_raycaster, source, useInvisible);
+      if (dynamicOrigin) {
+        this.origin = dynamicOrigin;
+      } else if (this.options.dynamicOrigin.defaultToAbsoluteOrigin) {
+        this.origin.set(0, 0, 0);
+      } else {
+        this.origin.copy(target);
+      }
     } else {
-      this.origin = target;
+      this.origin.copy(target);
     }
   }
 

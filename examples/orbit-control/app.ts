@@ -41,6 +41,7 @@ function init() {
       dynamicOrigin: {
         source: scene,
         useInvisible: false,
+        defaultToAbsoluteOrigin: true,
       },
     },
     truck: {
