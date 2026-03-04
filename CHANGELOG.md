@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.10.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.9.0...v0.10.0) (2026-03-04)
+
+### Features
+
+- add 'default to absolute origin' optional feature to rotation control fragments dc94880
+- add dynamic target feature to truck fragment 79b5435
+- change dolly behaviour (additive movement, target positioning) a87c851
+- improve control options handling dde20bc
+
 ## [0.9.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.8.0...v0.9.0) (2026-02-22)
 
 ### Features
