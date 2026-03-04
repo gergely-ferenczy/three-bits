@@ -174,8 +174,8 @@ export abstract class BaseControl implements Control {
   private handleActiveControlChange(activeControls: Set<string>, activePointers: ActivePointer[]) {
     this.updateStartValues();
 
-    for (const [conrtolId, controlFragment] of this.controlFragmentMap.entries()) {
-      if (activeControls.has(conrtolId)) {
+    for (const [controlId, controlFragment] of this.controlFragmentMap.entries()) {
+      if (activeControls.has(controlId)) {
         controlFragment.updateStartValues(activePointers, this.camera, this.target);
       }
     }
