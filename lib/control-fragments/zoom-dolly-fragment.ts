@@ -5,8 +5,7 @@ import { ControllableCamera } from '../common/controllable-camera';
 import { clamp } from '../common/internal/clamp';
 import { clampLength } from '../common/internal/clamp-length';
 import { getStartCoordsFromActivePointers } from '../common/internal/get-coords-from-active-pointers';
-import { getInvert } from '../common/internal/getInvert';
-import { getSpeed } from '../common/internal/getSpeed';
+import { getOption } from '../common/internal/get-option';
 import { calculatePointerTarget } from '../utils/calculate-pointer-target';
 
 const _v2a = new THREE.Vector2();
@@ -82,7 +81,7 @@ export class ZoomDollyFragment implements ControlFragment {
 
     this.updateStartValues(activePointers, camera, target);
 
-    const speed = getSpeed(this.options.speed, activePointers[0].type);
+    const speed = getOption(this.options.speed, activePointers[0].type);
     let delta;
     if (activePointers.length == 2) {
       const prevLength = _v2a.copy(activePointers[0].coords).sub(activePointers[1].coords).length();
@@ -101,7 +100,7 @@ export class ZoomDollyFragment implements ControlFragment {
 
     delta *= speed;
 
-    const invert = getInvert(this.options.invert, activePointers[0].type);
+    const invert = getOption(this.options.invert, activePointers[0].type);
     if (invert) {
       delta *= -1;
     }

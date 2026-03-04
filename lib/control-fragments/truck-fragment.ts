@@ -6,7 +6,7 @@ import {
   getCoordsFromActivePointers,
   getDeltaCoordsFromActivePointers,
 } from '../common/internal/get-coords-from-active-pointers';
-import { getSpeed } from '../common/internal/getSpeed';
+import { getOption } from '../common/internal/get-option';
 import { calculatePointerTarget } from '../utils/calculate-pointer-target';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 
@@ -213,7 +213,7 @@ export class TruckFragment implements ControlFragment {
 
     if (!intersection) return;
 
-    const speed = getSpeed(this.options.speed, activePointers[0].type);
+    const speed = getOption(this.options.speed, activePointers[0].type);
     const positionDelta = _v3a
       .copy(intersection)
       .sub(this.state.exact.pointerTarget)
@@ -233,7 +233,7 @@ export class TruckFragment implements ControlFragment {
     const deltaCoords = getDeltaCoordsFromActivePointers(activePointers);
     deltaCoords.x *= aspect;
 
-    const speed = getSpeed(this.options.speed, activePointers[0].type);
+    const speed = getOption(this.options.speed, activePointers[0].type);
     let scale = speed / camera.zoom;
     if (camera instanceof THREE.PerspectiveCamera) {
       scale *= this.state.approximate.distance / 2;

@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { ControlFragment } from './control-fragment';
 import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
-import { getInvert } from '../common/internal/getInvert';
-import { getSpeed } from '../common/internal/getSpeed';
+import { findDynamicTarget } from '../common/internal/find-dynamic-target';
+import { getOption } from '../common/internal/get-option';
 import { calculateSphericalAngles } from '../utils';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 
@@ -41,7 +41,8 @@ export interface FixedUpRotationFragmentOptions {
   invertVertical: boolean | { pointer: boolean; touch: boolean };
   dynamicOrigin?: {
     source: THREE.Object3D | THREE.Object3D[];
-    useInvisible: boolean;
+    useInvisible?: boolean;
+    defaultToAbsoluteOrigin?: boolean;
   };
 }
 
@@ -95,24 +96,13 @@ export class FixedUpRotationFragment implements ControlFragment {
     target: THREE.Vector3,
   ) {
     if (this.orbit) {
-      let originSet = false;
       if (this.options.dynamicOrigin) {
         const source = this.options.dynamicOrigin.source;
-        const useInvisible = this.options.dynamicOrigin.useInvisible;
+        const useInvisible = !!this.options.dynamicOrigin.useInvisible;
         const coords = activePointers[0].coords;
         _raycaster.setFromCamera(coords, camera);
-        const intersections = Array.isArray(source)
-          ? _raycaster.intersectObjects(source)
-          : _raycaster.intersectObject(source);
-        for (const i of intersections) {
-          if (i.object.visible || useInvisible) {
-            this.origin = i.point;
-            originSet = true;
-            break;
-          }
-        }
-      }
-      if (!originSet) {
+        this.origin = findDynamicTarget(_raycaster, source, useInvisible) ?? target;
+      } else {
         this.origin = target;
       }
     } else {
@@ -143,9 +133,9 @@ export class FixedUpRotationFragment implements ControlFragment {
   ): void {
     if (!this.options.enabled) return;
 
-    const speed = getSpeed(this.options.speed, activePointers[0].type);
-    const invertHorizontal = getInvert(this.options.invertHorizontal, activePointers[0].type);
-    const invertVertical = getInvert(this.options.invertVertical, activePointers[0].type);
+    const speed = getOption(this.options.speed, activePointers[0].type);
+    const invertHorizontal = getOption(this.options.invertHorizontal, activePointers[0].type);
+    const invertVertical = getOption(this.options.invertVertical, activePointers[0].type);
     const aspect = getCameraAspectRatio(camera);
     const deltaCoords = _v2.copy(activePointers[0].delta);
     deltaCoords.x *= aspect;
