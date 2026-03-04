@@ -49,6 +49,10 @@ function init() {
       lock: null,
       mode: 'exact',
       maxDistance: 100,
+      dynamicTarget: {
+        source: scene,
+        useInvisible: false,
+      },
     },
     zoomOrDolly: {
       enabled: true,
@@ -157,11 +161,6 @@ function init() {
     .onChange(updateControl);
   rotationFolder.add(controlOptions.rotation, 'invertHorizontal' as any).onChange(updateControl);
   rotationFolder.add(controlOptions.rotation, 'invertVertical' as any).onChange(updateControl);
-
-  const dynOriginFolder = rotationFolder.addFolder('Dynamic Origin');
-  dynOriginFolder
-    .add(controlOptions.rotation.dynamicOrigin as any, 'useInvisible')
-    .onChange(updateControl);
 
   const truckFolder = gui.addFolder('Truck');
   truckFolder.add(controlOptions.truck, 'enabled').onChange(updateControl);

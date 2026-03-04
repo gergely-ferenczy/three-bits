@@ -25,8 +25,12 @@ export interface TruckFragmentOptions {
   enabled: boolean;
   speed: number | { pointer: number; touch: number };
   lock: THREE.Plane | THREE.Vector3 | null;
-  mode: 'exact' | 'approximate';
   maxDistance: number;
+  mode: 'exact' | 'approximate';
+  dynamicTarget?: {
+    source: THREE.Object3D | THREE.Object3D[];
+    useInvisible: boolean;
+  };
 }
 
 export interface TruckFragmentState {
@@ -117,7 +121,24 @@ export class TruckFragment implements ControlFragment {
       } else {
         panNormal = camera.getWorldDirection(_v3a);
       }
-      this.state.plane.setFromNormalAndCoplanarPoint(panNormal, target);
+
+      let dynamicTarget = target;
+      if (this.options.dynamicTarget) {
+        const source = this.options.dynamicTarget.source;
+        const useInvisible = this.options.dynamicTarget.useInvisible;
+        const coords = activePointers[0].coords;
+        this.raycaster.setFromCamera(coords, camera);
+        const intersections = Array.isArray(source)
+          ? this.raycaster.intersectObjects(source)
+          : this.raycaster.intersectObject(source);
+        for (const i of intersections) {
+          if (i.object.visible || useInvisible) {
+            dynamicTarget = i.point;
+            break;
+          }
+        }
+      }
+      this.state.plane.setFromNormalAndCoplanarPoint(panNormal, dynamicTarget);
     }
 
     const coords = getCoordsFromActivePointers(activePointers);
