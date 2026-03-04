@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
-import { TrackballControl, OrbitControlOptions, ThreeBitUtils } from '../../lib';
+import { TrackballControl, ThreeBitUtils } from '../../lib';
+import { TrackballControlOptions } from '../../lib/controls/trackball-control-options';
 
 let perspectiveCamera: THREE.PerspectiveCamera;
 let orthographicCamera: THREE.OrthographicCamera;
@@ -28,14 +29,11 @@ function init() {
 
   activeCamera = perspectiveCamera;
 
-  const controlOptions: Omit<OrbitControlOptions, 'inputMappings'> = {
+  type RequiredOptions<T> = { [P in keyof T]-?: Required<T[P]> };
+  const controlOptions: RequiredOptions<Omit<TrackballControlOptions, 'inputMappings'>> = {
     rotation: {
       enabled: true,
       speed: 2,
-      minHorizontalAngle: -Infinity,
-      maxHorizontalAngle: Infinity,
-      minVerticalAngle: -Math.PI / 2,
-      maxVerticalAngle: Math.PI / 2,
       invertHorizontal: false,
       invertVertical: false,
       dynamicOrigin: {
@@ -147,25 +145,13 @@ function init() {
 
   const rotationFolder = gui.addFolder('Rotation');
   rotationFolder.add(controlOptions.rotation, 'enabled').onChange(updateControl);
-  rotationFolder.add(controlOptions.rotation, 'speed' as any, 0.1, 10, 0.1).onChange(updateControl);
-  rotationFolder
-    .add(controlOptions.rotation, 'minHorizontalAngle', horizontalAngleOptions)
-    .onChange(updateControl);
-  rotationFolder
-    .add(controlOptions.rotation, 'maxHorizontalAngle', horizontalAngleOptions)
-    .onChange(updateControl);
-  rotationFolder
-    .add(controlOptions.rotation, 'minVerticalAngle', verticalAngleOptions)
-    .onChange(updateControl);
-  rotationFolder
-    .add(controlOptions.rotation, 'maxVerticalAngle', verticalAngleOptions)
-    .onChange(updateControl);
+  rotationFolder.add(controlOptions.rotation as any, 'speed', 0.1, 10, 0.1).onChange(updateControl);
   rotationFolder.add(controlOptions.rotation, 'invertHorizontal' as any).onChange(updateControl);
   rotationFolder.add(controlOptions.rotation, 'invertVertical' as any).onChange(updateControl);
 
   const truckFolder = gui.addFolder('Truck');
   truckFolder.add(controlOptions.truck, 'enabled').onChange(updateControl);
-  truckFolder.add(controlOptions.truck, 'speed' as any, 0.01, 10, 0.01).onChange(updateControl);
+  truckFolder.add(controlOptions.truck as any, 'speed', 0.01, 10, 0.01).onChange(updateControl);
   truckFolder.add(controlOptions.truck, 'mode', ['exact', 'approximate']).onChange(updateControl);
   truckFolder.add(controlOptions.truck, 'maxDistance', 0, 1000, 1).onChange(updateControl);
 

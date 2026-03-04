@@ -2,15 +2,14 @@ import * as THREE from 'three';
 import { Control } from './control';
 import { PointerHandler, PointerHandlerOptions } from './handlers/pointer-handler';
 import { ControlFragment } from '../control-fragments/control-fragment';
-import { WheelHandler, WheelHandlerOptions } from './handlers/wheel-handler';
+import { WheelHandler } from './handlers/wheel-handler';
 import { ActivePointer } from '../common/active-pointer';
 import { ControlEventListener } from '../common/control-event-listener';
 import { ControlEventType } from '../common/control-event-type';
 import { ControllableCamera } from '../common/controllable-camera';
 
 export interface BaseControlOptions {
-  pointerHandlerOptions: PointerHandlerOptions;
-  wheelHandlerOptions: WheelHandlerOptions;
+  pointerHandlerOptions?: PointerHandlerOptions;
 }
 
 export abstract class BaseControl implements Control {
@@ -41,7 +40,7 @@ export abstract class BaseControl implements Control {
     camera: ControllableCamera,
     target: THREE.Vector3,
     controlFragmentMap: Map<string, ControlFragment>,
-    options: BaseControlOptions,
+    options: Required<BaseControlOptions>,
   ) {
     this.enabled = true;
     this.camera = camera;
@@ -65,18 +64,12 @@ export abstract class BaseControl implements Control {
       this.handleActiveControlChange.bind(this),
       this.handleInputChange.bind(this),
     );
-    this.wheelHandler = new WheelHandler(
-      options.wheelHandlerOptions,
-      this.handleWheelChange.bind(this),
-    );
+    this.wheelHandler = new WheelHandler(this.handleWheelChange.bind(this));
   }
 
-  protected updateHandlerOptions(options: Partial<BaseControlOptions>) {
+  protected updateHandlerOptions(options: BaseControlOptions) {
     if (options.pointerHandlerOptions) {
       this.pointerHandler.updateOptions(options.pointerHandlerOptions);
-    }
-    if (options.wheelHandlerOptions) {
-      this.wheelHandler.updateOptions(options.wheelHandlerOptions);
     }
   }
 

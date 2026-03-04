@@ -4,8 +4,14 @@ import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
 import { findDynamicTarget } from '../common/internal/find-dynamic-target';
 import { getOption } from '../common/internal/get-option';
+import { InternalOptions } from '../common/internal/internal-options';
 import { calculateSphericalAngles } from '../utils';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
+
+type FixedUpRotationFragmentOptionsInternal = InternalOptions<
+  FixedUpRotationFragmentOptions,
+  'dynamicOrigin'
+>;
 
 const _v3a = new THREE.Vector3();
 const _v3b = new THREE.Vector3();
@@ -14,31 +20,31 @@ const _v3d = new THREE.Vector3();
 const _v2 = new THREE.Vector2();
 const _raycaster = new THREE.Raycaster();
 
-const DefaultVerticalAxis = new THREE.Vector3(1, 0, 0);
-const DefaultHorizontalAxis = new THREE.Vector3(0, 1, 0);
-const DefaultDirectionAxis = new THREE.Vector3(0, 0, 1);
-const AbsoluteMaxVerticalAngle = Math.PI / 2 - 1e-8;
+const defaultVerticalAxis = new THREE.Vector3(1, 0, 0);
+const defaultHorizontalAxis = new THREE.Vector3(0, 1, 0);
+const defaultDirectionAxis = new THREE.Vector3(0, 0, 1);
+const absoluteMaxVerticalAngle = Math.PI / 2 - 1e-8;
 
-const DefaultRotationControlOptions: FixedUpRotationFragmentOptions = {
+const defaultRotationControlOptions: FixedUpRotationFragmentOptionsInternal = {
   enabled: true,
   speed: 1,
   minHorizontalAngle: -Infinity,
   maxHorizontalAngle: Infinity,
-  minVerticalAngle: -AbsoluteMaxVerticalAngle,
-  maxVerticalAngle: AbsoluteMaxVerticalAngle,
+  minVerticalAngle: -absoluteMaxVerticalAngle,
+  maxVerticalAngle: absoluteMaxVerticalAngle,
   invertHorizontal: false,
   invertVertical: false,
 };
 
 export interface FixedUpRotationFragmentOptions {
-  enabled: boolean;
-  speed: number | { pointer: number; touch: number };
-  minHorizontalAngle: number;
-  maxHorizontalAngle: number;
-  minVerticalAngle: number;
-  maxVerticalAngle: number;
-  invertHorizontal: boolean | { pointer: boolean; touch: boolean };
-  invertVertical: boolean | { pointer: boolean; touch: boolean };
+  enabled?: boolean;
+  speed?: number | { pointer: number; touch: number };
+  minHorizontalAngle?: number;
+  maxHorizontalAngle?: number;
+  minVerticalAngle?: number;
+  maxVerticalAngle?: number;
+  invertHorizontal?: boolean | { pointer: boolean; touch: boolean };
+  invertVertical?: boolean | { pointer: boolean; touch: boolean };
   dynamicOrigin?: {
     source: THREE.Object3D | THREE.Object3D[];
     useInvisible?: boolean;
@@ -48,26 +54,26 @@ export interface FixedUpRotationFragmentOptions {
 
 export class FixedUpRotationFragment implements ControlFragment {
   private orbit: boolean;
-  private options: FixedUpRotationFragmentOptions;
+  private options: FixedUpRotationFragmentOptionsInternal;
   private rotationBasis: THREE.Matrix4;
   private inverseRotationBasis: THREE.Matrix4;
   private horizontalAngle = 0;
   private verticalAngle = 0;
   private origin = new THREE.Vector3();
 
-  constructor(orbit: boolean, options?: Partial<FixedUpRotationFragmentOptions>) {
+  constructor(orbit: boolean, options?: FixedUpRotationFragmentOptions) {
     this.orbit = orbit;
-    const normal = _v3a.copy(DefaultHorizontalAxis).cross(THREE.Object3D.DEFAULT_UP).normalize();
-    const angle = -THREE.Object3D.DEFAULT_UP.angleTo(DefaultHorizontalAxis);
+    const normal = _v3a.copy(defaultHorizontalAxis).cross(THREE.Object3D.DEFAULT_UP).normalize();
+    const angle = -THREE.Object3D.DEFAULT_UP.angleTo(defaultHorizontalAxis);
     this.rotationBasis = new THREE.Matrix4().makeRotationAxis(normal, angle);
     this.inverseRotationBasis = this.rotationBasis.clone().invert();
-    this.options = { ...DefaultRotationControlOptions };
+    this.options = { ...defaultRotationControlOptions };
     if (options) {
       this.updateOptions(options);
     }
   }
 
-  updateOptions(options: Partial<FixedUpRotationFragmentOptions>) {
+  updateOptions(options: FixedUpRotationFragmentOptions) {
     for (const key in options) {
       const k = key as keyof FixedUpRotationFragmentOptions;
       (this.options[k] as any) = options[k];
@@ -82,11 +88,11 @@ export class FixedUpRotationFragment implements ControlFragment {
 
     this.options.minVerticalAngle = Math.max(
       this.options.minVerticalAngle,
-      -AbsoluteMaxVerticalAngle,
+      -absoluteMaxVerticalAngle,
     );
     this.options.maxVerticalAngle = Math.min(
       this.options.maxVerticalAngle,
-      AbsoluteMaxVerticalAngle,
+      absoluteMaxVerticalAngle,
     );
   }
 
@@ -296,20 +302,20 @@ export class FixedUpRotationFragment implements ControlFragment {
 
     const relativeCameraPos = _v3a.copy(camera.position).sub(this.origin);
     const baseCameraPosition = _v3b
-      .copy(DefaultDirectionAxis)
+      .copy(defaultDirectionAxis)
       .multiplyScalar(relativeCameraPos.length());
 
     const newRelativeCameraPos = baseCameraPosition
-      .applyAxisAngle(DefaultVerticalAxis, this.orbit ? -newVerticalAngle : newVerticalAngle)
-      .applyAxisAngle(DefaultHorizontalAxis, -newHorizontalAngle)
+      .applyAxisAngle(defaultVerticalAxis, this.orbit ? -newVerticalAngle : newVerticalAngle)
+      .applyAxisAngle(defaultHorizontalAxis, -newHorizontalAngle)
       .applyMatrix4(this.inverseRotationBasis);
     const cameraRotationDelta = newRelativeCameraPos.sub(relativeCameraPos);
 
     const relativeTargetPos = _v3c.copy(target).sub(this.origin);
     const newRelativeTargetPos = _v3d
       .copy(relativeTargetPos)
-      .applyAxisAngle(DefaultVerticalAxis, this.orbit ? -newVerticalAngle : newVerticalAngle)
-      .applyAxisAngle(DefaultHorizontalAxis, -newHorizontalAngle)
+      .applyAxisAngle(defaultVerticalAxis, this.orbit ? -newVerticalAngle : newVerticalAngle)
+      .applyAxisAngle(defaultHorizontalAxis, -newHorizontalAngle)
       .applyMatrix4(this.inverseRotationBasis);
     const targetRotationDelta = newRelativeTargetPos.sub(relativeTargetPos);
 

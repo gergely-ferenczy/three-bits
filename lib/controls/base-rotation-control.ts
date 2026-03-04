@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { BaseControl, BaseControlOptions } from './base-control';
-import { PartialBaseRotationControlOptions } from './base-rotation-control-options';
+import { BaseRotationControlOptions } from './base-rotation-control-options';
 import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
+import { InputMappings } from '../common/input-mappings';
 import { MouseButton } from '../common/mouse-button';
 import { TouchGesture } from '../common/touch-gesture';
 import { ControlFragment } from '../control-fragments/control-fragment';
@@ -10,7 +11,7 @@ import { FixedUpRotationFragment } from '../control-fragments/fixed-up-rotation-
 import { TruckFragment } from '../control-fragments/truck-fragment';
 import { ZoomDollyFragment } from '../control-fragments/zoom-dolly-fragment';
 
-const DefaultInputMappings = {
+const defaultInputMappings: InputMappings = {
   rotate: [
     {
       mouseButton: MouseButton.Primary,
@@ -50,20 +51,13 @@ export class BaseRotationControl extends BaseControl {
   private truckFragment: TruckFragment;
   private zoomDollyFragment: ZoomDollyFragment;
 
-  constructor(
-    camera: ControllableCamera,
-    orbit: boolean,
-    options?: PartialBaseRotationControlOptions,
-  ) {
+  constructor(camera: ControllableCamera, orbit: boolean, options?: BaseRotationControlOptions) {
     const target = new THREE.Vector3();
     const controlFragmentMap = new Map<string, ControlFragment>();
-    const inputMappings = { ...DefaultInputMappings, ...options?.inputMappings };
-    const baseControlOptions: BaseControlOptions = {
+    const inputMappings = { ...defaultInputMappings, ...options?.inputMappings };
+    const baseControlOptions: Required<BaseControlOptions> = {
       pointerHandlerOptions: {
         inputMappings,
-      },
-      wheelHandlerOptions: {
-        inverse: options?.inverseWheel,
       },
     };
     super(camera, target, controlFragmentMap, baseControlOptions);
@@ -78,8 +72,8 @@ export class BaseRotationControl extends BaseControl {
     controlFragmentMap.set('zoomOrDolly', this.zoomDollyFragment);
   }
 
-  updateOptions(options: PartialBaseRotationControlOptions) {
-    const baseControlOptions: Partial<BaseControlOptions> = {
+  updateOptions(options: BaseRotationControlOptions) {
+    const baseControlOptions: BaseControlOptions = {
       ...(options.inputMappings
         ? {
             pointerHandlerOptions: {
@@ -87,9 +81,6 @@ export class BaseRotationControl extends BaseControl {
             },
           }
         : {}),
-      wheelHandlerOptions: {
-        inverse: options?.inverseWheel,
-      },
     };
     super.updateHandlerOptions(baseControlOptions);
 

@@ -7,13 +7,16 @@ import {
   getDeltaCoordsFromActivePointers,
 } from '../common/internal/get-coords-from-active-pointers';
 import { getOption } from '../common/internal/get-option';
+import { InternalOptions } from '../common/internal/internal-options';
 import { calculatePointerTarget } from '../utils/calculate-pointer-target';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
+
+type TruckFragmentOptionsInternal = InternalOptions<TruckFragmentOptions, 'dynamicTarget'>;
 
 const _v3a = new THREE.Vector3();
 const _v3b = new THREE.Vector3();
 
-const DefaultTruckControlOptions: TruckFragmentOptions = {
+const defaultTruckControlOptions: TruckFragmentOptionsInternal = {
   enabled: true,
   speed: 1,
   lock: null,
@@ -22,11 +25,11 @@ const DefaultTruckControlOptions: TruckFragmentOptions = {
 };
 
 export interface TruckFragmentOptions {
-  enabled: boolean;
-  speed: number | { pointer: number; touch: number };
-  lock: THREE.Plane | THREE.Vector3 | null;
-  maxDistance: number;
-  mode: 'exact' | 'approximate';
+  enabled?: boolean;
+  speed?: number | { pointer: number; touch: number };
+  lock?: THREE.Plane | THREE.Vector3 | null;
+  maxDistance?: number;
+  mode?: 'exact' | 'approximate';
   dynamicTarget?: {
     source: THREE.Object3D | THREE.Object3D[];
     useInvisible: boolean;
@@ -47,7 +50,7 @@ export interface TruckFragmentState {
 }
 
 export class TruckFragment implements ControlFragment {
-  private options: TruckFragmentOptions;
+  private options: TruckFragmentOptionsInternal;
 
   private state: TruckFragmentState = {
     plane: new THREE.Plane(),
@@ -65,7 +68,7 @@ export class TruckFragment implements ControlFragment {
   private raycaster: THREE.Raycaster;
 
   constructor(options?: Partial<TruckFragmentOptions>) {
-    this.options = { ...DefaultTruckControlOptions, ...options };
+    this.options = { ...defaultTruckControlOptions, ...options };
     this.raycaster = new THREE.Raycaster();
     this.raycaster.far = this.options.maxDistance;
   }

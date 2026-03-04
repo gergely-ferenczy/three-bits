@@ -28,7 +28,8 @@ function init() {
 
   activeCamera = perspectiveCamera;
 
-  const controlOptions: Omit<OrbitControlOptions, 'inputMappings'> = {
+  type RequiredOptions<T> = { [P in keyof T]-?: Required<T[P]> };
+  const controlOptions: RequiredOptions<Omit<OrbitControlOptions, 'inputMappings'>> = {
     rotation: {
       enabled: true,
       speed: 2,

@@ -5,14 +5,20 @@ import { ControllableCamera } from '../common/controllable-camera';
 import { findDynamicTarget } from '../common/internal/find-dynamic-target';
 import { getDeltaCoordsFromActivePointers } from '../common/internal/get-coords-from-active-pointers';
 import { getOption } from '../common/internal/get-option';
+import { InternalOptions } from '../common/internal/internal-options';
 import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
+
+type FreeUpRotationFragmentOptionsInternal = InternalOptions<
+  FreeUpRotationFragmentOptions,
+  'dynamicOrigin'
+>;
 
 const _v3a = new THREE.Vector3();
 const _v3b = new THREE.Vector3();
 const _v3c = new THREE.Vector3();
 const _raycaster = new THREE.Raycaster();
 
-const DefaultRotationControlOptions: FreeUpRotationFragmentOptions = {
+const defaultRotationControlOptions: FreeUpRotationFragmentOptionsInternal = {
   enabled: true,
   invertHorizontal: false,
   invertVertical: false,
@@ -20,10 +26,10 @@ const DefaultRotationControlOptions: FreeUpRotationFragmentOptions = {
 };
 
 export interface FreeUpRotationFragmentOptions {
-  enabled: boolean;
-  speed: number | { pointer: number; touch: number };
-  invertHorizontal: boolean | { pointer: boolean; touch: boolean };
-  invertVertical: boolean | { pointer: boolean; touch: boolean };
+  enabled?: boolean;
+  speed?: number | { pointer: number; touch: number };
+  invertHorizontal?: boolean | { pointer: boolean; touch: boolean };
+  invertVertical?: boolean | { pointer: boolean; touch: boolean };
   dynamicOrigin?: {
     source: THREE.Object3D | THREE.Object3D[];
     useInvisible?: boolean;
@@ -39,14 +45,14 @@ export interface FreeUpRotationFragmentStartValues {
 }
 
 export class FreeUpRotationFragment implements ControlFragment {
-  private options: FreeUpRotationFragmentOptions;
+  private options: FreeUpRotationFragmentOptionsInternal;
   private origin = new THREE.Vector3();
 
-  constructor(options?: Partial<FreeUpRotationFragmentOptions>) {
-    this.options = { ...DefaultRotationControlOptions, ...options };
+  constructor(options?: FreeUpRotationFragmentOptions) {
+    this.options = { ...defaultRotationControlOptions, ...options };
   }
 
-  updateOptions(options: Partial<FreeUpRotationFragmentOptions>) {
+  updateOptions(options: FreeUpRotationFragmentOptions) {
     for (const key in options) {
       const k = key as keyof FreeUpRotationFragmentOptions;
       (this.options[k] as any) = options[k];

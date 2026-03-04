@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { BaseControl, BaseControlOptions } from './base-control';
-import { PartialTrackballControlOptions } from './trackball-control-options';
+import { TrackballControlOptions } from './trackball-control-options';
 import { ActivePointer } from '../common/active-pointer';
 import { ControllableCamera } from '../common/controllable-camera';
 import { MouseButton } from '../common/mouse-button';
@@ -50,16 +50,13 @@ export class TrackballControl extends BaseControl {
   private truckFragment: TruckFragment;
   private zoomDollyFragment: ZoomDollyFragment;
 
-  constructor(camera: ControllableCamera, options?: PartialTrackballControlOptions) {
+  constructor(camera: ControllableCamera, options?: TrackballControlOptions) {
     const target = new THREE.Vector3();
     const controlFragmentMap = new Map<string, ControlFragment>();
     const inputMappings = { ...DefaultInputMappings, ...options?.inputMappings };
-    const baseControlOptions: BaseControlOptions = {
+    const baseControlOptions: Required<BaseControlOptions> = {
       pointerHandlerOptions: {
         inputMappings,
-      },
-      wheelHandlerOptions: {
-        inverse: options?.inverseWheel,
       },
     };
     super(camera, target, controlFragmentMap, baseControlOptions);
@@ -74,8 +71,8 @@ export class TrackballControl extends BaseControl {
     controlFragmentMap.set('zoomOrDolly', this.zoomDollyFragment);
   }
 
-  updateOptions(options: PartialTrackballControlOptions) {
-    const baseControlOptions: Partial<BaseControlOptions> = {
+  updateOptions(options: TrackballControlOptions) {
+    const baseControlOptions: BaseControlOptions = {
       ...(options.inputMappings
         ? {
             pointerHandlerOptions: {
@@ -83,9 +80,6 @@ export class TrackballControl extends BaseControl {
             },
           }
         : {}),
-      wheelHandlerOptions: {
-        inverse: options?.inverseWheel,
-      },
     };
     super.updateHandlerOptions(baseControlOptions);
 

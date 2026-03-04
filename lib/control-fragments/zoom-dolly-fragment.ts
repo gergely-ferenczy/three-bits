@@ -6,7 +6,10 @@ import { clamp } from '../common/internal/clamp';
 import { clampLength } from '../common/internal/clamp-length';
 import { getStartCoordsFromActivePointers } from '../common/internal/get-coords-from-active-pointers';
 import { getOption } from '../common/internal/get-option';
+import { InternalOptions } from '../common/internal/internal-options';
 import { calculatePointerTarget } from '../utils/calculate-pointer-target';
+
+type ZoomDollyFragmentOptionsInternal = InternalOptions<ZoomDollyFragmentOptions>;
 
 const _v2a = new THREE.Vector2();
 const _v2b = new THREE.Vector2();
@@ -16,7 +19,7 @@ const _v3c = new THREE.Vector3();
 const _v3d = new THREE.Vector3();
 const _q1 = new THREE.Quaternion();
 
-const DefaultZoomDollyControlOptions: ZoomDollyFragmentOptions = {
+const defaultZoomDollyControlOptions: ZoomDollyFragmentOptionsInternal = {
   enabled: true,
   type: 'zoom',
   secondaryMotion: 'truck',
@@ -29,15 +32,15 @@ const DefaultZoomDollyControlOptions: ZoomDollyFragmentOptions = {
 };
 
 export interface ZoomDollyFragmentOptions {
-  enabled: boolean;
-  type: 'zoom' | 'dolly' | 'zoomAndDolly';
-  secondaryMotion: 'none' | 'truck' | 'orbit' | 'rotate';
-  speed: number | { pointer: number; touch: number; scroll: number };
-  invert: boolean | { pointer: boolean; touch: boolean; scroll: number };
-  minDistance: number;
-  maxDistance: number;
-  minZoom: number;
-  maxZoom: number;
+  enabled?: boolean;
+  type?: 'zoom' | 'dolly' | 'zoomAndDolly';
+  secondaryMotion?: 'none' | 'truck' | 'orbit' | 'rotate';
+  speed?: number | { pointer: number; touch: number; scroll: number };
+  invert?: boolean | { pointer: boolean; touch: boolean; scroll: boolean };
+  minDistance?: number;
+  maxDistance?: number;
+  minZoom?: number;
+  maxZoom?: number;
 }
 
 export interface ZoomDollyFragmentState {
@@ -48,7 +51,7 @@ export interface ZoomDollyFragmentState {
 }
 
 export class ZoomDollyFragment implements ControlFragment {
-  private options: ZoomDollyFragmentOptions;
+  private options: ZoomDollyFragmentOptionsInternal;
 
   private raycaster: THREE.Raycaster;
 
@@ -60,7 +63,7 @@ export class ZoomDollyFragment implements ControlFragment {
   };
 
   constructor(options?: Partial<ZoomDollyFragmentOptions>) {
-    this.options = { ...DefaultZoomDollyControlOptions, ...options };
+    this.options = { ...defaultZoomDollyControlOptions, ...options };
     this.raycaster = new THREE.Raycaster();
   }
 
@@ -129,10 +132,9 @@ export class ZoomDollyFragment implements ControlFragment {
 
     this.updateStartValues([activePointer], camera, target);
 
-    const speed =
-      typeof this.options.speed === 'number' ? this.options.speed : this.options.speed.scroll;
-    const invert =
-      typeof this.options.invert === 'boolean' ? this.options.invert : this.options.invert.scroll;
+    const speed = getOption(this.options.speed, 'scroll');
+    const invert = getOption(this.options.invert, 'scroll');
+
     delta *= speed;
     if (invert) {
       delta *= -1;

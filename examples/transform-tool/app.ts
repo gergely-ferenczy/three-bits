@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import {
   OrbitControl,
-  PartialOrbitControlOptions,
+  OrbitControlOptions,
   ThreeBitUtils,
   ThreeEventDispatcher,
   TransformTool,
@@ -59,7 +59,7 @@ function init() {
   transformTool.transformObject.position.set(0, 0, 0.5);
   box.add(transformTool.transformObject);
 
-  const controlOptions: PartialOrbitControlOptions = {
+  const controlOptions: OrbitControlOptions = {
     rotation: {
       dynamicOrigin: {
         source: scene,
