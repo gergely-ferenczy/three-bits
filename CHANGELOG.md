@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.11.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.10.1...v0.11.0) (2026-03-05)
+
+### Features
+
+- make defaultToAbsoluteOrigin part of the root rotation options 76d8d89
+
 ## [0.10.1](https://github.com/gergely-ferenczy/three-bits/compare/v0.10.0...v0.10.1) (2026-03-04)
 
 ## [0.10.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.9.0...v0.10.0) (2026-03-04)
