@@ -34,6 +34,7 @@ const defaultRotationControlOptions: FixedUpRotationFragmentOptionsInternal = {
   maxVerticalAngle: absoluteMaxVerticalAngle,
   invertHorizontal: false,
   invertVertical: false,
+  defaultToAbsoluteOrigin: false,
 };
 
 export interface FixedUpRotationFragmentOptions {
@@ -48,8 +49,8 @@ export interface FixedUpRotationFragmentOptions {
   dynamicOrigin?: {
     source: THREE.Object3D | THREE.Object3D[];
     useInvisible?: boolean;
-    defaultToAbsoluteOrigin?: boolean;
   };
+  defaultToAbsoluteOrigin?: boolean;
 }
 
 export class FixedUpRotationFragment implements ControlFragment {
@@ -102,6 +103,7 @@ export class FixedUpRotationFragment implements ControlFragment {
     target: THREE.Vector3,
   ) {
     if (this.orbit) {
+      let originSet = false;
       if (this.options.dynamicOrigin) {
         const source = this.options.dynamicOrigin.source;
         const useInvisible = !!this.options.dynamicOrigin.useInvisible;
@@ -110,13 +112,16 @@ export class FixedUpRotationFragment implements ControlFragment {
         const dynamicOrigin = findDynamicTarget(_raycaster, source, useInvisible);
         if (dynamicOrigin) {
           this.origin = dynamicOrigin;
-        } else if (this.options.dynamicOrigin.defaultToAbsoluteOrigin) {
+          originSet = true;
+        }
+      }
+
+      if (!originSet) {
+        if (this.options.defaultToAbsoluteOrigin) {
           this.origin.set(0, 0, 0);
         } else {
           this.origin.copy(target);
         }
-      } else {
-        this.origin.copy(target);
       }
     } else {
       this.origin.copy(camera.position);

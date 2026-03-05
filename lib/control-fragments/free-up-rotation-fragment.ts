@@ -23,6 +23,7 @@ const defaultRotationControlOptions: FreeUpRotationFragmentOptionsInternal = {
   invertHorizontal: false,
   invertVertical: false,
   speed: 1,
+  defaultToAbsoluteOrigin: false,
 };
 
 export interface FreeUpRotationFragmentOptions {
@@ -33,8 +34,8 @@ export interface FreeUpRotationFragmentOptions {
   dynamicOrigin?: {
     source: THREE.Object3D | THREE.Object3D[];
     useInvisible?: boolean;
-    defaultToAbsoluteOrigin?: boolean;
   };
+  defaultToAbsoluteOrigin?: boolean;
 }
 
 export interface FreeUpRotationFragmentStartValues {
@@ -64,6 +65,7 @@ export class FreeUpRotationFragment implements ControlFragment {
     camera: ControllableCamera,
     target: THREE.Vector3,
   ) {
+    let originSet = false;
     if (this.options.dynamicOrigin) {
       const source = this.options.dynamicOrigin.source;
       const useInvisible = !!this.options.dynamicOrigin.useInvisible;
@@ -72,13 +74,16 @@ export class FreeUpRotationFragment implements ControlFragment {
       const dynamicOrigin = findDynamicTarget(_raycaster, source, useInvisible);
       if (dynamicOrigin) {
         this.origin = dynamicOrigin;
-      } else if (this.options.dynamicOrigin.defaultToAbsoluteOrigin) {
+        originSet = true;
+      }
+    }
+
+    if (!originSet) {
+      if (this.options.defaultToAbsoluteOrigin) {
         this.origin.set(0, 0, 0);
       } else {
         this.origin.copy(target);
       }
-    } else {
-      this.origin.copy(target);
     }
   }
 
