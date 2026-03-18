@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.12.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.11.0...v0.12.0) (2026-03-18)
+
+### Features
+
+- make dolly movement type changeable (fixed/scale) 72a8e1c
+
 ## [0.11.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.10.1...v0.11.0) (2026-03-05)
 
 ### Features
