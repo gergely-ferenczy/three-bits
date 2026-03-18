@@ -27,22 +27,64 @@ const defaultRotationControlOptions: FreeUpRotationFragmentOptionsInternal = {
 };
 
 export interface FreeUpRotationFragmentOptions {
+  /**
+   * Whether the rotation control is enabled.
+   * @default true
+   */
   enabled?: boolean;
+
+  /**
+   * Speed multiplier for rotation motion.
+   * Can be a single number or an object specifying different speeds for each
+   * input type.
+   * @default 1
+   */
   speed?: number | { pointer: number; touch: number };
+
+  /**
+   * Whether to invert horizontal rotation direction.
+   * Can be a boolean or an object specifying different inversions for each
+   * input type.
+   * @default false
+   */
   invertHorizontal?: boolean | { pointer: boolean; touch: boolean };
+
+  /**
+   * Whether to invert vertical rotation direction.
+   * Can be a boolean or an object specifying different inversions for each
+   * input type.
+   * @default false
+   */
   invertVertical?: boolean | { pointer: boolean; touch: boolean };
+
+  /**
+   * Configuration for dynamic origin detection.
+   *
+   * When provided (in orbit mode), raycasts against the specified objects to
+   * dynamically determine the rotation origin based on what's under the pointer
+   * at the start of the interaction.
+   */
   dynamicOrigin?: {
+    /**
+     * The object(s) to raycast against for dynamic origin detection.
+     */
     source: THREE.Object3D | THREE.Object3D[];
+
+    /**
+     * Whether to consider invisible objects when raycasting.
+     * @default false
+     */
     useInvisible?: boolean;
   };
-  defaultToAbsoluteOrigin?: boolean;
-}
 
-export interface FreeUpRotationFragmentStartValues {
-  camera: ControllableCamera;
-  target: THREE.Vector3;
-  origin: THREE.Vector3;
-  pointerTarget: THREE.Vector3;
+  /**
+   * Whether to use the absolute world origin (0,0,0) as the rotation origin
+   * when in orbit mode and no dynamic origin is detected.
+   *
+   * If false, uses the control target as the origin.
+   * @default false
+   */
+  defaultToAbsoluteOrigin?: boolean;
 }
 
 export class FreeUpRotationFragment implements ControlFragment {

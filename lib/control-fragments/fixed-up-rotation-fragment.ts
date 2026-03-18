@@ -38,18 +38,95 @@ const defaultRotationControlOptions: FixedUpRotationFragmentOptionsInternal = {
 };
 
 export interface FixedUpRotationFragmentOptions {
+  /**
+   * Whether the rotation control is enabled.
+   * @default true
+   */
   enabled?: boolean;
+
+  /**
+   * Speed multiplier for rotation motion.
+   * Can be a single number or an object specifying different speeds for each
+   * input type.
+   * @default 1
+   */
   speed?: number | { pointer: number; touch: number };
+
+  /**
+   * Minimum horizontal rotation angle in radians.
+   *
+   * Clamped between -2π and the maxHorizontalAngle.
+   * @default -Infinity
+   */
   minHorizontalAngle?: number;
+
+  /**
+   * Maximum horizontal rotation angle in radians.
+   *
+   * Clamped between the minHorizontalAngle and 2π.
+   * @default Infinity
+   */
   maxHorizontalAngle?: number;
+
+  /**
+   * Minimum vertical rotation angle in radians (pitch/elevation).
+   *
+   * Cannot be less than approximately -π/2 to prevent gimbal lock.
+   * @default approximately -π/2
+   */
   minVerticalAngle?: number;
+
+  /**
+   * Maximum vertical rotation angle in radians (pitch/elevation).
+   *
+   * Cannot exceed approximately π/2 to prevent gimbal lock.
+   * @default approximately π/2
+   */
   maxVerticalAngle?: number;
+
+  /**
+   * Whether to invert horizontal rotation direction.
+   * Can be a boolean or an object specifying different inversions for each
+   * input type.
+   * @default false
+   */
   invertHorizontal?: boolean | { pointer: boolean; touch: boolean };
+
+  /**
+   * Whether to invert vertical rotation direction.
+   * Can be a boolean or an object specifying different inversions for each
+   * input type.
+   * @default false
+   */
   invertVertical?: boolean | { pointer: boolean; touch: boolean };
+
+  /**
+   * Configuration for dynamic origin detection.
+   *
+   * When provided (in orbit mode), raycasts against the specified objects to
+   * dynamically determine the rotation origin based on what's under the pointer
+   * at the start of the interaction.
+   */
   dynamicOrigin?: {
+    /**
+     * The object(s) to raycast against for dynamic origin detection.
+     */
     source: THREE.Object3D | THREE.Object3D[];
+
+    /**
+     * Whether to consider invisible objects when raycasting.
+     * @default false
+     */
     useInvisible?: boolean;
   };
+
+  /**
+   * Whether to use the absolute world origin (0,0,0) as the rotation origin
+   * when in orbit mode and no dynamic origin is detected.
+   *
+   * If false, uses the control target as the origin.
+   * @default false
+   */
   defaultToAbsoluteOrigin?: boolean;
 }
 

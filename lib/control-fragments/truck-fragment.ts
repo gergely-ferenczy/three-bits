@@ -25,18 +25,73 @@ const defaultTruckControlOptions: TruckFragmentOptionsInternal = {
 };
 
 export interface TruckFragmentOptions {
+  /**
+   * Whether the truck control is enabled.
+   * @default true
+   */
   enabled?: boolean;
+
+  /**
+   * Speed multiplier for truck motion.
+   * Can be a single number or an object specifying different speeds for each
+   * input type.
+   * @default 1
+   */
   speed?: number | { pointer: number; touch: number };
+
+  /**
+   * Constraint for truck motion.
+   * - `THREE.Plane`: Locks trucking to the specified plane.
+   * - `THREE.Vector3`: Locks trucking perpendicular to the specified direction vector.
+   * - `null`: No constraint, trucking occurs perpendicular to the camera's view direction.
+   * @default null
+   */
   lock?: THREE.Plane | THREE.Vector3 | null;
+
+  /**
+   * Maximum distance a single truck motion can move the camera from its stating
+   * position.
+   *
+   * Limits how far the raycaster will check for intersections with the truck
+   * plane.
+   * @default Infinity
+   */
   maxDistance?: number;
+
+  /**
+   * Calculation mode for truck motion.
+   * - `'exact'`: Uses raycasting to calculate precise intersection points with
+   *    the truck plane.
+   * - `'approximate'`: Uses delta coordinates for approximate calculations. Can
+   *    be useful when trucking is locked to a fixed plane via the `lock`
+   *    property.
+   * @default 'exact'
+   */
   mode?: 'exact' | 'approximate';
+
+  /**
+   * Configuration for dynamic target detection.
+   *
+   * When provided, raycasts against the specified objects recursively to
+   * dynamically determine the truck plane based on what's under the pointer at
+   * the start of the interaction.
+   *
+   * Only used in 'exact' mode.
+   */
   dynamicTarget?: {
+    /**
+     * The object(s) to raycast against for dynamic target detection.
+     */
     source: THREE.Object3D | THREE.Object3D[];
+
+    /**
+     * Whether to consider invisible objects when raycasting.
+     */
     useInvisible: boolean;
   };
 }
 
-export interface TruckFragmentState {
+interface TruckFragmentState {
   plane: THREE.Plane;
   camera: ControllableCamera;
   exact: {
