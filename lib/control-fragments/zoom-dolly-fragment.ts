@@ -29,6 +29,7 @@ const defaultZoomDollyControlOptions: ZoomDollyFragmentOptionsInternal = {
   maxDistance: Infinity,
   minZoom: -Infinity,
   maxZoom: Infinity,
+  dollyType: 'scale',
 };
 
 export interface ZoomDollyFragmentOptions {
@@ -41,6 +42,7 @@ export interface ZoomDollyFragmentOptions {
   maxDistance?: number;
   minZoom?: number;
   maxZoom?: number;
+  dollyType?: 'fixed' | 'scale';
 }
 
 export interface ZoomDollyFragmentState {
@@ -188,7 +190,6 @@ export class ZoomDollyFragment implements ControlFragment {
       camera.updateProjectionMatrix();
       camera.position.add(dollyDelta);
       camera.updateMatrixWorld();
-      target.add(dollyDelta);
     } else if (this.options.type == 'zoom') {
       const zoomDelta = this.zoom(delta);
       camera.zoom *= zoomDelta;
@@ -197,7 +198,6 @@ export class ZoomDollyFragment implements ControlFragment {
       const dollyDelta = this.dolly(delta);
       camera.position.add(dollyDelta);
       camera.updateMatrixWorld();
-      target.add(dollyDelta);
     }
   }
 
@@ -279,13 +279,26 @@ export class ZoomDollyFragment implements ControlFragment {
   }
 
   private dolly(delta: number): THREE.Vector3 {
-    const deltaMultiplier = delta * 10;
-    const newRelativeTarget = _v3c
-      .copy(this.state.relativeTarget)
-      .normalize()
-      .multiplyScalar(deltaMultiplier)
-      .add(this.state.relativeTarget)
-      .clampLength(this.options.minDistance, this.options.maxDistance);
+    let deltaMultiplier;
+    let newRelativeTarget;
+    if (this.options.dollyType === 'fixed') {
+      deltaMultiplier = delta * 10;
+      newRelativeTarget = _v3c
+        .copy(this.state.relativeTarget)
+        .normalize()
+        .multiplyScalar(deltaMultiplier)
+        .add(this.state.relativeTarget)
+        .clampLength(this.options.minDistance, this.options.maxDistance);
+      if (newRelativeTarget.dot(this.state.relativeTarget) < 0) {
+        newRelativeTarget.copy(this.state.relativeTarget);
+      }
+    } else {
+      deltaMultiplier = delta > 0 ? 1 + delta : 1 / (1 - delta);
+      newRelativeTarget = _v3c
+        .copy(this.state.relativeTarget)
+        .multiplyScalar(deltaMultiplier)
+        .clampLength(this.options.minDistance, this.options.maxDistance);
+    }
     const dollyDelta = _v3d.copy(this.state.relativeTarget).sub(newRelativeTarget);
     this.state.relativeTarget.copy(newRelativeTarget);
 
@@ -294,7 +307,7 @@ export class ZoomDollyFragment implements ControlFragment {
 
   private zoomAndDolly(delta: number) {
     const zoomDeltaMultiplier = delta > 0 ? 1 / (1 + delta) : 1 - delta;
-    const dollyDeltaMultiplier = delta * 10;
+    const dollyDeltaMultiplier = delta > 0 ? 1 + delta : 1 / (1 - delta);
 
     let zoomClampRatio = 1;
     const newZoom = this.state.zoom * zoomDeltaMultiplier;
@@ -323,8 +336,7 @@ export class ZoomDollyFragment implements ControlFragment {
 
     const zoomDelta = clampedZoom / this.state.zoom;
     this.state.zoom = clampedZoom;
-
-    const dollyDelta = _v3c.copy(this.state.relativeTarget).sub(clampedRelativeTarget);
+    const dollyDelta = _v3d.copy(this.state.relativeTarget).sub(clampedRelativeTarget);
     this.state.relativeTarget.copy(clampedRelativeTarget);
 
     return { dollyDelta, zoomDelta };

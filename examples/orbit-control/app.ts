@@ -66,12 +66,24 @@ function init() {
       maxDistance: 100,
       minZoom: 0.1,
       maxZoom: 10,
+      dollyType: 'fixed',
     },
   };
 
   const control = new OrbitControl(activeCamera, controlOptions);
   control.attach(renderer.domElement);
   control.addEventListener('change', render);
+
+  const updateCameraInfo = () => {
+    const targetPosDiv = document.getElementById('target-position')!;
+    targetPosDiv.innerHTML = ThreeBitUtils.formatVector(control.getTarget());
+    const cameraPosDiv = document.getElementById('camera-position')!;
+    cameraPosDiv.innerHTML = ThreeBitUtils.formatVector(control.getCamera().position);
+    const cameraZoomDiv = document.getElementById('camera-zoom')!;
+    cameraZoomDiv.innerHTML = control.getCamera().zoom.toFixed(3);
+  };
+  control.addEventListener('change', updateCameraInfo);
+  updateCameraInfo();
 
   const box = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshNormalMaterial());
   scene.add(box);
@@ -95,6 +107,7 @@ function init() {
   function updateControl() {
     control.updateOptions(controlOptions);
     render();
+    updateCameraInfo();
   }
 
   // Rotation options
@@ -144,6 +157,7 @@ function init() {
     }
     control.setCamera(activeCamera);
     render();
+    updateCameraInfo();
   });
 
   const rotationFolder = gui.addFolder('Rotation');
@@ -186,6 +200,9 @@ function init() {
   zoomFolder.add(controlOptions.zoomOrDolly, 'maxDistance', 0, 1000, 0.01).onChange(updateControl);
   zoomFolder.add(controlOptions.zoomOrDolly, 'minZoom', 0.01, 10, 0.01).onChange(updateControl);
   zoomFolder.add(controlOptions.zoomOrDolly, 'maxZoom', 0.01, 100, 0.01).onChange(updateControl);
+  zoomFolder
+    .add(controlOptions.zoomOrDolly, 'dollyType', ['fixed', 'scale'])
+    .onChange(updateControl);
 
   window.addEventListener('resize', onWindowResize);
   onWindowResize();
