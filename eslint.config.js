@@ -1,10 +1,11 @@
 import eslint from '@eslint/js';
+import { defineConfig } from 'eslint/config';
 import tsEslint from 'typescript-eslint';
 import unusedImports from 'eslint-plugin-unused-imports';
 
-export default tsEslint.config(
+export default defineConfig(
   {
-    ignores: ['eslint.config.js', 'eslint-import.config.js', 'lint-staged.config.js', 'dist/**'],
+    ignores: ['dist/**', 'coverage/**'],
   },
   eslint.configs.recommended,
   ...tsEslint.configs.recommendedTypeChecked,
@@ -30,7 +31,6 @@ export default tsEslint.config(
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
     },
   },
 );

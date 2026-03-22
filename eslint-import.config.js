@@ -1,12 +1,13 @@
 import tsEslint from 'typescript-eslint';
 import importEslint from 'eslint-plugin-import';
+import { defineConfig } from 'eslint/config';
 
 const TypeScriptExtensions = ['.ts', '.cts', '.mts', '.tsx'];
 const AllExtensions = [...TypeScriptExtensions, '.js', '.jsx', '.mjs', '.cjs'];
 
-export default tsEslint.config(
+export default defineConfig(
   {
-    ignores: ['eslint.config.js', 'vite.config.ts', 'dist/**'],
+    ignores: ['dist/**', 'coverage/**'],
   },
   tsEslint.configs.base,
   {

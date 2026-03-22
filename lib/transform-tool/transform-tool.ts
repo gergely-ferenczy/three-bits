@@ -5,9 +5,9 @@ import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { MouseButtonValues, ThreeBitUtils } from '..';
-import { ThreeEvent } from '../event-dispatcher/three-event';
-import { ThreeEventDispatcher } from '../event-dispatcher/three-event-dispatcher';
-import { ThreeEventListener } from '../event-dispatcher/three-event-listener';
+import { TbEvent } from '../event-dispatcher/tb-event';
+import { TbEventDispatcher } from '../event-dispatcher/tb-event-dispatcher';
+import { TbEventListener } from '../event-dispatcher/tb-event-listener';
 
 const TransformToolName = 'TransformTool';
 const DefaultScale = 150;
@@ -138,7 +138,7 @@ const DefaultOptions: TransformToolOptionsInternal = {
  *
  * @example
  * ```typescript
- * const eventDispatcher = new ThreeEventDispatcher(scene, camera, renderer.domElement);
+ * const eventDispatcher = new TbEventDispatcher(scene, camera, renderer.domElement);
  * const transformTool = new TransformTool(eventDispatcher, {
  *   onRequestRender: () => renderer.render(scene, camera),
  *   target: myObject3D
@@ -157,7 +157,7 @@ export class TransformTool {
   layers: THREE.Layers;
 
   private root: THREE.Group;
-  private eventDispatcher: ThreeEventDispatcher;
+  private eventDispatcher: TbEventDispatcher;
   private options: TransformToolOptionsInternal;
   private parts: {
     xTranslateArrow: THREE.Object3D | null;
@@ -175,8 +175,8 @@ export class TransformTool {
 
   private inverseMatrixWorld: THREE.Matrix4;
   private pointerActionsDisabled: boolean;
-  private globalPointerDownHandler: ThreeEventListener<PointerEvent>;
-  private globalPointerUpHandler: ThreeEventListener<PointerEvent>;
+  private globalPointerDownHandler: TbEventListener<PointerEvent, 'global'>;
+  private globalPointerUpHandler: TbEventListener<PointerEvent, 'global'>;
 
   private innerMaterial: LineMaterial;
   private outerMaterial: LineMaterial;
@@ -189,10 +189,10 @@ export class TransformTool {
   /**
    * Creates a new TransformTool instance.
    *
-   * @param eventDispatcher - A {@link ThreeEventDispatcher} instance that handles 3D pointer events
+   * @param eventDispatcher - A {@link TbEventDispatcher} instance that handles 3D pointer events
    * @param options - Configuration options for the transform tool
    */
-  constructor(eventDispatcher: ThreeEventDispatcher, options: TransformToolOptions) {
+  constructor(eventDispatcher: TbEventDispatcher, options: TransformToolOptions) {
     const root = new THREE.Group();
     root.name = TransformToolName;
     this.eventDispatcher = eventDispatcher;
@@ -351,7 +351,7 @@ export class TransformTool {
 
             root.traverse((child) => {
               const childLayers = child.layers;
-              // @ts-expect-error
+              // @ts-expect-error propertyKey is validated to be a key of Layers
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               const childLayersFn = childLayers[propertyKey];
               // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -589,7 +589,7 @@ export class TransformTool {
     const intersectionStartPos = new THREE.Vector3();
     const startPlane = new THREE.Plane();
     const startAxis = new THREE.Vector3();
-    const pointerMoveHandler = (event: ThreeEvent<PointerEvent>) => {
+    const pointerMoveHandler = (event: TbEvent<PointerEvent>) => {
       const intersection = event.ray.intersectPlane(startPlane, new THREE.Vector3());
       if (!intersection) return;
 
@@ -743,7 +743,7 @@ export class TransformTool {
     const startOffset = new THREE.Vector3();
     const startPlane = new THREE.Plane();
     const intersectionStartPos = new THREE.Vector3();
-    const pointerMoveHandler = (event: ThreeEvent<PointerEvent>) => {
+    const pointerMoveHandler = (event: TbEvent<PointerEvent>) => {
       const intersection = event.ray.intersectPlane(startPlane, new THREE.Vector3());
       if (!intersection) return;
 
@@ -862,7 +862,7 @@ export class TransformTool {
     const objectStartPos = new THREE.Vector3();
     const intersectionStartPos = new THREE.Vector3();
     const startPlane = new THREE.Plane();
-    const pointerMoveHandler = (event: ThreeEvent<PointerEvent>) => {
+    const pointerMoveHandler = (event: TbEvent<PointerEvent>) => {
       const intersection = ThreeBitUtils.calculatePointerTarget(
         event.camera,
         startPlane,
@@ -899,11 +899,11 @@ export class TransformTool {
   private createPointerDownHandler(
     hitbox: THREE.Object3D,
     innerLine: THREE.Mesh,
-    pointerUpHandler: (event: ThreeEvent<PointerEvent>) => void,
-    pointerMoveHandler: (event: ThreeEvent<PointerEvent>) => void,
-    onPointerDown: (event: ThreeEvent<PointerEvent>) => void,
+    pointerUpHandler: (event: TbEvent<PointerEvent>) => void,
+    pointerMoveHandler: (event: TbEvent<PointerEvent>) => void,
+    onPointerDown: (event: TbEvent<PointerEvent>) => void,
   ) {
-    const pointerDownHandler = (event: ThreeEvent<PointerEvent>) => {
+    const pointerDownHandler = (event: TbEvent<PointerEvent>) => {
       if (
         event.nativeEvent.pointerType === 'mouse' &&
         (event.nativeEvent.buttons & MouseButtonValues.Primary) === 0
@@ -934,9 +934,9 @@ export class TransformTool {
   private createPointerUpHandler(
     hitbox: THREE.Object3D,
     innerLine: THREE.Mesh,
-    pointerMoveHandler: (event: ThreeEvent<PointerEvent>) => void,
+    pointerMoveHandler: (event: TbEvent<PointerEvent>) => void,
   ) {
-    const pointerUpHandler = (event: ThreeEvent<PointerEvent>) => {
+    const pointerUpHandler = (event: TbEvent<PointerEvent>) => {
       this.pointerActionsDisabled = false;
       this.eventDispatcher.removeEventListener(hitbox, 'pointerup', pointerUpHandler);
       this.eventDispatcher.removeEventListener(hitbox, 'pointermove', pointerMoveHandler);
@@ -952,7 +952,7 @@ export class TransformTool {
   }
 
   private createHitboxPointerOverHandler(innerLine: THREE.Mesh) {
-    return (event: ThreeEvent<PointerEvent>) => {
+    return (event: TbEvent<PointerEvent>) => {
       if (
         this.pointerActionsDisabled ||
         (event.nativeEvent.pointerType === 'mouse' &&
@@ -969,7 +969,7 @@ export class TransformTool {
   }
 
   private createHitboxPointerOutHandler(innerLine: THREE.Mesh) {
-    return (event: ThreeEvent<PointerEvent>) => {
+    return (event: TbEvent<PointerEvent>) => {
       if (
         this.pointerActionsDisabled ||
         (event.nativeEvent.pointerType === 'mouse' &&

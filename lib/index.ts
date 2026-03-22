@@ -20,11 +20,11 @@ export * from './control-fragments/fixed-up-rotation-fragment';
 export * from './control-fragments/truck-fragment';
 export * from './control-fragments/zoom-dolly-fragment';
 
-export * from './event-dispatcher/event-phases';
-export * from './event-dispatcher/three-event-dispatcher';
-export * from './event-dispatcher/three-event-listener';
-export * from './event-dispatcher/three-event-types';
-export * from './event-dispatcher/three-event';
+export * from './event-dispatcher/tb-add-event-listener-options';
+export * from './event-dispatcher/tb-event-dispatcher';
+export * from './event-dispatcher/tb-event-listener';
+export * from './event-dispatcher/tb-event-types';
+export * from './event-dispatcher/tb-event';
 
 export * from './transform-tool/transform-tool';
 

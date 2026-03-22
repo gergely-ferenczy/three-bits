@@ -4,7 +4,7 @@ import {
   OrbitControl,
   OrbitControlOptions,
   ThreeBitUtils,
-  ThreeEventDispatcher,
+  TbEventDispatcher,
   TransformTool,
 } from '../../lib';
 
@@ -51,7 +51,7 @@ function init() {
   icosahedron.position.set(0, 4, 0);
   scene.add(icosahedron);
 
-  const eventDispatcher = new ThreeEventDispatcher(renderer.domElement, activeCamera);
+  const eventDispatcher = new TbEventDispatcher(renderer.domElement, activeCamera);
   const transformTool = new TransformTool(eventDispatcher, {
     onRequestRender: render,
     target: box,

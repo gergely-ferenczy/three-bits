@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "lib": ["ESNext", "DOM"],
-    "types": ["node"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -9,13 +8,18 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "strict": true,
-    "noEmit": true
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true
   },
   "include": [
     "test/**/*",
     "examples/**/*",
     "vite.config.ts",
     "vitest.config.ts",
-    "commitlint.config.ts"
+    "commitlint.config.ts",
+    "eslint.config.js",
+    "eslint-import.config.js",
+    "lint-staged.config.js"
   ]
 }

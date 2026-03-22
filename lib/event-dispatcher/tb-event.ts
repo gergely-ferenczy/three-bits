@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { ThreeEventType } from './three-event-types';
+import { TbEventType } from './tb-event-types';
 
 /**
- * Represents a synthetic event dispatched by {@link ThreeEventDispatcher} for
+ * Represents a synthetic event dispatched by {@link TbEventDispatcher} for
  * {@link THREE.Object3D} objects.
  *
  * Wraps a native DOM event and provides additional Three.js specific context.
@@ -10,16 +10,16 @@ import { ThreeEventType } from './three-event-types';
  *
  * @template E The type of the underlying native DOM event.
  */
-export interface ThreeEvent<E extends Event = Event> {
+export interface TbEvent<E extends Event = Event, G extends 'object' | 'global' = 'object'> {
   /**
    * Original object onto which the event was dispatched.
    */
-  readonly target: THREE.Object3D;
+  readonly target: G extends 'object' ? THREE.Object3D : THREE.Object3D | undefined;
 
   /**
    * Object to which the event handler has been attached.
    */
-  readonly currentTarget: THREE.Object3D;
+  readonly currentTarget: G extends 'object' ? THREE.Object3D : THREE.Object3D | undefined;
 
   /**
    * Array of intersections from the latest raycast.
@@ -39,7 +39,7 @@ export interface ThreeEvent<E extends Event = Event> {
   /**
    * Event type (e.g., 'pointerdown', 'pointermove', etc.).
    */
-  readonly type: ThreeEventType;
+  readonly type: TbEventType;
 
   /**
    * Original native DOM event that triggered this event.
@@ -47,7 +47,9 @@ export interface ThreeEvent<E extends Event = Event> {
   readonly nativeEvent: E;
 
   /**
-   * Current event propagation phase (capturing, at-target, bubbling).
+   * Current event propagation phase (CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE).
+   *
+   * See {@link Event}
    */
   readonly eventPhase: number;
 

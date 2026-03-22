@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 /**
  * Returns the aspect ratio of a perspective or orthographic camera. If called
- * with any orher type of camera, it returns `1`.
+ * with any other type of camera, it returns `1`.
  */
 export function getCameraAspectRatio(
   camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,

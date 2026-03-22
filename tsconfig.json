@@ -4,7 +4,6 @@
     "outDir": "dist",
     "declarationDir": "dist/types",
     "lib": ["ESNext", "DOM"],
-    "types": ["node"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
