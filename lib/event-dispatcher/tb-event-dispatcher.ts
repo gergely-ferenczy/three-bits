@@ -323,7 +323,9 @@ export class TbEventDispatcher {
     }
     const coords = calculatePointerCoords(this.lastPointerEvent, this.domElement);
     this.raycaster.setFromCamera(coords, this.camera);
-    this.targetIntersections = this.raycaster.intersectObjects(this.eventObjects);
+    this.targetIntersections = this.raycaster
+      .intersectObjects(this.eventObjects)
+      .sort((a, b) => b.object.renderOrder - a.object.renderOrder);
     this.targetObjects = new Set(this.targetIntersections.map((i) => i.object));
 
     this.updatePointerOverOutEvents();
@@ -349,12 +351,8 @@ export class TbEventDispatcher {
 
       let current: THREE.Object3D | null = target;
       while (current !== null) {
-        const match = this.captureMatchParams(current);
-        currentMatch = {
-          visible: match.visible === false ? false : currentMatch.visible,
-          inSight: match.inSight || currentMatch.inSight,
-          inSightWithInvisible: match.inSightWithInvisible || currentMatch.inSightWithInvisible,
-        };
+        const newMatch = this.captureMatchParams(current);
+        currentMatch = this.mergeMatch(newMatch, currentMatch);
         if (this.enterLeaveState.objects.has(current)) {
           localQueue.push({ object: current, match: currentMatch });
         }
@@ -365,7 +363,10 @@ export class TbEventDispatcher {
       // We need localQueue, because the order or insertion will dictate the order of
       // listener execution.
       for (let i = localQueue.length - 1; i >= 0; i--) {
-        hovers.set(localQueue[i].object, localQueue[i].match);
+        const object = localQueue[i].object;
+        const newMatch = localQueue[i].match;
+        const currentMatch = hovers.get(object);
+        hovers.set(localQueue[i].object, this.mergeMatch(newMatch, currentMatch));
       }
     }
 
@@ -667,11 +668,11 @@ export class TbEventDispatcher {
     match: MatchParams,
   ): void {
     const targetParents = this.getParents(target);
-    const targetParentsReverse = targetParents.slice().reverse();
 
     // Capturing phase
     event.eventPhase = Event.CAPTURING_PHASE;
-    for (const currentTarget of targetParentsReverse) {
+    for (let i = targetParents.length - 1; i >= 0; i--) {
+      const currentTarget = targetParents[i];
       this.handleSingleEvent(event, target, currentTarget, match);
 
       if (stopPropagationRef.value) return;
@@ -685,7 +686,8 @@ export class TbEventDispatcher {
 
     // Bubbling phase
     event.eventPhase = Event.BUBBLING_PHASE;
-    for (const currentTarget of targetParents) {
+    for (let i = 0; i < targetParents.length; i++) {
+      const currentTarget = targetParents[i];
       this.handleSingleEvent(event, target, currentTarget, match);
 
       if (stopPropagationRef.value) return;
@@ -782,6 +784,14 @@ export class TbEventDispatcher {
     match.inSight = firstVisible > -1 && object === this.targetIntersections[firstVisible].object;
 
     return match;
+  }
+
+  private mergeMatch(newMatch: MatchParams, currentMatch: MatchParams | undefined): MatchParams {
+    return {
+      visible: newMatch.visible === false ? false : (currentMatch?.visible ?? newMatch.visible),
+      inSight: newMatch.inSight || !!currentMatch?.inSight,
+      inSightWithInvisible: newMatch.inSightWithInvisible || !!currentMatch?.inSightWithInvisible,
+    };
   }
 
   private updateEventObjects() {

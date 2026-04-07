@@ -273,3 +273,84 @@ describe('event order and target data is correct', () => {
     ]);
   });
 });
+
+describe('renderOrder is respected for overlapping objects', () => {
+  test('object with higher renderOrder receives event when objects overlap', () => {
+    // Create two objects at the exact same position
+    const objectLowOrder = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    objectLowOrder.name = 'LowOrder';
+    objectLowOrder.renderOrder = 1;
+    objectLowOrder.position.set(0, 0, 0);
+    objectLowOrder.updateMatrixWorld();
+
+    const objectHighOrder = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    objectHighOrder.name = 'HighOrder';
+    objectHighOrder.renderOrder = 2;
+    objectHighOrder.position.set(0, 0, 0);
+    objectHighOrder.updateMatrixWorld();
+
+    const listenerLowOrder = vi.fn().mockName('listenerLowOrder');
+    const listenerHighOrder = vi.fn().mockName('listenerHighOrder');
+
+    eventDispatcher.addEventListener(objectLowOrder, 'click', listenerLowOrder);
+    eventDispatcher.addEventListener(objectHighOrder, 'click', listenerHighOrder);
+
+    // Initialize pointer position
+    canvas.dispatchEvent(createPointerEvent('pointermove'));
+
+    // Dispatch click event
+    canvas.dispatchEvent(createPointerEvent('pointerdown'));
+    canvas.dispatchEvent(createMouseEvent('click'));
+
+    // Object with higher renderOrder should receive the event
+    expect(listenerHighOrder).toHaveBeenCalledOnce();
+    // Object with lower renderOrder should be occluded and not receive the event
+    expect(listenerLowOrder).not.toHaveBeenCalled();
+  });
+
+  test('objects with same renderOrder maintain stable ordering', () => {
+    // Create three objects at the same position with different renderOrders
+    const object1 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    object1.name = 'Order10_First';
+    object1.renderOrder = 10;
+    object1.position.set(0, 0, 0);
+    object1.updateMatrixWorld();
+
+    const object2 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    object2.name = 'Order10_Second';
+    object2.renderOrder = 10;
+    object2.position.set(0, 0, 0);
+    object2.updateMatrixWorld();
+
+    const object3 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    object3.name = 'Order5';
+    object3.renderOrder = 5;
+    object3.position.set(0, 0, 0);
+    object3.updateMatrixWorld();
+
+    let targetName = '';
+    const listener1 = vi.fn().mockImplementation((event: TbEvent) => {
+      targetName = event.target.name;
+    });
+    const listener2 = vi.fn().mockImplementation((event: TbEvent) => {
+      targetName = event.target.name;
+    });
+    const listener3 = vi.fn().mockImplementation((event: TbEvent) => {
+      targetName = event.target.name;
+    });
+
+    eventDispatcher.addEventListener(object1, 'click', listener1);
+    eventDispatcher.addEventListener(object2, 'click', listener2);
+    eventDispatcher.addEventListener(object3, 'click', listener3);
+
+    canvas.dispatchEvent(createPointerEvent('pointermove'));
+    canvas.dispatchEvent(createPointerEvent('pointerdown'));
+    canvas.dispatchEvent(createMouseEvent('click'));
+
+    // One of the objects with renderOrder 10 should receive the event
+    // Object with renderOrder 5 should be occluded
+    expect(listener3).not.toHaveBeenCalled();
+    expect(listener1.mock.calls.length + listener2.mock.calls.length).toBe(1);
+    expect(targetName).toMatch(/Order10_(First|Second)/);
+  });
+});

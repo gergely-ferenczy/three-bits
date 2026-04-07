@@ -391,14 +391,8 @@ test('object group with two overlapping objects', () => {
 test('object group with enter/leave events only on group object', () => {
   const objectA = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
   objectA.name = 'A';
-  objectA.position.z = -0.6;
-  objectA.updateMatrixWorld();
-
-  const objectB = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+  const objectB = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2, 2));
   objectB.name = 'B';
-  objectB.position.x = 0.1;
-  objectB.position.z = 0.6;
-  objectB.updateMatrixWorld();
 
   const group = new THREE.Group();
   group.name = 'Group';
@@ -409,27 +403,25 @@ test('object group with enter/leave events only on group object', () => {
   const leaveGroup = vi.fn().mockName('leaveGroup');
   eventDispatcher.addEventListener(group, 'pointerleave', leaveGroup);
 
-  const clearAllMocks = () => {
-    enterGroup.mockClear();
-    leaveGroup.mockClear();
-  };
-
-  // Enter object A
-  dispatchEvent(-0.2, 0);
-  expect(enterGroup).toHaveBeenCalledOnce();
-  expect(leaveGroup).not.toHaveBeenCalled();
-
-  // Enter object B while leaving object A
-  clearAllMocks();
-  dispatchEvent(0.2, 0);
+  dispatchEvent(1.1, 0);
   expect(enterGroup).not.toHaveBeenCalled();
   expect(leaveGroup).not.toHaveBeenCalled();
 
-  // Leave object B
-  clearAllMocks();
-  dispatchEvent(1.2, 0);
-  expect(enterGroup).not.toHaveBeenCalled();
-  expect(leaveGroup).toHaveBeenCalledOnce();
+  dispatchEvent(-0.6, 0);
+  expect(enterGroup).toHaveBeenCalledTimes(1);
+  expect(leaveGroup).not.toHaveBeenCalled();
+
+  dispatchEvent(0, 0);
+  expect(enterGroup).toHaveBeenCalledTimes(1);
+  expect(leaveGroup).not.toHaveBeenCalled();
+
+  dispatchEvent(0.6, 0);
+  expect(enterGroup).toHaveBeenCalledTimes(1);
+  expect(leaveGroup).not.toHaveBeenCalled();
+
+  dispatchEvent(1.1, 0);
+  expect(enterGroup).toHaveBeenCalledTimes(1);
+  expect(leaveGroup).toHaveBeenCalledTimes(1);
 });
 
 test('object group with two non-overlapping objects', () => {

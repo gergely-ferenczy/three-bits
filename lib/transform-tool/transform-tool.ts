@@ -4,7 +4,7 @@ import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
-import { MouseButtonValues, ThreeBitUtils } from '..';
+import { MouseButtonValues, TbEventType, TbPointerEventType, ThreeBitUtils } from '..';
 import { TbEvent } from '../event-dispatcher/tb-event';
 import { TbEventDispatcher } from '../event-dispatcher/tb-event-dispatcher';
 import { TbEventListener } from '../event-dispatcher/tb-event-listener';
@@ -534,17 +534,17 @@ export class TransformTool {
     const hitbox = new LineSegments2(hitboxGeometry, this.hitboxLineMaterial);
     hitbox.renderOrder = this.options.baseRenderOrder + RenderOrders.hitbox;
     hitbox.name = 'hitbox';
-    this.eventDispatcher.addEventListener(
-      hitbox,
-      'pointerover',
-      this.createHitboxPointerOverHandler(innerLine),
-    );
-    this.eventDispatcher.addEventListener(
-      hitbox,
-      'pointerout',
-      this.createHitboxPointerOutHandler(innerLine),
-    );
     arrowGroup.add(hitbox);
+    this.addEventListener(
+      arrowGroup,
+      'pointerenter',
+      this.createHitboxPointerEnterHandler(innerLine),
+    );
+    this.addEventListener(
+      arrowGroup,
+      'pointerleave',
+      this.createHitboxPointerLeaveHandler(innerLine),
+    );
 
     const baseRotation = new THREE.Quaternion().setFromUnitVectors(DefaultArrowDir, axis);
     const faceDir = DefaultArrowFaceDir.clone().applyQuaternion(baseRotation);
@@ -596,10 +596,9 @@ export class TransformTool {
       const delta = intersection.sub(intersectionStartPos).projectOnVector(startAxis);
       this.applyPositionChange(objectStartPos, delta);
     };
-    const pointerUpHandler = this.createPointerUpHandler(hitbox, innerLine, pointerMoveHandler);
+    const pointerUpHandler = this.createPointerUpHandler(arrowGroup, innerLine, pointerMoveHandler);
     const pointerDownHandler = this.createPointerDownHandler(
-      hitbox,
-      innerLine,
+      arrowGroup,
       pointerUpHandler,
       pointerMoveHandler,
       (event) => {
@@ -615,7 +614,7 @@ export class TransformTool {
         startPlane.setFromNormalAndCoplanarPoint(startNormal, intersectionStartPos);
       },
     );
-    this.eventDispatcher.addEventListener(hitbox, 'pointerdown', pointerDownHandler);
+    this.addEventListener(arrowGroup, 'pointerdown', pointerDownHandler);
 
     return arrowGroup;
   }
@@ -700,17 +699,17 @@ export class TransformTool {
     const hitbox = new Line2(hitboxGeometry, this.hitboxLineMaterial);
     hitbox.renderOrder = this.options.baseRenderOrder + RenderOrders.hitbox;
     hitbox.name = 'hitbox';
-    this.eventDispatcher.addEventListener(
-      hitbox,
-      'pointerover',
-      this.createHitboxPointerOverHandler(innerLine),
-    );
-    this.eventDispatcher.addEventListener(
-      hitbox,
-      'pointerout',
-      this.createHitboxPointerOutHandler(innerLine),
-    );
     arrowGroup.add(hitbox);
+    this.addEventListener(
+      arrowGroup,
+      'pointerenter',
+      this.createHitboxPointerEnterHandler(innerLine),
+    );
+    this.addEventListener(
+      arrowGroup,
+      'pointerleave',
+      this.createHitboxPointerLeaveHandler(innerLine),
+    );
 
     const originalBeforeRender = outerLine.onBeforeRender.bind(outerLine);
     // @ts-expect-error onBeforeRender is definition is wrong in LineSegments2
@@ -755,10 +754,9 @@ export class TransformTool {
       const rotationDelta = new THREE.Quaternion().setFromAxisAngle(startNormal, angle);
       this.applyRotationChange(startPosition, startRotation, rotationDelta, startOffset);
     };
-    const pointerUpHandler = this.createPointerUpHandler(hitbox, innerLine, pointerMoveHandler);
+    const pointerUpHandler = this.createPointerUpHandler(arrowGroup, innerLine, pointerMoveHandler);
     const pointerDownHandler = this.createPointerDownHandler(
-      hitbox,
-      innerLine,
+      arrowGroup,
       pointerUpHandler,
       pointerMoveHandler,
       (event) => {
@@ -773,7 +771,7 @@ export class TransformTool {
         startOffset.copy(target.getWorldPosition(_v1).sub(startOrigin));
       },
     );
-    this.eventDispatcher.addEventListener(hitbox, 'pointerdown', pointerDownHandler);
+    this.addEventListener(arrowGroup, 'pointerdown', pointerDownHandler);
 
     return arrowGroup;
   }
@@ -821,17 +819,17 @@ export class TransformTool {
     const hitbox = new THREE.Mesh(hitboxGeometry, this.hitboxPlaneMaterial);
     hitbox.name = 'hitbox';
     hitbox.renderOrder = this.options.baseRenderOrder + RenderOrders.hitbox;
-    this.eventDispatcher.addEventListener(
-      hitbox,
-      'pointerover',
-      this.createHitboxPointerOverHandler(innerLine),
-    );
-    this.eventDispatcher.addEventListener(
-      hitbox,
-      'pointerout',
-      this.createHitboxPointerOutHandler(innerLine),
-    );
     sidePlaneGroup.add(hitbox);
+    this.addEventListener(
+      sidePlaneGroup,
+      'pointerenter',
+      this.createHitboxPointerEnterHandler(innerLine),
+    );
+    this.addEventListener(
+      sidePlaneGroup,
+      'pointerleave',
+      this.createHitboxPointerLeaveHandler(innerLine),
+    );
 
     const startPosition = sidePlaneGroup.position.clone();
     const originalBeforeRender = outerLine.onBeforeRender.bind(outerLine);
@@ -874,10 +872,13 @@ export class TransformTool {
       const delta = intersection.sub(intersectionStartPos);
       this.applyPositionChange(objectStartPos, delta);
     };
-    const pointerUpHandler = this.createPointerUpHandler(hitbox, innerLine, pointerMoveHandler);
-    const pointerDownHandler = this.createPointerDownHandler(
-      hitbox,
+    const pointerUpHandler = this.createPointerUpHandler(
+      sidePlaneGroup,
       innerLine,
+      pointerMoveHandler,
+    );
+    const pointerDownHandler = this.createPointerDownHandler(
+      sidePlaneGroup,
       pointerUpHandler,
       pointerMoveHandler,
       (event) => {
@@ -891,14 +892,13 @@ export class TransformTool {
       },
     );
 
-    this.eventDispatcher.addEventListener(hitbox, 'pointerdown', pointerDownHandler);
+    this.addEventListener(sidePlaneGroup, 'pointerdown', pointerDownHandler);
 
     return sidePlaneGroup;
   }
 
   private createPointerDownHandler(
-    hitbox: THREE.Object3D,
-    innerLine: THREE.Mesh,
+    target: THREE.Object3D,
     pointerUpHandler: (event: TbEvent<PointerEvent>) => void,
     pointerMoveHandler: (event: TbEvent<PointerEvent>) => void,
     onPointerDown: (event: TbEvent<PointerEvent>) => void,
@@ -917,30 +917,25 @@ export class TransformTool {
       // Stops other canvas DOM event listeners (like an orbit control)
       event.nativeEvent.stopImmediatePropagation();
 
-      this.eventDispatcher.addEventListener(hitbox, 'pointerup', pointerUpHandler);
-      this.eventDispatcher.addEventListener(hitbox, 'pointermove', pointerMoveHandler);
-      this.eventDispatcher.setPointerCapture(hitbox, event.nativeEvent.pointerId);
+      this.addEventListener(target, 'pointerup', pointerUpHandler);
+      this.addEventListener(target, 'pointermove', pointerMoveHandler);
+      this.eventDispatcher.setPointerCapture(target, event.nativeEvent.pointerId);
       onPointerDown(event);
-
-      if (event.target.visible) {
-        innerLine.material = this.highlightMaterial;
-        this.options.onRequestRender?.();
-      }
     };
 
     return pointerDownHandler;
   }
 
   private createPointerUpHandler(
-    hitbox: THREE.Object3D,
+    target: THREE.Object3D,
     innerLine: THREE.Mesh,
     pointerMoveHandler: (event: TbEvent<PointerEvent>) => void,
   ) {
     const pointerUpHandler = (event: TbEvent<PointerEvent>) => {
       this.pointerActionsDisabled = false;
-      this.eventDispatcher.removeEventListener(hitbox, 'pointerup', pointerUpHandler);
-      this.eventDispatcher.removeEventListener(hitbox, 'pointermove', pointerMoveHandler);
-      this.eventDispatcher.releasePointerCapture(hitbox, event.nativeEvent.pointerId);
+      this.eventDispatcher.removeEventListener(target, 'pointerup', pointerUpHandler);
+      this.eventDispatcher.removeEventListener(target, 'pointermove', pointerMoveHandler);
+      this.eventDispatcher.releasePointerCapture(target, event.nativeEvent.pointerId);
 
       if (event.target.visible) {
         innerLine.material = this.innerMaterial;
@@ -951,36 +946,25 @@ export class TransformTool {
     return pointerUpHandler;
   }
 
-  private createHitboxPointerOverHandler(innerLine: THREE.Mesh) {
+  private createHitboxPointerEnterHandler(innerLine: THREE.Mesh) {
     return (event: TbEvent<PointerEvent>) => {
-      if (
-        this.pointerActionsDisabled ||
-        (event.nativeEvent.pointerType === 'mouse' &&
-          (event.nativeEvent.buttons & MouseButtonValues.Primary) !== 0)
-      ) {
+      if (this.pointerActionsDisabled) {
         return;
       }
 
-      if (event.target.visible) {
-        innerLine.material = this.highlightMaterial;
-        this.options.onRequestRender?.();
-      }
+      innerLine.material = this.highlightMaterial;
+      this.options.onRequestRender?.();
     };
   }
 
-  private createHitboxPointerOutHandler(innerLine: THREE.Mesh) {
+  private createHitboxPointerLeaveHandler(innerLine: THREE.Mesh) {
     return (event: TbEvent<PointerEvent>) => {
-      if (
-        this.pointerActionsDisabled ||
-        (event.nativeEvent.pointerType === 'mouse' &&
-          (event.nativeEvent.buttons & MouseButtonValues.Primary) !== 0)
-      ) {
+      if (this.pointerActionsDisabled) {
         return;
       }
-      if (event.target.visible) {
-        innerLine.material = this.innerMaterial;
-        this.options.onRequestRender?.();
-      }
+
+      innerLine.material = this.innerMaterial;
+      this.options.onRequestRender?.();
     };
   }
 
@@ -1041,5 +1025,13 @@ export class TransformTool {
       innerLine.material = this.innerMaterial;
       hitbox.visible = true;
     }
+  }
+
+  private addEventListener(
+    object: THREE.Object3D,
+    eventType: TbPointerEventType,
+    listener: TbEventListener<PointerEvent>,
+  ) {
+    this.eventDispatcher.addEventListener(object, eventType, listener);
   }
 }

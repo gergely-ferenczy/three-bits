@@ -60,7 +60,7 @@
 ### Bug Fixes
 
 - a bunch of orbit and fpv control bugs b97a1d6
-- remove leftover console.log 2cfbe6b
+- remove leftover console log 2cfbe6b
 
 ## [0.7.1](https://github.com/gergely-ferenczy/three-bits/compare/v0.7.0...v0.7.1) (2025-08-30)
 

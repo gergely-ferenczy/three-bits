@@ -580,14 +580,8 @@ test('object group with two non-overlapping objects', () => {
 test('object group with over/out events only on group object', () => {
   const objectA = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
   objectA.name = 'A';
-  objectA.position.z = -0.6;
-  objectA.updateMatrixWorld();
-
-  const objectB = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+  const objectB = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2, 2));
   objectB.name = 'B';
-  objectB.position.x = 0.1;
-  objectB.position.z = 0.6;
-  objectB.updateMatrixWorld();
 
   const group = new THREE.Group();
   group.name = 'Group';
@@ -616,25 +610,38 @@ test('object group with over/out events only on group object', () => {
     outGroup.mockClear();
   };
 
-  // Move over object A
-  dispatchEvent(-0.2, 0);
-  expect(overGroup).toHaveBeenCalledOnce();
-  expect(overGroupEventTargets).toEqual([objectA.name, group.name]);
+  // Move outside both objects
+  dispatchEvent(1.1, 0);
+  expect(overGroup).not.toHaveBeenCalled();
   expect(outGroup).not.toHaveBeenCalled();
 
-  // Move over B while moving out of object A
-  clearAllMocks();
-  dispatchEvent(0.6, 0);
-  expect(overGroup).toHaveBeenCalledOnce();
+  // Move over object B
+  dispatchEvent(-0.6, 0);
+  expect(overGroup).toHaveBeenCalledTimes(1);
   expect(overGroupEventTargets).toEqual([objectB.name, group.name]);
-  expect(outGroup).toHaveBeenCalledOnce();
-  expect(outGroupEventTargets).toEqual([objectA.name, group.name]);
-
-  // Leave object B
+  expect(outGroup).not.toHaveBeenCalled();
   clearAllMocks();
-  dispatchEvent(1.2, 0);
+
+  // Move over A while staying over object B
+  dispatchEvent(0, 0);
+  expect(overGroup).toHaveBeenCalledTimes(1);
+  expect(overGroupEventTargets).toEqual([objectA.name, group.name]);
+  expect(outGroup).toHaveBeenCalledTimes(1);
+  expect(outGroupEventTargets).toEqual([objectB.name, group.name]);
+  clearAllMocks();
+
+  // Move out of object A while staying over object B
+  dispatchEvent(0.6, 0);
+  expect(overGroup).toHaveBeenCalledTimes(1);
+  expect(overGroupEventTargets).toEqual([objectB.name, group.name]);
+  expect(outGroup).toHaveBeenCalledTimes(1);
+  expect(outGroupEventTargets).toEqual([objectA.name, group.name]);
+  clearAllMocks();
+
+  // Move out of object B
+  dispatchEvent(1.1, 0);
   expect(overGroup).not.toHaveBeenCalled();
-  expect(outGroup).toHaveBeenCalledOnce();
+  expect(outGroup).toHaveBeenCalledTimes(1);
   expect(outGroupEventTargets).toEqual([objectB.name, group.name]);
 });
 

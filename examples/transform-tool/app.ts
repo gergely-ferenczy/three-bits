@@ -35,12 +35,15 @@ function init() {
   activeCamera = perspectiveCamera;
 
   const box = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshNormalMaterial());
+  box.name = 'box';
   scene.add(box);
   const sphere = new THREE.Mesh(new THREE.SphereGeometry(), new THREE.MeshNormalMaterial());
+  sphere.name = 'sphere';
   sphere.position.set(5, 0, 0);
   scene.add(sphere);
   const torus = new THREE.Mesh(new THREE.TorusKnotGeometry(), new THREE.MeshNormalMaterial());
   torus.scale.setScalar(0.5);
+  torus.name = 'torus';
   torus.position.set(0, 0, -4);
   scene.add(torus);
   const icosahedron = new THREE.Mesh(
