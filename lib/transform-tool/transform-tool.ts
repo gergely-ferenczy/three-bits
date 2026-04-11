@@ -4,7 +4,7 @@ import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
-import { MouseButtonValues, TbEventType, TbPointerEventType, ThreeBitUtils } from '..';
+import { MouseButtonValues, TbPointerEventType, ThreeBitUtils } from '..';
 import { TbEvent } from '../event-dispatcher/tb-event';
 import { TbEventDispatcher } from '../event-dispatcher/tb-event-dispatcher';
 import { TbEventListener } from '../event-dispatcher/tb-event-listener';
@@ -99,6 +99,22 @@ export interface TransformToolOptions {
     offset: THREE.Vector3,
   ) => void;
 
+  /**
+   * Called when at the beginning of a transformation action.
+   *
+   * Can be useful to disable/enable controls or other features that use 3D event
+   * listeners.
+   */
+  onTransformStart?: (type: 'translate' | 'rotate') => void;
+
+  /**
+   * Called when at the end of a transformation action.
+   *
+   * Can be useful to disable/enable controls or other features that use 3D event
+   * listeners.
+   */
+  onTransformEnd?: (type: 'translate' | 'rotate') => void;
+
   /** Called when the tool's appearance, position or rotation has changed. */
   onRequestRender: () => void;
 }
@@ -110,7 +126,9 @@ type OptionalOptions =
   | 'disableTranslation'
   | 'disableRotation'
   | 'onPositionChange'
-  | 'onRotationChange';
+  | 'onRotationChange'
+  | 'onTransformStart'
+  | 'onTransformEnd';
 
 type TransformToolOptionsInternal = Required<Omit<TransformToolOptions, OptionalOptions>> &
   Pick<TransformToolOptions, OptionalOptions>;
@@ -596,8 +614,14 @@ export class TransformTool {
       const delta = intersection.sub(intersectionStartPos).projectOnVector(startAxis);
       this.applyPositionChange(objectStartPos, delta);
     };
-    const pointerUpHandler = this.createPointerUpHandler(arrowGroup, innerLine, pointerMoveHandler);
+    const pointerUpHandler = this.createPointerUpHandler(
+      'translate',
+      arrowGroup,
+      innerLine,
+      pointerMoveHandler,
+    );
     const pointerDownHandler = this.createPointerDownHandler(
+      'translate',
       arrowGroup,
       pointerUpHandler,
       pointerMoveHandler,
@@ -754,8 +778,14 @@ export class TransformTool {
       const rotationDelta = new THREE.Quaternion().setFromAxisAngle(startNormal, angle);
       this.applyRotationChange(startPosition, startRotation, rotationDelta, startOffset);
     };
-    const pointerUpHandler = this.createPointerUpHandler(arrowGroup, innerLine, pointerMoveHandler);
+    const pointerUpHandler = this.createPointerUpHandler(
+      'rotate',
+      arrowGroup,
+      innerLine,
+      pointerMoveHandler,
+    );
     const pointerDownHandler = this.createPointerDownHandler(
+      'rotate',
       arrowGroup,
       pointerUpHandler,
       pointerMoveHandler,
@@ -873,11 +903,13 @@ export class TransformTool {
       this.applyPositionChange(objectStartPos, delta);
     };
     const pointerUpHandler = this.createPointerUpHandler(
+      'translate',
       sidePlaneGroup,
       innerLine,
       pointerMoveHandler,
     );
     const pointerDownHandler = this.createPointerDownHandler(
+      'translate',
       sidePlaneGroup,
       pointerUpHandler,
       pointerMoveHandler,
@@ -898,6 +930,7 @@ export class TransformTool {
   }
 
   private createPointerDownHandler(
+    type: 'translate' | 'rotate',
     target: THREE.Object3D,
     pointerUpHandler: (event: TbEvent<PointerEvent>) => void,
     pointerMoveHandler: (event: TbEvent<PointerEvent>) => void,
@@ -914,8 +947,8 @@ export class TransformTool {
       this.pointerActionsDisabled = true;
       // Stops other 3D events from firing that could "steal" the pointer capture
       event.stopPropagation();
-      // Stops other canvas DOM event listeners (like an orbit control)
-      event.nativeEvent.stopImmediatePropagation();
+
+      this.options.onTransformStart?.(type);
 
       this.addEventListener(target, 'pointerup', pointerUpHandler);
       this.addEventListener(target, 'pointermove', pointerMoveHandler);
@@ -927,14 +960,19 @@ export class TransformTool {
   }
 
   private createPointerUpHandler(
+    type: 'translate' | 'rotate',
     target: THREE.Object3D,
     innerLine: THREE.Mesh,
     pointerMoveHandler: (event: TbEvent<PointerEvent>) => void,
   ) {
     const pointerUpHandler = (event: TbEvent<PointerEvent>) => {
       this.pointerActionsDisabled = false;
-      this.eventDispatcher.removeEventListener(target, 'pointerup', pointerUpHandler);
-      this.eventDispatcher.removeEventListener(target, 'pointermove', pointerMoveHandler);
+      event.stopPropagation();
+
+      this.options.onTransformEnd?.(type);
+
+      this.removeEventListener(target, 'pointerup', pointerUpHandler);
+      this.removeEventListener(target, 'pointermove', pointerMoveHandler);
       this.eventDispatcher.releasePointerCapture(target, event.nativeEvent.pointerId);
 
       if (event.target.visible) {
@@ -1033,5 +1071,13 @@ export class TransformTool {
     listener: TbEventListener<PointerEvent>,
   ) {
     this.eventDispatcher.addEventListener(object, eventType, listener);
+  }
+
+  private removeEventListener(
+    object: THREE.Object3D,
+    eventType: TbPointerEventType,
+    listener: TbEventListener<PointerEvent>,
+  ) {
+    this.eventDispatcher.removeEventListener(object, eventType, listener);
   }
 }
