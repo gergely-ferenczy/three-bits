@@ -163,6 +163,24 @@ export class TbEventDispatcher {
     object: THREE.Object3D,
     type: K,
     listener: (ev: TbEventHandlersEventMap[K]) => void,
+    capture?: boolean,
+  ): void;
+  addEventListener<K extends keyof TbEventHandlersEventMap>(
+    object: THREE.Object3D,
+    type: K,
+    listener: (ev: TbEventHandlersEventMap[K]) => void,
+    options?: TbAddEventListenerOptions,
+  ): void;
+  addEventListener<K extends keyof TbEventHandlersEventMap>(
+    object: THREE.Object3D,
+    type: K,
+    listener: (ev: TbEventHandlersEventMap[K]) => void,
+    options?: boolean | TbAddEventListenerOptions,
+  ): void;
+  addEventListener<K extends keyof TbEventHandlersEventMap>(
+    object: THREE.Object3D,
+    type: K,
+    listener: (ev: TbEventHandlersEventMap[K]) => void,
     options?: boolean | TbAddEventListenerOptions,
   ): void {
     if (typeof options !== 'boolean' && options?.signal?.aborted) {
@@ -206,6 +224,24 @@ export class TbEventDispatcher {
    * @param options An object that specifies characteristics about the event
    *  listener.
    */
+  removeEventListener<K extends keyof TbEventHandlersEventMap>(
+    object: THREE.Object3D,
+    type: K,
+    listener: (ev: TbEventHandlersEventMap[K]) => void,
+    capture?: boolean,
+  ): void;
+  removeEventListener<K extends keyof TbEventHandlersEventMap>(
+    object: THREE.Object3D,
+    type: K,
+    listener: (ev: TbEventHandlersEventMap[K]) => void,
+    options?: TbAddEventListenerOptions,
+  ): void;
+  removeEventListener<K extends keyof TbEventHandlersEventMap>(
+    object: THREE.Object3D,
+    type: K,
+    listener: (ev: TbEventHandlersEventMap[K]) => void,
+    options?: boolean | TbAddEventListenerOptions,
+  ): void;
   removeEventListener<K extends keyof TbEventHandlersEventMap>(
     object: THREE.Object3D,
     type: K,
@@ -427,7 +463,11 @@ export class TbEventDispatcher {
     this.enterLeaveState.hovers = hovers;
 
     if (leaveEventQueue.length > 0) {
-      const leaveEvent = this.createTbEvent('pointerleave', this.lastPointerEvent!);
+      const leaveEvent = this.createTbEvent(
+        'pointerleave',
+        this.lastPointerEvent!,
+      ) as Writable<TbEvent>;
+      leaveEvent.eventPhase = Event.AT_TARGET;
       const stopPropagationRef: StopPropagationRef = { value: false };
       leaveEvent.stopPropagation = () => {
         stopPropagationRef.value = true;
@@ -440,7 +480,11 @@ export class TbEventDispatcher {
     }
 
     if (enterEventQueue.length > 0) {
-      const enterEvent = this.createTbEvent('pointerenter', this.lastPointerEvent!);
+      const enterEvent = this.createTbEvent(
+        'pointerenter',
+        this.lastPointerEvent!,
+      ) as Writable<TbEvent>;
+      enterEvent.eventPhase = Event.AT_TARGET;
       const stopPropagationRef: StopPropagationRef = { value: false };
       enterEvent.stopPropagation = () => {
         stopPropagationRef.value = true;
@@ -533,28 +577,28 @@ export class TbEventDispatcher {
     this.overOutState.hovers = hovers;
 
     if (outEventQueue.length > 0) {
-      const leaveEvent = this.createTbEvent('pointerout', this.lastPointerEvent!);
+      const outEvent = this.createTbEvent('pointerout', this.lastPointerEvent!);
       const stopPropagationRef: StopPropagationRef = { value: false };
-      leaveEvent.stopPropagation = () => {
+      outEvent.stopPropagation = () => {
         stopPropagationRef.value = true;
       };
 
       for (const event of outEventQueue.toReversed()) {
-        this.handleBubblingEvent(leaveEvent, event.object, stopPropagationRef, event.match);
+        this.handleBubblingEvent(outEvent, event.object, stopPropagationRef, event.match);
 
         if (stopPropagationRef.value) break;
       }
     }
 
     if (overEventQueue.length > 0) {
-      const enterEvent = this.createTbEvent('pointerover', this.lastPointerEvent!);
+      const overEvent = this.createTbEvent('pointerover', this.lastPointerEvent!);
       const stopPropagationRef: StopPropagationRef = { value: false };
-      enterEvent.stopPropagation = () => {
+      overEvent.stopPropagation = () => {
         stopPropagationRef.value = true;
       };
 
       for (const event of overEventQueue) {
-        this.handleBubblingEvent(enterEvent, event.object, stopPropagationRef, event.match);
+        this.handleBubblingEvent(overEvent, event.object, stopPropagationRef, event.match);
 
         if (stopPropagationRef.value) break;
       }

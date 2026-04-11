@@ -52,6 +52,23 @@ test('single object', () => {
   expect(leave).toHaveBeenCalledAfter(enter);
 });
 
+test('enter/leave events with capture flag set to true work as if the flag is unset', () => {
+  const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+
+  const enter = vi.fn().mockName('enter');
+  eventDispatcher.addEventListener(object, 'pointerenter', enter, true);
+  const leave = vi.fn().mockName('leave');
+  eventDispatcher.addEventListener(object, 'pointerleave', leave, true);
+
+  dispatchEvent(0.49, 0);
+  expect(enter).toHaveBeenCalledOnce();
+
+  dispatchEvent(0.51, 0);
+  expect(enter).toHaveBeenCalledOnce();
+  expect(leave).toHaveBeenCalledOnce();
+  expect(leave).toHaveBeenCalledAfter(enter);
+});
+
 describe('object visibility changes under pointer', () => {
   test.each<{
     id: string;
