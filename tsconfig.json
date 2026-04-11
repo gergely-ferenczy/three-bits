@@ -11,7 +11,8 @@
     "pretty": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "strict": true
+    "strict": true,
+    "jsx": "react-jsx"
   },
   "include": ["lib/**/*"]
 }

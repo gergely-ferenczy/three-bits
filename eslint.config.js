@@ -1,14 +1,19 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from 'eslint-plugin-storybook';
+
 import eslint from '@eslint/js';
-import { defineConfig } from 'eslint/config';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import tsEslint from 'typescript-eslint';
 import unusedImports from 'eslint-plugin-unused-imports';
 
 export default defineConfig(
+  globalIgnores(['!.storybook'], 'Include Storybook Directory'),
   {
     ignores: ['dist/**', 'coverage/**'],
   },
   eslint.configs.recommended,
   ...tsEslint.configs.recommendedTypeChecked,
+  storybook.configs['flat/recommended'],
   {
     // eslint-plugin-unused-imports not have a flat config
     plugins: {
@@ -23,7 +28,7 @@ export default defineConfig(
     languageOptions: {
       parserOptions: {
         parser: '@typescript-eslint/parser',
-        project: ['./tsconfig.json', './tsconfig.dev.json'],
+        project: ['./tsconfig.json', './tsconfig.dev.json', './tsconfig.storybook.json'],
       },
     },
     settings: {},
