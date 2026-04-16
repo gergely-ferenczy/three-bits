@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.13.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.12.0...v0.13.0) (2026-04-16)
+
+### Features
+
+- improve TransformTool 8862737
+- rework event dispatcher and create full test suite 2e9ff7c
+
+### Bug Fixes
+
+- event dispatcher improvements e5f0acc
+
 ## [0.12.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.11.0...v0.12.0) (2026-03-18)
 
 ### Features
