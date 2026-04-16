@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Canvas, useThree } from '@react-three/fiber';
 import { Grid } from '@react-three/drei';
+import { Canvas, useThree } from '@react-three/fiber';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { TrackballControl } from '../../../lib/controls/trackball-control';
 import type { TrackballControlOptions } from '../../../lib/controls/trackball-control-options';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 /**
  * Component to display camera information in an overlay

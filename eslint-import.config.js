@@ -16,7 +16,7 @@ export default defineConfig(
     languageOptions: {
       parserOptions: {
         parser: '@typescript-eslint/parser',
-        project: ['./tsconfig.json', './tsconfig.dev.json'],
+        project: ['./tsconfig.json', './tsconfig.dev.json', './tsconfig.storybook.json'],
       },
     },
     plugins: importEslint.flatConfigs.recommended.plugins,

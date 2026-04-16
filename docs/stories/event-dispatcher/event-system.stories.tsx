@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as THREE from 'three';
 import { TbEventDispatcher, OrbitControl } from '../../../lib/index';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 interface GroupConfig {
   geometry: THREE.BufferGeometry;

@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Canvas, useThree } from '@react-three/fiber';
 import { Grid } from '@react-three/drei';
+import { Canvas, useThree } from '@react-three/fiber';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { OrbitControl } from '../../../lib/controls/orbit-control';
 import type { OrbitControlOptions } from '../../../lib/controls/orbit-control';
+import { OrbitControl } from '../../../lib/controls/orbit-control';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 /**
  * Component to display camera information in an overlay

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import React from 'react';
 
 export interface ThreeSceneProps {
   children: React.ReactNode;
