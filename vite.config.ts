@@ -2,7 +2,6 @@ import path from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  publicDir: 'examples/assets',
   build: {
     minify: false,
     target: 'esnext',
