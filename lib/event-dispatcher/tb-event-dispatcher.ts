@@ -839,15 +839,15 @@ export class TbEventDispatcher {
   }
 
   private updateEventObjects() {
-    const eventObjects: THREE.Object3D[] = [];
+    const eventObjectSet = new Set<THREE.Object3D>();
     for (const object of this.eventMap.keys()) {
       let current = object;
       while (current.parent) {
         current = current.parent;
       }
-      eventObjects.push(current);
+      eventObjectSet.add(current);
     }
-    this.eventObjects = eventObjects;
+    this.eventObjects = [...eventObjectSet];
 
     const enterLeaveRelatedObjects = this.eventMap
       .entries()
