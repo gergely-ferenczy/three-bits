@@ -246,3 +246,51 @@ describe('stopImmediatePropagation prevents calls to remaining listeners on same
     expect(childListener).not.toHaveBeenCalled();
   });
 });
+
+describe('stopPropagation with global event listeners', () => {
+  test('stopPropagation on object listener does not prevent global listener from being called', () => {
+    const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    object.name = 'Target';
+
+    const objectListener = vi
+      .fn()
+      .mockName('object-listener')
+      .mockImplementation((event: TbEvent) => {
+        event.stopPropagation();
+      });
+    const globalListener = vi.fn().mockName('global-listener');
+
+    eventDispatcher.addEventListener(object, 'pointerdown', objectListener);
+    eventDispatcher.addGlobalEventListener('pointerdown', globalListener);
+
+    canvas.dispatchEvent(createPointerEvent('pointermove'));
+    canvas.dispatchEvent(createPointerEvent('pointerdown'));
+
+    expect(objectListener).toHaveBeenCalledOnce();
+    // Global listeners should still be called even if stopPropagation is called on object listener
+    expect(globalListener).toHaveBeenCalledOnce();
+  });
+
+  test('stopImmediatePropagation on object listener does not prevent global listener from being called', () => {
+    const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    object.name = 'Target';
+
+    const objectListener = vi
+      .fn()
+      .mockName('object-listener')
+      .mockImplementation((event: TbEvent) => {
+        event.stopImmediatePropagation();
+      });
+    const globalListener = vi.fn().mockName('global-listener');
+
+    eventDispatcher.addEventListener(object, 'pointerdown', objectListener);
+    eventDispatcher.addGlobalEventListener('pointerdown', globalListener);
+
+    canvas.dispatchEvent(createPointerEvent('pointermove'));
+    canvas.dispatchEvent(createPointerEvent('pointerdown'));
+
+    expect(objectListener).toHaveBeenCalledOnce();
+    // Global listeners should still be called even if stopImmediatePropagation is called
+    expect(globalListener).toHaveBeenCalledOnce();
+  });
+});
