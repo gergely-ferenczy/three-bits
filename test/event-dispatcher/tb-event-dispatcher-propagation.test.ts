@@ -73,7 +73,7 @@ describe('stopPropagation callback stops event propagation', () => {
 
       const objectB1 = createObject('B1', d++);
       const objectB2 = createObject('B2', d++);
-      const objectBg = createObject('Bg', d++);
+      const objectBg = createObject('Bg', d);
 
       objectAg.add(objectA1, objectA2);
       objectBg.add(objectB1, objectB2);

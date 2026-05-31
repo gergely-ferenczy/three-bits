@@ -728,7 +728,7 @@ test('event order is correct', () => {
   const objectC1 = createObject('C1', d++);
   const objectCg = createObject('Cg', d++);
   const objectC2 = createObject('C2', d++);
-  const objectD2 = createObject('D2', d++);
+  const objectD2 = createObject('D2', d);
 
   objectAg.add(objectA1, objectA2);
   objectBg.add(objectB1, objectB2);
@@ -875,7 +875,7 @@ describe('stopPropagation callback stops event propagation', () => {
 
       const objectB1 = createObject('B1', d++);
       const objectB2 = createObject('B2', d++);
-      const objectBg = createObject('Bg', d++);
+      const objectBg = createObject('Bg', d);
 
       objectAg.add(objectA1, objectA2);
       objectBg.add(objectB1, objectB2);
@@ -975,7 +975,7 @@ describe('stopPropagation callback stops event propagation', () => {
 
       const objectB1 = createObject('B1', d++);
       const objectB2 = createObject('B2', d++);
-      const objectBg = createObject('Bg', d++);
+      const objectBg = createObject('Bg', d);
 
       objectAg.add(objectA1, objectA2);
       objectBg.add(objectB1, objectB2);

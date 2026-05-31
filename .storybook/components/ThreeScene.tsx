@@ -1,6 +1,5 @@
 import { OrbitControls, Grid } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
-import React from 'react';
 
 export interface ThreeSceneProps {
   children: React.ReactNode;
@@ -13,12 +12,12 @@ export interface ThreeSceneProps {
  * A reusable Three.js scene wrapper for Storybook stories.
  * Provides a consistent canvas setup with optional grid and orbit controls.
  */
-export const ThreeScene: React.FC<ThreeSceneProps> = ({
+export const ThreeScene = ({
   children,
   showGrid = true,
   cameraPosition = [10, 10, 10],
   cameraFov = 50,
-}) => {
+}: ThreeSceneProps) => {
   return (
     <Canvas
       camera={{

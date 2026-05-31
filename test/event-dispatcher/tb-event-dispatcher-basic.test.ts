@@ -217,7 +217,7 @@ describe('event order and target data is correct', () => {
     const objectC1 = createObject('C1', d++);
     const objectCg = createObject('Cg', d++);
     const objectC2 = createObject('C2', d++);
-    const objectD2 = createObject('D2', d++);
+    const objectD2 = createObject('D2', d);
 
     objectAg.add(objectA1, objectA2);
     objectBg.add(objectB1, objectB2);

@@ -1,6 +1,6 @@
 import { Grid } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { TrackballControl } from '../../../lib/controls/trackball-control';
 import type { TrackballControlOptions } from '../../../lib/controls/trackball-control-options';
@@ -9,10 +9,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 /**
  * Component to display camera information in an overlay
  */
-const CameraInfo: React.FC<{
-  camera: THREE.Camera;
-  target: THREE.Vector3;
-}> = ({ camera, target }) => {
+const CameraInfo = ({ camera, target }: { camera: THREE.Camera; target: THREE.Vector3 }) => {
   const [position, setPosition] = useState<THREE.Vector3>(camera.position.clone());
   const [targetPos, setTargetPos] = useState<THREE.Vector3>(target.clone());
   const [zoom, setZoom] = useState<number>((camera as THREE.PerspectiveCamera).zoom);

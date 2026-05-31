@@ -1,10 +1,13 @@
-// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from 'eslint-plugin-storybook';
+/* eslint-disable import-x/no-named-as-default-member */
+/* eslint-disable import-x/no-named-as-default */
 
 import eslint from '@eslint/js';
 import { defineConfig, globalIgnores } from 'eslint/config';
-import tsEslint from 'typescript-eslint';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import importX, { createNodeResolver } from 'eslint-plugin-import-x';
+import storybook from 'eslint-plugin-storybook';
 import unusedImports from 'eslint-plugin-unused-imports';
+import tsEslint from 'typescript-eslint';
 
 export default defineConfig(
   globalIgnores(['!.storybook'], 'Include Storybook Directory'),
@@ -13,6 +16,8 @@ export default defineConfig(
   },
   eslint.configs.recommended,
   ...tsEslint.configs.recommendedTypeChecked,
+  importX.flatConfigs.recommended,
+  importX.flatConfigs.typescript,
   storybook.configs['flat/recommended'],
   {
     // eslint-plugin-unused-imports not have a flat config
@@ -31,11 +36,25 @@ export default defineConfig(
         project: ['./tsconfig.json', './tsconfig.dev.json', './tsconfig.storybook.json'],
       },
     },
-    settings: {},
+    settings: {
+      'import-x/resolver-next': [createTypeScriptImportResolver(), createNodeResolver()],
+    },
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+
+      'import-x/order': [
+        'warn',
+        {
+          groups: ['builtin', 'external', ['parent', 'sibling', 'index', 'object', 'type']],
+          alphabetize: {
+            order: 'asc',
+            orderImportKind: 'asc',
+          },
+          'newlines-between': 'ignore',
+        },
+      ],
     },
   },
 );

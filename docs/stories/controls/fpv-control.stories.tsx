@@ -1,6 +1,6 @@
 import { Grid } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import type { FpvControlOptions } from '../../../lib/controls/fpv-control';
 import { FpvControl } from '../../../lib/controls/fpv-control';

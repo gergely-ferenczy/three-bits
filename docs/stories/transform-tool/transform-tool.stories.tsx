@@ -1,6 +1,6 @@
 import { Grid } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { TransformTool, TbEventDispatcher, OrbitControl } from '../../../lib/index';
 import type { TransformToolOptions } from '../../../lib/transform-tool/transform-tool';
@@ -9,9 +9,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 /**
  * Component to display transform information in an overlay
  */
-const TransformInfo: React.FC<{
-  objectRef: React.RefObject<THREE.Object3D | null>;
-}> = ({ objectRef }) => {
+const TransformInfo = ({ objectRef }: { objectRef: React.RefObject<THREE.Object3D | null> }) => {
   const [position, setPosition] = useState<THREE.Vector3>(new THREE.Vector3());
   const [rotation, setRotation] = useState<THREE.Euler>(new THREE.Euler());
 
@@ -143,7 +141,7 @@ const TransformToolDemo = ({
   const eventDispatcherRef = useRef<TbEventDispatcher | null>(null);
 
   // Create the mesh geometry based on type
-  const geometry = React.useMemo(() => {
+  const geometry = useMemo(() => {
     switch (meshType) {
       case 'sphere':
         return new THREE.SphereGeometry(1, 32, 32);

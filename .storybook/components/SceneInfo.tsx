@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import * as THREE from 'three';
 
 export interface SceneInfoProps {
@@ -12,7 +12,7 @@ export interface SceneInfoProps {
  * Displays transform information (position, rotation, scale) in an overlay.
  * Useful for debugging and demonstrating transform changes.
  */
-export const SceneInfo: React.FC<SceneInfoProps> = ({ position, rotation, quaternion, scale }) => {
+export const SceneInfo = ({ position, rotation, quaternion, scale }: SceneInfoProps) => {
   const formatVector3 = (v: THREE.Vector3) =>
     `(${v.x.toFixed(2)}, ${v.y.toFixed(2)}, ${v.z.toFixed(2)})`;
 
