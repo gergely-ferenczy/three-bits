@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    // Modules
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    // Language and Environment
+    "lib": ["ESNext", "DOM"],
+    "target": "ESNext",
+
+    // Interop Constraints
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Type checking
+    "skipLibCheck": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  }
+}

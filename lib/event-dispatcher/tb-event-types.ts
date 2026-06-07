@@ -1,5 +1,3 @@
-import type { TbEventDispatcher } from './tb-event-dispatcher';
-
 /**
  * Supported pointer event types by {@link TbEventDispatcher}.
  */

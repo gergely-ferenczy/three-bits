@@ -114,7 +114,7 @@ export class BaseRotationControl extends BaseControl {
     this.rotationFragment.handleRotationAction(0, 0, this.camera, this.target);
 
     this.zoomDollyFragment.updateStartValues(dummyPointers, this.camera, this.target);
-    this.zoomDollyFragment.zoomOrDolly(0, this.camera, this.target);
+    this.zoomDollyFragment.zoomOrDolly(0, this.camera);
 
     this.camera.lookAt(this.target);
     this.camera.updateProjectionMatrix();

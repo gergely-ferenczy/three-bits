@@ -498,7 +498,7 @@ export class TransformTool {
     // @ts-expect-error onBeforeRender is definition is wrong in LineSegments2
     outerObject.onBeforeRender = (
       renderer: THREE.WebGLRenderer,
-      scene: THREE.Scene,
+      _scene: THREE.Scene,
       camera: THREE.Camera,
     ) => {
       originalBeforeRender(renderer);
@@ -571,7 +571,7 @@ export class TransformTool {
     // @ts-expect-error onBeforeRender is definition is wrong in LineSegments2
     outerLine.onBeforeRender = (
       renderer: THREE.WebGLRenderer,
-      scene: THREE.Scene,
+      _scene: THREE.Scene,
       camera: THREE.Camera,
     ) => {
       originalBeforeRender(renderer);
@@ -739,7 +739,7 @@ export class TransformTool {
     // @ts-expect-error onBeforeRender is definition is wrong in LineSegments2
     outerLine.onBeforeRender = (
       renderer: THREE.WebGLRenderer,
-      scene: THREE.Scene,
+      _scene: THREE.Scene,
       camera: THREE.Camera,
     ) => {
       originalBeforeRender(renderer);
@@ -866,7 +866,7 @@ export class TransformTool {
     // @ts-expect-error onBeforeRender is definition is wrong in LineSegments2
     outerLine.onBeforeRender = (
       renderer: THREE.WebGLRenderer,
-      scene: THREE.Scene,
+      _scene: THREE.Scene,
       camera: THREE.Camera,
     ) => {
       originalBeforeRender(renderer);
@@ -985,7 +985,7 @@ export class TransformTool {
   }
 
   private createHitboxPointerEnterHandler(innerLine: THREE.Mesh) {
-    return (event: TbEvent<PointerEvent>) => {
+    return (_event: TbEvent<PointerEvent>) => {
       if (this.pointerActionsDisabled) {
         return;
       }
@@ -996,7 +996,7 @@ export class TransformTool {
   }
 
   private createHitboxPointerLeaveHandler(innerLine: THREE.Mesh) {
-    return (event: TbEvent<PointerEvent>) => {
+    return (_event: TbEvent<PointerEvent>) => {
       if (this.pointerActionsDisabled) {
         return;
       }

@@ -111,7 +111,7 @@ const EventSystemDemo: React.FC = () => {
     ];
 
     // Create groups and objects
-    groups.forEach((groupConfig, groupIndex) => {
+    groups.forEach((groupConfig) => {
       const group = new THREE.Group();
       group.name = groupConfig.name;
       group.userData.groupConfig = groupConfig;

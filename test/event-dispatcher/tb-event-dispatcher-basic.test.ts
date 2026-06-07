@@ -98,7 +98,7 @@ describe('event handlers can be added/removed', () => {
       testEventHandlerB2.mockClear();
     };
 
-    const testCallCount = (a1: number, a2: number, a3: number, b1: number, b2: number) => {
+    const testCallCount = (a1: number, a2: number, b1: number, b2: number) => {
       clearAllMocks();
       canvas.dispatchEvent(createMouseEvent('click'));
       expect(testEventHandlerA1).toHaveBeenCalledTimes(a1);
@@ -107,19 +107,19 @@ describe('event handlers can be added/removed', () => {
       expect(testEventHandlerB2).toHaveBeenCalledTimes(b2);
     };
 
-    testCallCount(2, 2, 2, 0, 1);
+    testCallCount(2, 2, 0, 1);
 
     eventDispatcher.removeEventListener(objectA, 'click', testEventHandlerA1, false);
-    testCallCount(1, 2, 2, 0, 1);
+    testCallCount(1, 2, 0, 1);
 
     eventDispatcher.removeEventListener(objectA, 'click', testEventHandlerA1, true);
-    testCallCount(0, 2, 2, 0, 1);
+    testCallCount(0, 2, 0, 1);
 
     eventDispatcher.removeEventListener(objectA, 'click', testEventHandlerA2);
-    testCallCount(0, 1, 2, 0, 1);
+    testCallCount(0, 1, 0, 1);
 
     eventDispatcher.removeEventListener(objectA, 'click', testEventHandlerA2, true);
-    testCallCount(0, 0, 2, 0, 1);
+    testCallCount(0, 0, 0, 1);
   });
 });
 

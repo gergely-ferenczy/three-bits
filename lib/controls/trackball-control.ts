@@ -110,7 +110,7 @@ export class TrackballControl extends BaseControl {
     ];
 
     this.zoomDollyFragment.updateStartValues(dummyPointers, this.camera, this.target);
-    this.zoomDollyFragment.zoomOrDolly(0, this.camera, this.target);
+    this.zoomDollyFragment.zoomOrDolly(0, this.camera);
 
     this.camera.lookAt(this.target);
     this.camera.updateProjectionMatrix();

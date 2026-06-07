@@ -20,7 +20,7 @@ function formatNumber(value: number, decimals: number, padding?: number) {
 export function formatVector(object: THREE.Vector2, decimals?: number, padding?: number): string;
 export function formatVector(object: THREE.Vector3, decimals?: number, padding?: number): string;
 export function formatVector(object: THREE.Vector4, decimals?: number, padding?: number): string;
-export function formatVector(object: unknown, decimals = 3, padding?: number) {
+export function formatVector(object: unknown, decimals = 3, padding?: number): string {
   const p = padding ?? decimals + 3;
   if (object instanceof THREE.Vector2) {
     return `[${formatNumber(object.x, decimals, p)},` + ` ${formatNumber(object.y, decimals, p)}]`;
@@ -38,4 +38,6 @@ export function formatVector(object: unknown, decimals = 3, padding?: number) {
       ` ${formatNumber(object.w, decimals, p)}]`
     );
   }
+
+  return '';
 }

@@ -1,25 +1,9 @@
 {
+  "extends": ["./tsconfig.common.json"],
   "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "pretty": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "strict": true,
-    "noEmit": true,
     "allowJs": true,
-    "checkJs": true
+    "checkJs": true,
+    "composite": true
   },
-  "include": [
-    "test/**/*",
-    "examples/**/*",
-    "vite.config.ts",
-    "vitest.config.ts",
-    "commitlint.config.ts",
-    "eslint.config.js",
-    "eslint-import.config.js",
-    "lint-staged.config.js"
-  ]
+  "include": ["./*"]
 }

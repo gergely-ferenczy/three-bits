@@ -1,0 +1,9 @@
+{
+  "extends": ["../tsconfig.common.json"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "types": ["node"],
+    "composite": true
+  },
+  "references": [{ "path": "../lib" }]
+}

@@ -120,7 +120,7 @@ export class ZoomDollyFragment implements ControlFragment {
       const coords = getStartCoordsFromActivePointers(activePointers);
       this.zoomOrDollyAndRotate(coords, delta, camera, target);
     } else {
-      this.zoomOrDolly(delta, camera, target);
+      this.zoomOrDolly(delta, camera);
     }
   }
 
@@ -150,12 +150,12 @@ export class ZoomDollyFragment implements ControlFragment {
     ) {
       this.zoomOrDollyAndRotate(activePointer.coords, delta, camera, target);
     } else {
-      this.zoomOrDolly(delta, camera, target);
+      this.zoomOrDolly(delta, camera);
     }
   }
 
   updateStartValues(
-    activePointers: ActivePointer[],
+    _activePointers: ActivePointer[],
     camera: ControllableCamera,
     target: THREE.Vector3,
   ): void {
@@ -183,7 +183,7 @@ export class ZoomDollyFragment implements ControlFragment {
     }
   }
 
-  public zoomOrDolly(delta: number, camera: ControllableCamera, target: THREE.Vector3): void {
+  public zoomOrDolly(delta: number, camera: ControllableCamera): void {
     if (this.options.type == 'zoomAndDolly') {
       const { zoomDelta, dollyDelta } = this.zoomAndDolly(delta);
       camera.zoom *= zoomDelta;
@@ -215,7 +215,7 @@ export class ZoomDollyFragment implements ControlFragment {
       this.raycaster.far,
     );
 
-    this.zoomOrDolly(delta, camera, target);
+    this.zoomOrDolly(delta, camera);
 
     if (!intersectionA) return;
 
@@ -246,7 +246,7 @@ export class ZoomDollyFragment implements ControlFragment {
 
     this.raycaster.setFromCamera(startCoords, camera);
     const intersectionA = this.raycaster.ray.intersectSphere(this.state.sphere, _v3a);
-    this.zoomOrDolly(delta, camera, target);
+    this.zoomOrDolly(delta, camera);
 
     if (!intersectionA) return;
 

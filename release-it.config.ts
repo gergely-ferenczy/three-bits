@@ -1,0 +1,32 @@
+import type { Config } from 'release-it';
+
+export default {
+  git: {
+    tagName: 'v${version}',
+    requireCleanWorkingDir: true,
+    requireBranch: 'main',
+    commitMessage: 'chore(release): v${version}',
+    tagAnnotation: 'Release v${version}',
+  },
+  github: {
+    release: true,
+    releaseName: 'Release v${version}',
+    web: true,
+  },
+  npm: {
+    publish: false,
+  },
+  plugins: {
+    '@release-it/conventional-changelog': {
+      infile: 'CHANGELOG.md',
+      preset: 'conventionalcommits',
+      bumpFiles: ['package.json'],
+      context: {
+        linkReferences: false,
+      },
+    },
+  },
+  hooks: {
+    'before:init': ['npm run build', 'npm test'],
+  },
+} satisfies Config;

@@ -5,13 +5,13 @@ export default defineConfig({
   build: {
     minify: false,
     target: 'esnext',
-    sourcemap: true,
     lib: {
       formats: ['es'],
-      entry: 'lib/index.ts',
+      entry: './lib/index.ts',
       fileName: () => '[name].js',
     },
-    rollupOptions: {
+    outDir: './lib/dist',
+    rolldownOptions: {
       external: (id: string) => !id.startsWith('.') && !path.isAbsolute(id),
       output: {
         preserveModules: true,

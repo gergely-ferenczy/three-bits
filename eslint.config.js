@@ -2,45 +2,42 @@
 /* eslint-disable import-x/no-named-as-default */
 
 import eslint from '@eslint/js';
-import { defineConfig, globalIgnores } from 'eslint/config';
+import { defineConfig } from 'eslint/config';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import importX, { createNodeResolver } from 'eslint-plugin-import-x';
 import storybook from 'eslint-plugin-storybook';
-import unusedImports from 'eslint-plugin-unused-imports';
 import tsEslint from 'typescript-eslint';
 
 export default defineConfig(
-  globalIgnores(['!.storybook'], 'Include Storybook Directory'),
   {
-    ignores: ['dist/**', 'coverage/**'],
+    ignores: ['**/dist', 'coverage'],
   },
   eslint.configs.recommended,
   ...tsEslint.configs.recommendedTypeChecked,
   importX.flatConfigs.recommended,
   importX.flatConfigs.typescript,
-  storybook.configs['flat/recommended'],
-  {
-    // eslint-plugin-unused-imports not have a flat config
-    plugins: {
-      'unused-imports': unusedImports,
-    },
-    rules: {
-      'unused-imports/no-unused-vars': 'off',
-      'unused-imports/no-unused-imports': 'warn',
-    },
-  },
+  // @ts-expect-error eslint-plugin-storybook uses legacy RuleModule types incompatible with eslint's new RuleDefinition
+  ...storybook.configs['flat/recommended'],
   {
     languageOptions: {
       parserOptions: {
         parser: '@typescript-eslint/parser',
-        project: ['./tsconfig.json', './tsconfig.dev.json', './tsconfig.storybook.json'],
+        project: [
+          './tsconfig.dev.json',
+          './docs/stories/tsconfig.json',
+          './lib/tsconfig.json',
+          './test/tsconfig.json',
+        ],
       },
     },
     settings: {
       'import-x/resolver-next': [createTypeScriptImportResolver(), createNodeResolver()],
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
 

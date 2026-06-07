@@ -1,19 +1,4 @@
 {
-  "compilerOptions": {
-    "rootDir": "./lib",
-    "outDir": "dist",
-    "declarationDir": "dist/types",
-    "lib": ["ESNext", "DOM"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "declaration": true,
-    "pretty": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "strict": true,
-    "jsx": "react-jsx",
-    "skipLibCheck": true
-  },
-  "include": ["lib/**/*"]
+  "files": [],
+  "references": [{ "path": "./lib" }, { "path": "./docs/stories" }, { "path": "./test" }]
 }
