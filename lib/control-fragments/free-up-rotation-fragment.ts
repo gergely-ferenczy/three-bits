@@ -142,8 +142,8 @@ export class FreeUpRotationFragment implements ControlFragment {
     const invertVertical = getOption(this.options.invertVertical, activePointers[0].type);
     const deltaCoords = getDeltaCoordsFromActivePointers(activePointers);
     deltaCoords.x *= aspect;
-    let horizontalAngleDelta = deltaCoords.x * 2 * speed;
-    let verticalAngleDelta = deltaCoords.y * 2 * speed;
+    let horizontalAngleDelta = (deltaCoords.x * 2 * speed) / camera.zoom;
+    let verticalAngleDelta = (deltaCoords.y * 2 * speed) / camera.zoom;
 
     if (invertHorizontal) {
       horizontalAngleDelta *= -1;

@@ -234,8 +234,8 @@ export class FixedUpRotationFragment implements ControlFragment {
     const aspect = getCameraAspectRatio(camera);
     const deltaCoords = _v2.copy(activePointers[0].delta);
     deltaCoords.x *= aspect;
-    let horizontalAngleDelta = deltaCoords.x * speed;
-    let verticalAngleDelta = deltaCoords.y * speed;
+    let horizontalAngleDelta = (deltaCoords.x * speed) / camera.zoom;
+    let verticalAngleDelta = (deltaCoords.y * speed) / camera.zoom;
 
     if (this.orbit) {
       if (invertHorizontal) {
@@ -246,10 +246,10 @@ export class FixedUpRotationFragment implements ControlFragment {
       }
     } else {
       if (!invertHorizontal) {
-        horizontalAngleDelta *= -1;
+        horizontalAngleDelta *= -0.5;
       }
       if (!invertVertical) {
-        verticalAngleDelta *= -1;
+        verticalAngleDelta *= -0.5;
       }
     }
 
