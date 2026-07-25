@@ -1,3 +1,9 @@
+// We need to import React for three-bit-docs integration, otherwise the build
+// output becomes corrupted. Should check on this periodically to see if it's
+// still necessary.
+// eslint-disable-next-line import-x/default
+import React from 'react';
+
 import { addons, types } from 'storybook/manager-api';
 
 const ADDON_ID = 'docs-link';
