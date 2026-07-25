@@ -283,74 +283,41 @@ export class TransformTool {
       yzSidePlane: null,
     };
 
-    if (
-      !this.options.disableTranslation ||
-      (typeof this.options.disableTranslation !== 'boolean' && !this.options.disableTranslation.x)
-    ) {
+    if (this.isAxisEnabled(this.options.disableTranslation, ['x'])) {
       this.parts.xTranslateArrow = this.createTranslateArrow('x', new THREE.Vector3(1, 0, 0));
       root.add(this.parts.xTranslateArrow);
     }
-    if (
-      !this.options.disableTranslation ||
-      (typeof this.options.disableTranslation !== 'boolean' && !this.options.disableTranslation.y)
-    ) {
+    if (this.isAxisEnabled(this.options.disableTranslation, ['y'])) {
       this.parts.yTranslateArrow = this.createTranslateArrow('y', new THREE.Vector3(0, 1, 0));
       root.add(this.parts.yTranslateArrow);
     }
-    if (
-      !this.options.disableTranslation ||
-      (typeof this.options.disableTranslation !== 'boolean' && !this.options.disableTranslation.z)
-    ) {
+    if (this.isAxisEnabled(this.options.disableTranslation, ['z'])) {
       this.parts.zTranslateArrow = this.createTranslateArrow('z', new THREE.Vector3(0, 0, 1));
       root.add(this.parts.zTranslateArrow);
     }
 
-    if (
-      !this.options.disableTranslation ||
-      (typeof this.options.disableTranslation !== 'boolean' &&
-        !this.options.disableTranslation.x &&
-        !this.options.disableTranslation.y)
-    ) {
+    if (this.isAxisEnabled(this.options.disableTranslation, ['x', 'y'])) {
       this.parts.xySidePlane = this.createSidePlane(new THREE.Vector3(0, 0, 1));
       root.add(this.parts.xySidePlane);
     }
-    if (
-      !this.options.disableTranslation ||
-      (typeof this.options.disableTranslation !== 'boolean' &&
-        !this.options.disableTranslation.x &&
-        !this.options.disableTranslation.z)
-    ) {
+    if (this.isAxisEnabled(this.options.disableTranslation, ['x', 'z'])) {
       this.parts.xzSidePlane = this.createSidePlane(new THREE.Vector3(0, 1, 0));
       root.add(this.parts.xzSidePlane);
     }
-    if (
-      !this.options.disableTranslation ||
-      (typeof this.options.disableTranslation !== 'boolean' &&
-        !this.options.disableTranslation.y &&
-        !this.options.disableTranslation.z)
-    ) {
+    if (this.isAxisEnabled(this.options.disableTranslation, ['y', 'z'])) {
       this.parts.yzSidePlane = this.createSidePlane(new THREE.Vector3(1, 0, 0));
       root.add(this.parts.yzSidePlane);
     }
 
-    if (
-      !this.options.disableRotation ||
-      (typeof this.options.disableRotation !== 'boolean' && !this.options.disableRotation.x)
-    ) {
+    if (this.isAxisEnabled(this.options.disableRotation, ['x'])) {
       this.parts.xRotateArrow = this.createRotateArrow('x', new THREE.Vector3(1, 0, 0));
       root.add(this.parts.xRotateArrow);
     }
-    if (
-      !this.options.disableRotation ||
-      (typeof this.options.disableRotation !== 'boolean' && !this.options.disableRotation.y)
-    ) {
+    if (this.isAxisEnabled(this.options.disableRotation, ['y'])) {
       this.parts.yRotateArrow = this.createRotateArrow('y', new THREE.Vector3(0, -1, 0));
       root.add(this.parts.yRotateArrow);
     }
-    if (
-      !this.options.disableRotation ||
-      (typeof this.options.disableRotation !== 'boolean' && !this.options.disableRotation.z)
-    ) {
+    if (this.isAxisEnabled(this.options.disableRotation, ['z'])) {
       this.parts.zRotateArrow = this.createRotateArrow('z', new THREE.Vector3(0, 0, -1));
       root.add(this.parts.zRotateArrow);
     }
@@ -1111,5 +1078,12 @@ export class TransformTool {
     listener: TbEventListener<PointerEvent>,
   ) {
     this.eventDispatcher.removeEventListener(object, eventType, listener);
+  }
+
+  private isAxisEnabled(
+    option: boolean | { x: boolean; y: boolean; z: boolean } | undefined,
+    axis: ('x' | 'y' | 'z')[],
+  ) {
+    return !option || (typeof option !== 'boolean' && !axis.some((a) => option[a]));
   }
 }

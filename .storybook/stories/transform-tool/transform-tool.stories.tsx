@@ -95,8 +95,8 @@ interface TransformToolStoryProps {
   scale?: number;
   enableMaxDistance?: boolean;
   maxDistance?: number;
-  disableTranslation?: boolean | { x: boolean; y: boolean; z: boolean };
-  disableRotation?: boolean | { x: boolean; y: boolean; z: boolean };
+  disableTranslation?: 'none' | 'all' | 'x' | 'y' | 'z' | 'xy' | 'xz' | 'yz';
+  disableRotation?: 'none' | 'all' | 'x' | 'y' | 'z' | 'xy' | 'xz' | 'yz';
   meshType?: MeshType;
 }
 
@@ -108,8 +108,8 @@ const TransformToolStory = ({
   outlineLineWidth = 1,
   scale = 1,
   maxDistance,
-  disableTranslation = false,
-  disableRotation = false,
+  disableTranslation,
+  disableRotation,
   meshType = 'box',
 }: TransformToolStoryProps) => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -210,6 +210,30 @@ const TransformToolStory = ({
     const threeResources = threeResourcesRef.current;
     if (!threeResources) return;
 
+    // prettier-ignore
+    const processedDisableTranslation =
+      disableTranslation === 'none'
+        ? false
+        : disableTranslation === 'all'
+          ? true
+          : {
+              x: disableTranslation === 'x' || disableTranslation === 'xy' || disableTranslation === 'xz',
+              y: disableTranslation === 'y' || disableTranslation === 'xy' || disableTranslation === 'yz',
+              z: disableTranslation === 'z' || disableTranslation === 'xz' || disableTranslation === 'yz',
+            };
+
+    // prettier-ignore
+    const processedDisableRotation =
+      disableRotation === 'none'
+        ? false
+        : disableRotation === 'all'
+          ? true
+          : {
+              x: disableRotation === 'x' || disableRotation === 'xy' || disableRotation === 'xz',
+              y: disableRotation === 'y' || disableRotation === 'xy' || disableRotation === 'yz',
+              z: disableRotation === 'z' || disableRotation === 'xz' || disableRotation === 'yz',
+            };
+
     const options: TransformToolOptions = {
       color,
       outlineColor,
@@ -218,8 +242,8 @@ const TransformToolStory = ({
       outlineLineWidth,
       scale,
       maxDistance,
-      disableTranslation,
-      disableRotation,
+      disableTranslation: processedDisableTranslation,
+      disableRotation: processedDisableRotation,
       target: threeResources.mesh,
       onRequestRender: () => {
         threeResources.render();
@@ -301,11 +325,13 @@ const meta: Meta<typeof TransformToolStory> = {
       description: 'Maximum distance a single translation action can move',
     },
     disableTranslation: {
-      control: 'boolean',
+      control: 'select',
+      options: ['none', 'all', 'x', 'y', 'z', 'xy', 'xz', 'yz'],
       description: 'Disable translation actions',
     },
     disableRotation: {
-      control: 'boolean',
+      control: 'select',
+      options: ['none', 'all', 'x', 'y', 'z', 'xy', 'xz', 'yz'],
       description: 'Disable rotation actions',
     },
     meshType: {
@@ -334,6 +360,8 @@ export const Basic: Story = {
     scale: 1,
     meshType: 'box',
     enableMaxDistance: false,
+    disableTranslation: 'none',
+    disableRotation: 'none',
   },
 };
 
@@ -359,7 +387,7 @@ export const CustomColors: Story = {
 export const TranslationDisabled: Story = {
   args: {
     ...Basic.args,
-    disableTranslation: true,
+    disableTranslation: 'all',
   },
 };
 
@@ -370,7 +398,7 @@ export const TranslationDisabled: Story = {
 export const RotationDisabled: Story = {
   args: {
     ...Basic.args,
-    disableRotation: true,
+    disableRotation: 'all',
   },
 };
 
