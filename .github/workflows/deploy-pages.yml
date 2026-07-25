@@ -19,12 +19,12 @@ jobs:
       - name: Checkout three-bits-docs
         uses: actions/checkout@v7
         with:
+          repository: gergely-ferenczy/three-bits-docs
           path: three-bits-docs
 
       - name: Checkout three-bits
         uses: actions/checkout@v7
         with:
-          repository: gergely-ferenczy/three-bits
           path: three-bits
 
       - name: Setup Node.js
