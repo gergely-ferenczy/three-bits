@@ -42,8 +42,10 @@ export interface TruckFragmentOptions {
   /**
    * Constraint for truck motion.
    * - `THREE.Plane`: Locks trucking to the specified plane.
-   * - `THREE.Vector3`: Locks trucking perpendicular to the specified direction vector.
-   * - `null`: No constraint, trucking occurs perpendicular to the camera's view direction.
+   * - `THREE.Vector3`: Locks trucking perpendicular to the specified direction
+   *    vector.
+   * - `null`: No constraint, trucking occurs perpendicular to the camera's view
+   *    direction.
    * @default null
    */
   lock?: THREE.Plane | THREE.Vector3 | null;
