@@ -33,15 +33,85 @@ const defaultZoomDollyControlOptions: ZoomDollyFragmentOptionsInternal = {
 };
 
 export interface ZoomDollyFragmentOptions {
+  /**
+   * Whether the zoom/dolly control is enabled.
+   * @default true
+   */
   enabled?: boolean;
+
+  /**
+   * The kind of camera motion to apply on zoom/dolly input.
+   * - `'zoom'`: Adjusts `camera.zoom` (works best with orthographic cameras).
+   * - `'dolly'`: Moves the camera position along the view axis.
+   * - `'zoomAndDolly'`: Applies both simultaneously, balancing each against the configured min/max limits.
+   * @default 'zoom'
+   */
   type?: 'zoom' | 'dolly' | 'zoomAndDolly';
+
+  /**
+   * Secondary motion applied alongside the zoom/dolly to keep a world point under the pointer.
+   * - `'none'`: No secondary motion.
+   * - `'truck'`: Translates the camera and target so that the pointer remains over the same world point on the target plane.
+   * - `'orbit'`: Rotates the camera around the target to preserve the world point under the pointer.
+   * - `'rotate'`: Rotates the target around the camera to preserve the world point under the pointer.
+   * @default 'truck'
+   */
   secondaryMotion?: 'none' | 'truck' | 'orbit' | 'rotate';
+
+  /**
+   * Speed multiplier for zoom/dolly motion.
+   * Can be a single number or an object specifying different speeds for each
+   * input type.
+   * @default 1
+   */
   speed?: number | { pointer: number; touch: number; scroll: number };
+
+  /**
+   * Whether to invert the zoom/dolly direction.
+   * Can be a boolean or an object specifying different inversions for each
+   * input type.
+   * @default false
+   */
   invert?: boolean | { pointer: boolean; touch: boolean; scroll: boolean };
+
+  /**
+   * Minimum allowed distance between the camera and the target.
+   *
+   * Only applies when `type` is `'dolly'` or `'zoomAndDolly'`.
+   * @default 0
+   */
   minDistance?: number;
+
+  /**
+   * Maximum allowed distance between the camera and the target.
+   *
+   * Only applies when `type` is `'dolly'` or `'zoomAndDolly'`.
+   * @default Infinity
+   */
   maxDistance?: number;
+
+  /**
+   * Minimum allowed value for `camera.zoom`.
+   *
+   * Only applies when `type` is `'zoom'` or `'zoomAndDolly'`.
+   * @default -Infinity
+   */
   minZoom?: number;
+
+  /**
+   * Maximum allowed value for `camera.zoom`.
+   *
+   * Only applies when `type` is `'zoom'` or `'zoomAndDolly'`.
+   * @default Infinity
+   */
   maxZoom?: number;
+
+  /**
+   * How the dolly step size is calculated.
+   * - `'scale'`: Multiplies the current camera-to-target distance by a factor derived from the delta (relative motion).
+   * - `'fixed'`: Moves the camera by a fixed world-space amount proportional to the delta (linear motion).
+   * @default 'scale'
+   */
   dollyType?: 'fixed' | 'scale';
 }
 

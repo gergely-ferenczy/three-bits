@@ -68,9 +68,11 @@ export interface TransformToolOptions {
   autoUpdate?: boolean;
 
   /**
-   * The maximum distance a single translation action is allowed to move the
-   * tool or its target. A translation action is considered to be a single
-   * continuous pointer action. Default is `undefined`.
+   * The maximum allowed distance between the camera and the tool (or its
+   * target) after a translation. When translating along a plane that is nearly
+   * perpendicular to the camera direction, small pointer movements can produce
+   * very large displacements — setting this limit prevents objects from being
+   * moved out of view. Default is `undefined`.
    */
   maxDistance?: number;
 

@@ -53,7 +53,7 @@ export interface FixedUpRotationFragmentOptions {
   speed?: number | { pointer: number; touch: number };
 
   /**
-   * Minimum horizontal rotation angle in radians.
+   * Minimum horizontal (azimuth) rotation angle in radians.
    *
    * Clamped between -2π and the maxHorizontalAngle.
    * @default -Infinity
@@ -61,7 +61,7 @@ export interface FixedUpRotationFragmentOptions {
   minHorizontalAngle?: number;
 
   /**
-   * Maximum horizontal rotation angle in radians.
+   * Maximum horizontal (azimuth) rotation angle in radians.
    *
    * Clamped between the minHorizontalAngle and 2π.
    * @default Infinity
@@ -69,7 +69,7 @@ export interface FixedUpRotationFragmentOptions {
   maxHorizontalAngle?: number;
 
   /**
-   * Minimum vertical rotation angle in radians (pitch/elevation).
+   * Minimum vertical (polar) rotation angle in radians.
    *
    * Cannot be less than approximately -π/2 to prevent gimbal lock.
    * @default approximately -π/2
@@ -77,7 +77,7 @@ export interface FixedUpRotationFragmentOptions {
   minVerticalAngle?: number;
 
   /**
-   * Maximum vertical rotation angle in radians (pitch/elevation).
+   * Maximum vertical (polar) rotation angle in radians.
    *
    * Cannot exceed approximately π/2 to prevent gimbal lock.
    * @default approximately π/2

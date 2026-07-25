@@ -1,20 +1,14 @@
 import * as THREE from 'three';
 import { TbEventHandlersEventMap } from './internal/tb-event-handlers-event-map';
 import { Writable } from './internal/writable';
+import { TbAddEventListenerOptions } from './tb-add-event-listener-options';
 import { TbEvent } from './tb-event';
 import { TbEventListener } from './tb-event-listener';
 import { TbEventType } from './tb-event-types';
 import { calculatePointerCoords } from '../utils';
-import { TbAddEventListenerOptions } from './tb-add-event-listener-options';
 
 type HandlerEventType =
-  | 'pointerdown'
-  | 'pointermove'
-  | 'pointerup'
-  | 'pointercancel'
-  | 'click'
-  | 'dblclick'
-  | 'wheel';
+  'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel' | 'click' | 'dblclick' | 'wheel';
 
 interface TbEventListenerEntry<G extends 'object' | 'global' = 'object'> {
   type: TbEventType;

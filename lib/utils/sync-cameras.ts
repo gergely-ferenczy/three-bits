@@ -13,7 +13,7 @@ import { getCameraAspectRatio } from './camera-aspect-ratio';
  * the perspective camera's position and aspect ratio to match the orthographic
  * camera's view at the given target point.
  *
- * @note If either `from` or `to` is an unknown type of camera, the function
+ * Note: If either `from` or `to` is an unknown type of camera, the function
  * returns without any action.
  *
  * @param from Source camera which can be either a
