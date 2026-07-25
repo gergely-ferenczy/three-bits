@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.14.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.13.1...v0.14.0) (2026-07-25)
+
+### Features
+
+- add space (local, world) option to TransfromTool f6da068
+- add zoom compensation to rotation fragments 7e7945a
+- remove three.js as a peer dependency a474728
+
+### Bug Fixes
+
+- matrixWorld updates to comply with changed three.js behaviour adf310f
+- TransformTool options and memory handling 3c4f1b1
+
 ## [0.13.1](https://github.com/gergely-ferenczy/three-bits/compare/v0.13.0...v0.13.1) (2026-04-16)
 
 ### Bug Fixes
