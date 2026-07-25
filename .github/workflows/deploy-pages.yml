@@ -16,16 +16,8 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout three-bits-docs
+      - name: Checkout
         uses: actions/checkout@v7
-        with:
-          repository: gergely-ferenczy/three-bits-docs
-          path: three-bits-docs
-
-      - name: Checkout three-bits
-        uses: actions/checkout@v7
-        with:
-          path: three-bits
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -33,25 +25,24 @@ jobs:
           node-version: '24'
           cache: 'npm'
           cache-dependency-path: |
-            three-bits/package-lock.json
-            three-bits-docs/package-lock.json
+            package-lock.json
+            docs/package-lock.json
 
       - name: Install three-bits dependencies
         run: npm ci --ignore-scripts
-        working-directory: three-bits
 
-      - name: Install three-bits-docs dependencies
+      - name: Install docs dependencies
         run: npm ci --ignore-scripts
-        working-directory: three-bits-docs
+        working-directory: docs
 
       - name: Build docs
         run: npm run build
-        working-directory: three-bits-docs
+        working-directory: docs
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: three-bits-docs/dist
+          path: docs/dist
 
   deploy:
     permissions:

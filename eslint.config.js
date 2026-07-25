@@ -11,7 +11,7 @@ import tsEslint from 'typescript-eslint';
 
 export default defineConfig(
   {
-    ignores: ['**/dist', 'coverage'],
+    ignores: ['**/dist', 'coverage/**', 'docs/**'],
   },
   eslint.configs.recommended,
   ...tsEslint.configs.recommendedTypeChecked,

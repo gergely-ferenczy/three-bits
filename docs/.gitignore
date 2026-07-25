@@ -1,0 +1,16 @@
+.astro/
+.starlight-icons/
+dist/
+public/playground/
+src/content/docs/reference/
+node_modules/
+
+.DS_Store
+.vscode/*
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

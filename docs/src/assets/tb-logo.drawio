@@ -1,0 +1,19 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="Q16mbvIMKJEmOs3n7kaI">
+    <mxGraphModel dx="2500" dy="1386" grid="1" gridSize="2" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="84" pageHeight="88" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="KixWj4Zh31aoOFCxNpzh-5" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;size=10;rounded=1;arcSize=8;fillColor=#7B94E8;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="44" x="-83" y="-64" as="geometry" />
+        </mxCell>
+        <mxCell id="Lw2T-hgen2SP_U0Lh6uX-1" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;size=10;rounded=1;arcSize=8;fillColor=#B6E87C;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="44" x="-45" y="-42" as="geometry" />
+        </mxCell>
+        <mxCell id="Lw2T-hgen2SP_U0Lh6uX-2" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;size=10;rounded=1;arcSize=8;fillColor=#E8927B;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="44" x="-45" y="-86" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

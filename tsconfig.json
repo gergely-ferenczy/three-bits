@@ -4,6 +4,7 @@
     { "path": "./lib" },
     { "path": "./.storybook" },
     { "path": "./test" },
+    // { "path": "./docs" },
     { "path": "tsconfig.dev.json" }
   ]
 }
