@@ -34,6 +34,7 @@ beforeAll(() => {
   camera = new THREE.OrthographicCamera(-ratio, ratio, 1, -1);
   camera.position.set(-5, 0, 0);
   camera.lookAt(0, 0, 0);
+  camera.updateMatrixWorld(true);
 });
 
 beforeEach(() => {
@@ -175,10 +176,12 @@ describe('pointer capture functionality', () => {
     const object1 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
     object1.name = 'Object1';
     object1.position.set(0, 0, 0);
+    object1.updateMatrixWorld(true);
 
     const object2 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
     object2.name = 'Object2';
     object2.position.set(1, 0, 0);
+    object2.updateMatrixWorld(true);
 
     const listener1 = vi.fn().mockName('listener1');
     const listener2 = vi.fn().mockName('listener2');

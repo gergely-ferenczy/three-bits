@@ -186,7 +186,7 @@ describe('event order and target data is correct', () => {
       const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
       object.name = name;
       object.position.x = distance;
-      object.updateMatrixWorld();
+      object.updateMatrixWorld(true);
 
       const eventListener = vi
         .fn()
@@ -281,13 +281,13 @@ describe('renderOrder is respected for overlapping objects', () => {
     objectLowOrder.name = 'LowOrder';
     objectLowOrder.renderOrder = 1;
     objectLowOrder.position.set(0, 0, 0);
-    objectLowOrder.updateMatrixWorld();
+    objectLowOrder.updateMatrixWorld(true);
 
     const objectHighOrder = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
     objectHighOrder.name = 'HighOrder';
     objectHighOrder.renderOrder = 2;
     objectHighOrder.position.set(0, 0, 0);
-    objectHighOrder.updateMatrixWorld();
+    objectHighOrder.updateMatrixWorld(true);
 
     const listenerLowOrder = vi.fn().mockName('listenerLowOrder');
     const listenerHighOrder = vi.fn().mockName('listenerHighOrder');
@@ -314,19 +314,19 @@ describe('renderOrder is respected for overlapping objects', () => {
     object1.name = 'Order10_First';
     object1.renderOrder = 10;
     object1.position.set(0, 0, 0);
-    object1.updateMatrixWorld();
+    object1.updateMatrixWorld(true);
 
     const object2 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
     object2.name = 'Order10_Second';
     object2.renderOrder = 10;
     object2.position.set(0, 0, 0);
-    object2.updateMatrixWorld();
+    object2.updateMatrixWorld(true);
 
     const object3 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
     object3.name = 'Order5';
     object3.renderOrder = 5;
     object3.position.set(0, 0, 0);
-    object3.updateMatrixWorld();
+    object3.updateMatrixWorld(true);
 
     let targetName = '';
     const listener1 = vi.fn().mockImplementation((event: TbEvent) => {

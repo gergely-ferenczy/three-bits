@@ -509,7 +509,7 @@ export class TransformTool {
       originGroup.quaternion
         .setFromUnitVectors(objectDir, viewDir)
         .premultiply(inverseWorldRotation);
-      originGroup.updateMatrixWorld();
+      originGroup.updateMatrixWorld(true);
     };
 
     return originGroup;
@@ -600,7 +600,7 @@ export class TransformTool {
 
         const towardsCameraRotation = new THREE.Quaternion().setFromUnitVectors(faceDir, normal);
         arrowGroup.quaternion.copy(baseRotation).premultiply(towardsCameraRotation);
-        arrowGroup.updateMatrixWorld();
+        arrowGroup.updateMatrixWorld(true);
       }
     };
 
@@ -768,7 +768,7 @@ export class TransformTool {
         const height = renderer.domElement.clientHeight;
         const scale = this.calculateObjectScale(height, this.options.scale, camera, arrowGroup);
         arrowGroup.scale.setScalar(scale);
-        arrowGroup.updateMatrixWorld();
+        arrowGroup.updateMatrixWorld(true);
       }
     };
 
@@ -901,7 +901,7 @@ export class TransformTool {
         const scale = this.calculateObjectScale(height, this.options.scale, camera, sidePlaneGroup);
         sidePlaneGroup.scale.setScalar(scale);
         sidePlaneGroup.position.copy(startPosition).multiplyScalar(scale);
-        sidePlaneGroup.updateMatrixWorld();
+        sidePlaneGroup.updateMatrixWorld(true);
       }
     };
 

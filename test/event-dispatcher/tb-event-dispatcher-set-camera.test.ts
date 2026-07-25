@@ -28,6 +28,7 @@ describe('setCamera updates raycasting camera', () => {
     const newCamera = new THREE.OrthographicCamera(-ratio, ratio, 1, -1);
     newCamera.position.set(0, 0, 5);
     newCamera.lookAt(0, 0, 0);
+    camera.updateMatrixWorld(true);
 
     eventDispatcher.setCamera(newCamera);
     canvas.dispatchEvent(createPointerEvent('pointermove'));
@@ -46,7 +47,7 @@ describe('setCamera updates raycasting camera', () => {
     const rightObject = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2));
     rightObject.name = 'Right';
     rightObject.position.set(10, 0, 0);
-    rightObject.updateMatrixWorld();
+    rightObject.updateMatrixWorld(true);
 
     const centerListener = vi.fn().mockName('center-listener');
     const rightListener = vi.fn().mockName('right-listener');

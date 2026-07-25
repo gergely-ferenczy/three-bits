@@ -29,6 +29,7 @@ beforeAll(() => {
   camera = new THREE.OrthographicCamera(-ratio, ratio, 1, -1);
   camera.position.set(-5, 0, 0);
   camera.lookAt(0, 0, 0);
+  camera.updateMatrixWorld(true);
 });
 
 beforeEach(() => {
@@ -126,7 +127,7 @@ describe('object visibility changes under pointer', () => {
       objectB.name = 'B';
       objectB.visible = occludingObject === 'visible';
       objectB.position.x = -0.1;
-      objectB.updateMatrixWorld();
+      objectB.updateMatrixWorld(true);
 
       const scene = new THREE.Scene();
       scene.add(objectA);
@@ -281,7 +282,7 @@ describe('two overlapping objects', () => {
         object.name = objectName;
         object.position.copy(objectConfig.position);
         object.visible = objectConfig.visible;
-        object.updateMatrixWorld();
+        object.updateMatrixWorld(true);
         return [objectName, object];
       }),
     );
@@ -335,7 +336,7 @@ test('object group with two overlapping objects', () => {
   objectB.name = 'B';
   objectB.position.x = 0.1;
   objectB.position.z = 0.6;
-  objectB.updateMatrixWorld();
+  objectB.updateMatrixWorld(true);
 
   const group = new THREE.Group();
   group.name = 'Group';
@@ -445,13 +446,13 @@ test('object group with two non-overlapping objects', () => {
   const objectA = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
   objectA.name = 'A';
   objectA.position.z = -0.6;
-  objectA.updateMatrixWorld();
+  objectA.updateMatrixWorld(true);
 
   const objectB = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
   objectB.name = 'B';
   objectB.position.x = 0.1;
   objectB.position.z = 0.6;
-  objectB.updateMatrixWorld();
+  objectB.updateMatrixWorld(true);
 
   const group = new THREE.Group();
   group.name = 'Group';
@@ -550,7 +551,7 @@ test('event order is correct', () => {
     const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
     object.name = name;
     object.position.x = distance;
-    object.updateMatrixWorld();
+    object.updateMatrixWorld(true);
 
     const enterListener = vi
       .fn()
@@ -609,7 +610,7 @@ test('event order is correct', () => {
 
   const objectE = createObject('E', 0);
   objectE.position.set(0, 2, 2);
-  objectE.updateMatrixWorld();
+  objectE.updateMatrixWorld(true);
 
   dispatchEvent(0, 0);
   expect(callSequence).toEqual([
@@ -687,7 +688,7 @@ describe('stopPropagation callback stops event propagation', () => {
         const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
         object.name = name;
         object.position.x = distance;
-        object.updateMatrixWorld();
+        object.updateMatrixWorld(true);
 
         const eventListener = vi
           .fn()
@@ -779,7 +780,7 @@ describe('stopPropagation callback stops event propagation', () => {
         const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
         object.name = name;
         object.position.x = distance;
-        object.updateMatrixWorld();
+        object.updateMatrixWorld(true);
 
         const eventListener = vi
           .fn()

@@ -55,7 +55,7 @@ describe('stopPropagation callback stops event propagation', () => {
         const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
         object.name = name;
         object.position.x = distance;
-        object.updateMatrixWorld();
+        object.updateMatrixWorld(true);
 
         const eventListener = vi
           .fn()

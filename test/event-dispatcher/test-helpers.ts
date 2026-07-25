@@ -13,6 +13,7 @@ export function createTestResources() {
   const camera = new THREE.OrthographicCamera(-ratio, ratio, 1, -1);
   camera.position.set(-5, 0, 0);
   camera.lookAt(0, 0, 0);
+  camera.updateMatrixWorld(true);
 
   return {
     canvas,
