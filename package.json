@@ -30,9 +30,7 @@
     "prepack": "npm run build",
     "prepare": "husky",
     "release": "release-it --config release-it.config.ts",
-    "storybook:dev": "storybook dev -p 6006",
-    "storybook:build": "storybook build",
-    "storybook:build:docs": "storybook build --output-dir ../three-bits-docs/public/playground"
+    "storybook:dev": "storybook dev -p 6006"
   },
   "engines": {
     "node": ">=24.0.0",

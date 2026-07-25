@@ -92,7 +92,7 @@ const FpvControlStory = ({
     // invert the geometry on the x-axis so that all of the faces point inward
     geometry.scale(-1, 1, 1);
 
-    const texture = new THREE.TextureLoader().load('/KPNO-Drone-360-2-CC2.jpg', () => {
+    const texture = new THREE.TextureLoader().load('KPNO-Drone-360-2-CC2.jpg', () => {
       renderer.render(scene, camera);
       console.log('texture');
     });
