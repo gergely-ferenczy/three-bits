@@ -76,9 +76,6 @@
     "vite": "^8.0.14",
     "vitest": "^4.0.18"
   },
-  "peerDependencies": {
-    "three": ">=0.128.0"
-  },
   "dependencies": {
     "eslint-import-resolver-typescript": "^4.4.4"
   }
