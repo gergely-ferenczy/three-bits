@@ -95,7 +95,7 @@ export class PointerHandler {
       type: event.pointerType === 'touch' ? 'touch' : 'pointer',
     });
 
-    if (this.activePointers.length == 1) {
+    if (this.activePointers.length === 1) {
       this.domElement.addEventListener('pointerup', this.handlers.pointerup);
       this.domElement.addEventListener('pointercancel', this.handlers.pointerup);
       this.domElement.addEventListener('pointermove', this.handlers.pointermove);
@@ -109,7 +109,7 @@ export class PointerHandler {
     this.updateActiveControls(event);
 
     if (this.activeControls.size > 0) {
-      const pointer = this.activePointers.find((p) => p.id == event.pointerId)!;
+      const pointer = this.activePointers.find((p) => p.id === event.pointerId)!;
       const newCoords = calculatePointerCoords(event, this.domElement);
       pointer.delta = newCoords.clone().sub(pointer.coords);
       pointer.coords.copy(newCoords);
@@ -119,9 +119,9 @@ export class PointerHandler {
 
   private handlePointerUp(event: PointerEvent) {
     this.domElement.releasePointerCapture(event.pointerId);
-    this.activePointers = this.activePointers.filter((p) => p.id != event.pointerId);
+    this.activePointers = this.activePointers.filter((p) => p.id !== event.pointerId);
 
-    if (this.activePointers.length == 0) {
+    if (this.activePointers.length === 0) {
       this.domElement.removeEventListener('pointerup', this.handlers.pointerup);
       this.domElement.removeEventListener('pointermove', this.handlers.pointermove);
     }
@@ -131,7 +131,7 @@ export class PointerHandler {
 
   private handleContextMenu(event: MouseEvent) {
     event.preventDefault();
-    if (this.activePointers.length == 0) {
+    if (this.activePointers.length === 0) {
       window.removeEventListener('contextmenu', this.handlers.contextmenu);
     }
   }
@@ -140,16 +140,16 @@ export class PointerHandler {
     // prettier-ignore
     return (
       (
-        event.pointerType != 'touch' &&
-        (event.buttons & (input.mouseButton ?? 0)) != 0 &&
+        event.pointerType !== 'touch' &&
+        (event.buttons & (input.mouseButton ?? 0)) !== 0 &&
         ((!!input.modifiers?.ctrl && event.ctrlKey) || (!input.modifiers?.ctrl && !event.ctrlKey)) &&
         ((!!input.modifiers?.shift && event.shiftKey) || (!input.modifiers?.shift && !event.shiftKey)) &&
         ((!!input.modifiers?.alt && event.altKey) || (!input.modifiers?.alt && !event.altKey)) &&
         ((!!input.modifiers?.meta && event.metaKey) || (!input.modifiers?.meta && !event.metaKey))
       ) || (
-        event.pointerType == 'touch' && (
-          (this.activePointers.length == 1 && input.touchGesture == TouchGesture.One) ||
-          (this.activePointers.length == 2 && input.touchGesture == TouchGesture.Two)
+        event.pointerType === 'touch' && (
+          (this.activePointers.length === 1 && input.touchGesture === TouchGesture.One) ||
+          (this.activePointers.length === 2 && input.touchGesture === TouchGesture.Two)
         )
       )
     );

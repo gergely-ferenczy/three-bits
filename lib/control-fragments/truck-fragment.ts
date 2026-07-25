@@ -144,7 +144,7 @@ export class TruckFragment implements ControlFragment {
   ) {
     this.state.camera = camera.clone();
 
-    if (this.options.mode == 'approximate') {
+    if (this.options.mode === 'approximate') {
       this.updateStartValuesApproximate(camera, target);
     } else {
       this.updateStartValuesExact(activePointers, camera, target);
@@ -248,9 +248,9 @@ export class TruckFragment implements ControlFragment {
   ): void {
     if (!this.options.enabled) return;
 
-    if (this.options.mode == 'approximate') {
+    if (this.options.mode === 'approximate') {
       this.handlePointerInputApproximate(activePointers, camera, target);
-    } /* if (this.options.mode == 'exact') */ else {
+    } /* if (this.options.mode === 'exact') */ else {
       this.handlePointerInputExact(activePointers, camera, target);
     }
   }

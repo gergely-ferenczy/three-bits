@@ -88,7 +88,7 @@ export class ZoomDollyFragment implements ControlFragment {
 
     const speed = getOption(this.options.speed, activePointers[0].type);
     let delta;
-    if (activePointers.length == 2) {
+    if (activePointers.length === 2) {
       const prevLength = _v2a.copy(activePointers[0].coords).sub(activePointers[1].coords).length();
       const length = _v2a
         .copy(activePointers[0].coords)
@@ -110,12 +110,12 @@ export class ZoomDollyFragment implements ControlFragment {
       delta *= -1;
     }
 
-    if (this.options.secondaryMotion == 'truck') {
+    if (this.options.secondaryMotion === 'truck') {
       const coords = getStartCoordsFromActivePointers(activePointers);
       this.zoomOrDollyAndTruck(coords, delta, camera, target);
     } else if (
-      this.options.secondaryMotion == 'orbit' ||
-      this.options.secondaryMotion == 'rotate'
+      this.options.secondaryMotion === 'orbit' ||
+      this.options.secondaryMotion === 'rotate'
     ) {
       const coords = getStartCoordsFromActivePointers(activePointers);
       this.zoomOrDollyAndRotate(coords, delta, camera, target);
@@ -142,11 +142,11 @@ export class ZoomDollyFragment implements ControlFragment {
       delta *= -1;
     }
 
-    if (this.options.secondaryMotion == 'truck') {
+    if (this.options.secondaryMotion === 'truck') {
       this.zoomOrDollyAndTruck(activePointer.coords, delta, camera, target);
     } else if (
-      this.options.secondaryMotion == 'orbit' ||
-      this.options.secondaryMotion == 'rotate'
+      this.options.secondaryMotion === 'orbit' ||
+      this.options.secondaryMotion === 'rotate'
     ) {
       this.zoomOrDollyAndRotate(activePointer.coords, delta, camera, target);
     } else {
@@ -161,12 +161,12 @@ export class ZoomDollyFragment implements ControlFragment {
   ): void {
     this.raycaster.far = 1000 / camera.zoom; // TODO: check if necessary
 
-    if (this.options.secondaryMotion == 'truck') {
+    if (this.options.secondaryMotion === 'truck') {
       const panNormal = camera.getWorldDirection(_v3a);
       this.state.plane.setFromNormalAndCoplanarPoint(panNormal, target);
     } else if (
-      this.options.secondaryMotion == 'orbit' ||
-      this.options.secondaryMotion == 'rotate'
+      this.options.secondaryMotion === 'orbit' ||
+      this.options.secondaryMotion === 'rotate'
     ) {
       this.state.sphere.center.copy(camera.position);
       if (camera instanceof THREE.OrthographicCamera) {
@@ -175,26 +175,26 @@ export class ZoomDollyFragment implements ControlFragment {
         this.state.sphere.radius = Math.sqrt(a ** 2 + b ** 2);
       }
     }
-    if (this.options.type == 'zoomAndDolly' || this.options.type == 'zoom') {
+    if (this.options.type === 'zoomAndDolly' || this.options.type === 'zoom') {
       this.state.zoom = camera.zoom;
     }
-    if (this.options.type == 'zoomAndDolly' || this.options.type == 'dolly') {
+    if (this.options.type === 'zoomAndDolly' || this.options.type === 'dolly') {
       this.state.relativeTarget.copy(target).sub(camera.position);
     }
   }
 
   public zoomOrDolly(delta: number, camera: ControllableCamera): void {
-    if (this.options.type == 'zoomAndDolly') {
+    if (this.options.type === 'zoomAndDolly') {
       const { zoomDelta, dollyDelta } = this.zoomAndDolly(delta);
       camera.zoom *= zoomDelta;
       camera.updateProjectionMatrix();
       camera.position.add(dollyDelta);
       camera.updateMatrixWorld();
-    } else if (this.options.type == 'zoom') {
+    } else if (this.options.type === 'zoom') {
       const zoomDelta = this.zoom(delta);
       camera.zoom *= zoomDelta;
       camera.updateProjectionMatrix();
-    } else if (this.options.type == 'dolly') {
+    } else if (this.options.type === 'dolly') {
       const dollyDelta = this.dolly(delta);
       camera.position.add(dollyDelta);
       camera.updateMatrixWorld();
