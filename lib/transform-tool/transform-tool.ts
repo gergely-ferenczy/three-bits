@@ -198,6 +198,8 @@ export class TransformTool {
   private globalPointerDownHandler: TbEventListener<PointerEvent, 'global'>;
   private globalPointerUpHandler: TbEventListener<PointerEvent, 'global'>;
 
+  private geometries: Set<THREE.BufferGeometry>;
+
   private innerMaterial: LineMaterial;
   private outerMaterial: LineMaterial;
   private highlightMaterial: LineMaterial;
@@ -213,6 +215,8 @@ export class TransformTool {
    * @param options - Configuration options for the transform tool
    */
   constructor(eventDispatcher: TbEventDispatcher, options: TransformToolOptions) {
+    this.geometries = new Set();
+
     const root = new THREE.Group();
     root.name = TransformToolName;
     this.eventDispatcher = eventDispatcher;
@@ -290,15 +294,15 @@ export class TransformTool {
       !this.options.disableTranslation ||
       (typeof this.options.disableTranslation !== 'boolean' && !this.options.disableTranslation.y)
     ) {
-      this.parts.xTranslateArrow = this.createTranslateArrow('y', new THREE.Vector3(0, 1, 0));
-      root.add(this.parts.xTranslateArrow);
+      this.parts.yTranslateArrow = this.createTranslateArrow('y', new THREE.Vector3(0, 1, 0));
+      root.add(this.parts.yTranslateArrow);
     }
     if (
       !this.options.disableTranslation ||
       (typeof this.options.disableTranslation !== 'boolean' && !this.options.disableTranslation.z)
     ) {
-      this.parts.xTranslateArrow = this.createTranslateArrow('z', new THREE.Vector3(0, 0, 1));
-      root.add(this.parts.xTranslateArrow);
+      this.parts.zTranslateArrow = this.createTranslateArrow('z', new THREE.Vector3(0, 0, 1));
+      root.add(this.parts.zTranslateArrow);
     }
 
     if (
@@ -384,6 +388,15 @@ export class TransformTool {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return value;
       },
+      set(target, propertyKey, value, receiver) {
+        const result = Reflect.set(target, propertyKey, value, receiver);
+
+        root.traverse((child) => {
+          Reflect.set(child.layers, propertyKey, value);
+        });
+
+        return result;
+      },
     });
   }
 
@@ -432,11 +445,12 @@ export class TransformTool {
     this.hiddenPlaneMaterial.dispose();
     this.root.traverse((object) => {
       this.eventDispatcher.removeAllEventListeners(object);
-      if (object.name == 'hitbox') {
-        const hitbox = object as THREE.Mesh;
-        hitbox.geometry.dispose();
-      }
     });
+
+    for (const geometry of this.geometries) {
+      geometry.dispose();
+    }
+    this.geometries.clear();
   }
 
   /**
@@ -483,6 +497,7 @@ export class TransformTool {
       positions[i * 3 + 2] = 0;
     }
     const lineGeometry = new LineGeometry();
+    this.geometries.add(lineGeometry);
     lineGeometry.setPositions(positions);
 
     const objectDir = new THREE.Vector3(0, 0, 1);
@@ -497,8 +512,8 @@ export class TransformTool {
     originGroup.add(innerObject);
 
     const originalBeforeRender = outerObject.onBeforeRender.bind(outerObject);
-    // @ts-expect-error onBeforeRender is definition is wrong in LineSegments2
-    outerObject.onBeforeRender = (
+    // onBeforeRender is definition is wrong in LineSegments2
+    (outerObject.onBeforeRender as THREE.Object3D['onBeforeRender']) = (
       renderer: THREE.WebGLRenderer,
       _scene: THREE.Scene,
       camera: THREE.Camera,
@@ -537,6 +552,7 @@ export class TransformTool {
     arrowGroup.name = `${TransformToolName}-TranslateArrow-${dir}`;
 
     const lineSegmentsGeometry = new LineSegmentsGeometry();
+    this.geometries.add(lineSegmentsGeometry);
     lineSegmentsGeometry.setPositions(positions);
 
     const outerLine = new LineSegments2(lineSegmentsGeometry, this.outerMaterial);
@@ -550,7 +566,9 @@ export class TransformTool {
     arrowGroup.add(innerLine);
 
     const hitboxGeometry = new LineSegmentsGeometry();
+    this.geometries.add(hitboxGeometry);
     hitboxGeometry.setPositions([0.2, 0, 0, 0.9, 0, 0]);
+
     const hitbox = new LineSegments2(hitboxGeometry, this.hitboxLineMaterial);
     hitbox.renderOrder = this.options.baseRenderOrder + RenderOrders.hitbox;
     hitbox.name = 'hitbox';
@@ -610,7 +628,12 @@ export class TransformTool {
     const startPlane = new THREE.Plane();
     const startAxis = new THREE.Vector3();
     const pointerMoveHandler = (event: TbEvent<PointerEvent>) => {
-      const intersection = event.ray.intersectPlane(startPlane, new THREE.Vector3());
+      const intersection = ThreeBitUtils.calculatePointerTarget(
+        event.camera,
+        startPlane,
+        event.ray,
+        this.options.maxDistance,
+      );
       if (!intersection) return;
 
       const delta = intersection.sub(intersectionStartPos).projectOnVector(startAxis);
@@ -619,7 +642,6 @@ export class TransformTool {
     const pointerUpHandler = this.createPointerUpHandler(
       'translate',
       arrowGroup,
-      innerLine,
       pointerMoveHandler,
     );
     const pointerDownHandler = this.createPointerDownHandler(
@@ -628,7 +650,12 @@ export class TransformTool {
       pointerUpHandler,
       pointerMoveHandler,
       (event) => {
-        const intersection = event.intersections.find((i) => i.object === hitbox)!;
+        const intersection = event.intersections.find((i) => i.object === hitbox);
+        if (!intersection) {
+          console.error('Could not find hitbox in raycast intersections.');
+          return;
+        }
+
         const target = this.getTarget();
         objectStartPos.copy(target.position);
         intersectionStartPos.copy(intersection.point);
@@ -708,6 +735,7 @@ export class TransformTool {
     arrowGroup.quaternion.setFromUnitVectors(DefaultArrowDir, axis);
 
     const lineSegmentsGeometry = new LineSegmentsGeometry();
+    this.geometries.add(lineSegmentsGeometry);
     lineSegmentsGeometry.setPositions(positions);
 
     const outerLine = new LineSegments2(lineSegmentsGeometry, this.outerMaterial);
@@ -721,7 +749,9 @@ export class TransformTool {
     arrowGroup.add(innerLine);
 
     const hitboxGeometry = new LineGeometry();
+    this.geometries.add(hitboxGeometry);
     hitboxGeometry.setPositions(hitboxPositions);
+
     const hitbox = new Line2(hitboxGeometry, this.hitboxLineMaterial);
     hitbox.renderOrder = this.options.baseRenderOrder + RenderOrders.hitbox;
     hitbox.name = 'hitbox';
@@ -780,19 +810,19 @@ export class TransformTool {
       const rotationDelta = new THREE.Quaternion().setFromAxisAngle(startNormal, angle);
       this.applyRotationChange(startPosition, startRotation, rotationDelta, startOffset);
     };
-    const pointerUpHandler = this.createPointerUpHandler(
-      'rotate',
-      arrowGroup,
-      innerLine,
-      pointerMoveHandler,
-    );
+    const pointerUpHandler = this.createPointerUpHandler('rotate', arrowGroup, pointerMoveHandler);
     const pointerDownHandler = this.createPointerDownHandler(
       'rotate',
       arrowGroup,
       pointerUpHandler,
       pointerMoveHandler,
       (event) => {
-        const intersection = event.intersections.find((i) => i.object === hitbox)!;
+        const intersection = event.intersections.find((i) => i.object === hitbox);
+        if (!intersection) {
+          console.error('Could not find hitbox in raycast intersections.');
+          return;
+        }
+
         this.root.getWorldPosition(startOrigin);
         intersectionStartPos.copy(intersection.point).sub(startOrigin);
         const target = this.getTarget();
@@ -827,6 +857,7 @@ export class TransformTool {
       .applyQuaternion(sidePlaneGroup.quaternion);
 
     const lineGeometry = new LineGeometry();
+    this.geometries.add(lineGeometry);
     lineGeometry.setPositions(positions);
 
     const outerLine = new Line2(lineGeometry, this.outerMaterial);
@@ -840,6 +871,7 @@ export class TransformTool {
     sidePlaneGroup.add(innerLine);
 
     const hitboxGeometry = new THREE.BufferGeometry();
+    this.geometries.add(hitboxGeometry);
     const highlightSize = this.options.lineWidth + this.options.outlineLineWidth * 2;
     const hs = s + highlightSize / this.options.scale / DefaultScale;
     // prettier-ignore
@@ -907,7 +939,6 @@ export class TransformTool {
     const pointerUpHandler = this.createPointerUpHandler(
       'translate',
       sidePlaneGroup,
-      innerLine,
       pointerMoveHandler,
     );
     const pointerDownHandler = this.createPointerDownHandler(
@@ -916,7 +947,12 @@ export class TransformTool {
       pointerUpHandler,
       pointerMoveHandler,
       (event) => {
-        const intersection = event.intersections.find((i) => i.object === hitbox)!;
+        const intersection = event.intersections.find((i) => i.object === hitbox);
+        if (!intersection) {
+          console.error('Could not find hitbox in raycast intersections.');
+          return;
+        }
+
         const target = this.getTarget();
         objectStartPos.copy(target.position);
         intersectionStartPos.copy(intersection.point);
@@ -964,7 +1000,6 @@ export class TransformTool {
   private createPointerUpHandler(
     type: 'translate' | 'rotate',
     target: THREE.Object3D,
-    innerLine: THREE.Mesh,
     pointerMoveHandler: (event: TbEvent<PointerEvent>) => void,
   ) {
     const pointerUpHandler = (event: TbEvent<PointerEvent>) => {
@@ -976,11 +1011,6 @@ export class TransformTool {
       this.removeEventListener(target, 'pointerup', pointerUpHandler);
       this.removeEventListener(target, 'pointermove', pointerMoveHandler);
       this.eventDispatcher.releasePointerCapture(target, event.nativeEvent.pointerId);
-
-      if (event.target.visible) {
-        innerLine.material = this.innerMaterial;
-        this.options.onRequestRender?.();
-      }
     };
 
     return pointerUpHandler;
