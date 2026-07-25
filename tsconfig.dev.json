@@ -3,7 +3,9 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
-    "composite": true
+    "composite": true,
+    "noEmit": true,
+    "outDir": "lib/dist"
   },
   "include": ["./*"]
 }

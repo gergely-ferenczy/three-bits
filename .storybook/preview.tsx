@@ -9,6 +9,11 @@ const preview: Preview = {
       },
     },
     layout: 'fullscreen',
+    options: {
+      storySort: {
+        order: ['Controls', 'Event System', 'Tools'],
+      },
+    },
   },
   decorators: [
     (Story) => (

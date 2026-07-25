@@ -5,6 +5,7 @@ import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import importX, { createNodeResolver } from 'eslint-plugin-import-x';
+import reactHooksEslint from 'eslint-plugin-react-hooks';
 import storybook from 'eslint-plugin-storybook';
 import tsEslint from 'typescript-eslint';
 
@@ -16,18 +17,13 @@ export default defineConfig(
   ...tsEslint.configs.recommendedTypeChecked,
   importX.flatConfigs.recommended,
   importX.flatConfigs.typescript,
+  reactHooksEslint.configs.flat.recommended,
   // @ts-expect-error eslint-plugin-storybook uses legacy RuleModule types incompatible with eslint's new RuleDefinition
   ...storybook.configs['flat/recommended'],
   {
     languageOptions: {
       parserOptions: {
-        parser: '@typescript-eslint/parser',
-        project: [
-          './tsconfig.dev.json',
-          './docs/stories/tsconfig.json',
-          './lib/tsconfig.json',
-          './test/tsconfig.json',
-        ],
+        projectService: true,
       },
     },
     settings: {

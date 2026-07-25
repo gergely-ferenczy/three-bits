@@ -75,7 +75,7 @@ export interface FreeUpRotationFragmentOptions {
      * @default false
      */
     useInvisible?: boolean;
-  };
+  } | null;
 
   /**
    * Whether to use the absolute world origin (0,0,0) as the rotation origin

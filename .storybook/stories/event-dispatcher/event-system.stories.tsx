@@ -30,19 +30,20 @@ const EventSystemDemo: React.FC = () => {
 
   useEffect(() => {
     if (!containerRef.current) return;
+    const container = containerRef.current;
 
     // Setup renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    containerRef.current.appendChild(renderer.domElement);
+    container.appendChild(renderer.domElement);
 
     // Setup scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf0f0f0);
 
     // Setup orthographic camera (birds eye view)
-    const aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
+    const aspect = container.clientWidth / container.clientHeight;
     const frustumSize = 15;
     const camera = new THREE.OrthographicCamera(
       (frustumSize * aspect) / -2,
@@ -240,7 +241,7 @@ const EventSystemDemo: React.FC = () => {
     });
 
     // Setup orbit control
-    const control = new OrbitControl(camera);
+    const control = new OrbitControl(camera, { rotation: { dynamicOrigin: { source: scene } } });
     control.attach(renderer.domElement);
     control.addEventListener('change', () => {
       renderer.render(scene, camera);
@@ -250,14 +251,14 @@ const EventSystemDemo: React.FC = () => {
     const handleResize = () => {
       if (!containerRef.current) return;
 
-      const aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
+      const aspect = container.clientWidth / container.clientHeight;
       camera.left = (frustumSize * aspect) / -2;
       camera.right = (frustumSize * aspect) / 2;
       camera.top = frustumSize / 2;
       camera.bottom = frustumSize / -2;
       camera.updateProjectionMatrix();
 
-      renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+      renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.render(scene, camera);
     };
 
@@ -282,8 +283,8 @@ const EventSystemDemo: React.FC = () => {
         sceneRef.current.eventDispatcher.dispose();
       }
 
-      if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
-        containerRef.current.removeChild(renderer.domElement);
+      if (renderer.domElement.parentNode === container) {
+        container.removeChild(renderer.domElement);
       }
 
       // Dispose geometries and materials

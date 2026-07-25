@@ -1,8 +1,6 @@
-import { Grid } from '@react-three/drei';
-import { Canvas, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { TransformTool, TbEventDispatcher, OrbitControl } from '../../../lib/index';
+import { ThreeBitUtils, TransformTool, TbEventDispatcher, OrbitControl } from '../../../lib';
 import type { TransformToolOptions } from '../../../lib/transform-tool/transform-tool';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
@@ -59,109 +57,159 @@ const TransformInfo = ({ objectRef }: { objectRef: React.RefObject<THREE.Object3
   );
 };
 
-/**
- * OrbitControl component wrapper for React Three Fiber.
- * Integrates the vanilla Three.js OrbitControl with R3F.
- */
-const OrbitControlComponent = ({ ref }: { ref?: React.RefObject<OrbitControl | null> }) => {
-  const { gl, camera, invalidate } = useThree();
+type MeshType = 'box' | 'sphere' | 'torus' | 'cone';
 
-  useEffect(() => {
-    const control = new OrbitControl(camera, {
-      rotation: { speed: 2 },
-      zoomOrDolly: { type: 'dolly' },
-    });
-    control.attach(gl.domElement);
-
-    const handleChange = () => {
-      invalidate();
-    };
-
-    control.addEventListener('change', handleChange);
-
-    if (ref) {
-      ref.current = control;
-    }
-
-    return () => {
-      control.removeEventListener('change', handleChange);
-      control.detach();
-
-      if (ref) {
-        ref.current = null;
-      }
-    };
-  }, [gl, camera, invalidate]);
-
-  return null;
+const createMeshGeometry = (meshType: MeshType): THREE.BufferGeometry => {
+  switch (meshType) {
+    case 'sphere':
+      return new THREE.SphereGeometry(1, 32, 32);
+    case 'torus':
+      return new THREE.TorusKnotGeometry(0.7, 0.3, 100, 16);
+    case 'cone':
+      return new THREE.ConeGeometry(1, 2, 32);
+    default:
+      return new THREE.BoxGeometry(2, 2, 2);
+  }
 };
 
-/**
- * TransformTool component wrapper for use in React Three Fiber.
- * Integrates the vanilla Three.js TransformTool with R3F.
- */
-interface TransformToolDemoProps {
+interface SceneRefs {
+  renderer: THREE.WebGLRenderer;
+  scene: THREE.Scene;
+  camera: THREE.PerspectiveCamera;
+  control: OrbitControl;
+  eventDispatcher: TbEventDispatcher;
+  mesh: THREE.Mesh;
+  render: () => void;
+}
+
+// ---------------------------------------------------------------------------
+// Story component
+// ---------------------------------------------------------------------------
+
+interface TransformToolStoryProps {
   color?: THREE.ColorRepresentation;
   outlineColor?: THREE.ColorRepresentation;
   highlightColor?: THREE.ColorRepresentation;
   lineWidth?: number;
   outlineLineWidth?: number;
   scale?: number;
-  baseRenderOrder?: number;
-  autoUpdate?: boolean;
+  enableMaxDistance?: boolean;
   maxDistance?: number;
   disableTranslation?: boolean | { x: boolean; y: boolean; z: boolean };
   disableRotation?: boolean | { x: boolean; y: boolean; z: boolean };
-  showInfo?: boolean;
-  meshType?: 'box' | 'sphere' | 'torus' | 'cone';
-  meshRef?: React.RefObject<THREE.Mesh | null>;
-  controlRef?: React.RefObject<OrbitControl | null>;
+  meshType?: MeshType;
 }
 
-const TransformToolDemo = ({
+const TransformToolStory = ({
   color = '#ffffff',
   outlineColor = '#202020',
   highlightColor = '#40e0d0',
   lineWidth = 1.5,
   outlineLineWidth = 1,
   scale = 1,
-  baseRenderOrder = 0,
-  autoUpdate = true,
   maxDistance,
   disableTranslation = false,
   disableRotation = false,
   meshType = 'box',
-  meshRef: externalMeshRef,
-  controlRef,
-}: TransformToolDemoProps) => {
-  const { gl, scene, camera, invalidate } = useThree();
-  const internalMeshRef = useRef<THREE.Mesh>(null);
-  const meshRef = externalMeshRef || internalMeshRef;
-  const toolRef = useRef<TransformTool | null>(null);
-  const eventDispatcherRef = useRef<TbEventDispatcher | null>(null);
+}: TransformToolStoryProps) => {
+  const mountRef = useRef<HTMLDivElement>(null);
+  const meshRef = useRef<THREE.Mesh | null>(null);
+  const threeResourcesRef = useRef<SceneRefs | null>(null);
+  const meshTypeInitialized = useRef(false);
 
-  // Create the mesh geometry based on type
-  const geometry = useMemo(() => {
-    switch (meshType) {
-      case 'sphere':
-        return new THREE.SphereGeometry(1, 32, 32);
-      case 'torus':
-        return new THREE.TorusKnotGeometry(0.7, 0.3, 100, 16);
-      case 'cone':
-        return new THREE.ConeGeometry(1, 2, 32);
-      default:
-        return new THREE.BoxGeometry(2, 2, 2);
+  useEffect(() => {
+    const container = mountRef.current;
+    if (!container) return;
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    // Scene
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x222222);
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight);
+    camera.position.set(8, 6, 8);
+    camera.lookAt(0, 0, 0);
+
+    // Grid
+    const grid = new THREE.GridHelper(20, 20, 0x9d4b4b, 0x6f6f6f);
+    scene.add(grid);
+
+    // Mesh
+    const material = new THREE.MeshNormalMaterial();
+    const mesh = new THREE.Mesh(createMeshGeometry(meshType), material);
+    scene.add(mesh);
+    meshRef.current = mesh;
+
+    const render = () => renderer.render(scene, camera);
+
+    // Event dispatcher and camera control
+    const eventDispatcher = new TbEventDispatcher(renderer.domElement, camera);
+
+    const control = new OrbitControl(camera, {
+      rotation: { dynamicOrigin: { source: scene } },
+      zoomOrDolly: { type: 'dolly' },
+    });
+    control.attach(renderer.domElement);
+    control.addEventListener('change', render);
+
+    // Resize
+    const resize = () => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      ThreeBitUtils.updateCameraAspectRatio(camera, w, h);
+      renderer.setSize(w, h);
+      render();
+    };
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(container);
+    resize();
+
+    threeResourcesRef.current = { renderer, scene, camera, control, eventDispatcher, mesh, render };
+
+    return () => {
+      resizeObserver.disconnect();
+      control.removeEventListener('change', render);
+      control.detach();
+      eventDispatcher.dispose();
+      grid.dispose();
+      mesh.geometry.dispose();
+      material.dispose();
+      renderer.dispose();
+      container.removeChild(renderer.domElement);
+
+      meshRef.current = null;
+      threeResourcesRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Swap the mesh geometry in place when the mesh type changes, keeping the
+  // same Object3D identity so the TransformTool stays attached to it.
+  useEffect(() => {
+    const s = threeResourcesRef.current;
+    if (!s) return;
+
+    if (!meshTypeInitialized.current) {
+      meshTypeInitialized.current = true;
+      return;
     }
+
+    const oldGeometry = s.mesh.geometry;
+    s.mesh.geometry = createMeshGeometry(meshType);
+    oldGeometry.dispose();
+    s.render();
   }, [meshType]);
 
   useEffect(() => {
-    if (!meshRef.current) return;
+    const threeResources = threeResourcesRef.current;
+    if (!threeResources) return;
 
-    // Create event dispatcher
-    const eventDispatcher = new TbEventDispatcher(gl.domElement, camera);
-    eventDispatcherRef.current = eventDispatcher;
-
-    // Create transform tool
     const options: TransformToolOptions = {
       color,
       outlineColor,
@@ -169,96 +217,51 @@ const TransformToolDemo = ({
       lineWidth,
       outlineLineWidth,
       scale,
-      baseRenderOrder,
-      autoUpdate,
       maxDistance,
       disableTranslation,
       disableRotation,
-      target: meshRef.current,
+      target: threeResources.mesh,
       onRequestRender: () => {
-        invalidate();
+        threeResources.render();
       },
       onTransformStart: () => {
-        controlRef?.current?.disable();
+        threeResources.control.disable();
       },
       onTransformEnd: () => {
-        controlRef?.current?.enable();
+        threeResources.control.enable();
       },
     };
 
-    const tool = new TransformTool(eventDispatcher, options);
-    toolRef.current = tool;
-
-    // Attach tool to mesh
-    tool.attach(meshRef.current);
+    const tool = new TransformTool(threeResources.eventDispatcher, options);
+    tool.attach(threeResources.mesh);
+    threeResources.render();
 
     return () => {
       tool.dispose();
-      eventDispatcher.dispose();
     };
   }, [
-    gl.domElement,
-    camera,
-    scene,
     color,
     outlineColor,
     highlightColor,
     lineWidth,
     outlineLineWidth,
     scale,
-    baseRenderOrder,
-    autoUpdate,
     maxDistance,
     disableTranslation,
     disableRotation,
   ]);
 
   return (
-    <>
-      <Grid
-        args={[20, 20]}
-        cellSize={1}
-        cellColor="#6f6f6f"
-        sectionSize={5}
-        sectionColor="#9d4b4b"
-        fadeDistance={50}
-        fadeStrength={1}
-        infiniteGrid
-      />
-      <mesh ref={meshRef} geometry={geometry}>
-        <meshNormalMaterial />
-      </mesh>
-    </>
-  );
-};
-
-/**
- * Story wrapper component
- */
-const TransformToolStory = (props: TransformToolDemoProps) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const controlRef = useRef<OrbitControl>(null);
-
-  return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      {props.showInfo && <TransformInfo objectRef={meshRef} />}
-      <Canvas
-        camera={{
-          position: [8, 6, 8],
-          fov: 50,
-        }}
-        gl={{ antialias: true }}
-      >
-        <TransformToolDemo {...props} meshRef={meshRef} controlRef={controlRef} />
-        <OrbitControlComponent ref={controlRef} />
-      </Canvas>
+      <TransformInfo objectRef={meshRef} />
+      <div ref={mountRef} style={{ width: '100%', height: '100%', overflow: 'hidden' }} />
     </div>
   );
 };
 
 // Storybook metadata
 const meta: Meta<typeof TransformToolStory> = {
-  title: 'TransformTool',
+  title: 'Tools/TransformTool',
   component: TransformToolStory,
   parameters: {
     layout: 'fullscreen',
@@ -288,16 +291,13 @@ const meta: Meta<typeof TransformToolStory> = {
       control: { type: 'range', min: 0.5, max: 3, step: 0.1 },
       description: 'Relative scale of the tool',
     },
-    baseRenderOrder: {
-      control: { type: 'number', min: 0, max: 100 },
-      description: 'Base render order for materials',
-    },
-    autoUpdate: {
-      control: 'boolean',
-      description: 'Automatically update position/rotation or only call callbacks',
+    enableMaxDistance: {
+      control: { type: 'boolean' },
+      description: 'Enable maxDistance',
     },
     maxDistance: {
-      control: { type: 'number', min: 0, max: 100 },
+      control: { type: 'range', min: 10, max: 100, step: 10 },
+      if: { arg: 'enableMaxDistance', eq: true },
       description: 'Maximum distance a single translation action can move',
     },
     disableTranslation: {
@@ -307,10 +307,6 @@ const meta: Meta<typeof TransformToolStory> = {
     disableRotation: {
       control: 'boolean',
       description: 'Disable rotation actions',
-    },
-    showInfo: {
-      control: 'boolean',
-      description: 'Show transform information overlay',
     },
     meshType: {
       control: 'select',
@@ -336,10 +332,8 @@ export const Basic: Story = {
     lineWidth: 1.5,
     outlineLineWidth: 1,
     scale: 1,
-    baseRenderOrder: 0,
-    autoUpdate: true,
-    showInfo: true,
     meshType: 'box',
+    enableMaxDistance: false,
   },
 };
 

@@ -1,4 +1,9 @@
 {
   "files": [],
-  "references": [{ "path": "./lib" }, { "path": "./docs/stories" }, { "path": "./test" }]
+  "references": [
+    { "path": "./lib" },
+    { "path": "./.storybook" },
+    { "path": "./test" },
+    { "path": "tsconfig.dev.json" }
+  ]
 }

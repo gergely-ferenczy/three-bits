@@ -1,0 +1,10 @@
+{
+  "extends": ["../tsconfig.common.json"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "composite": true
+  },
+  "references": [{ "path": "../lib" }]
+}
