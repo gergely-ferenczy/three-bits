@@ -68,6 +68,14 @@ export interface TransformToolOptions {
   autoUpdate?: boolean;
 
   /**
+   * Determines whether the transformation handles are aligned with the world
+   * axes (`'world'`) or the target object's local axes (`'local'`). In world
+   * space the handles always point along the world X, Y and Z axes regardless
+   * of the target's rotation. Default is `'local'`.
+   */
+  space?: 'world' | 'local';
+
+  /**
    * The maximum allowed distance between the camera and the tool (or its
    * target) after a translation. When translating along a plane that is nearly
    * perpendicular to the camera direction, small pointer movements can produce
@@ -125,6 +133,7 @@ type OptionalOptions =
   | 'target'
   | 'maxDistance'
   | 'autoUpdate'
+  | 'space'
   | 'disableTranslation'
   | 'disableRotation'
   | 'onPositionChange'
@@ -144,6 +153,7 @@ const DefaultOptions: TransformToolOptionsInternal = {
   scale: 1,
   baseRenderOrder: 0,
   autoUpdate: true,
+  space: 'local',
   onRequestRender: undefined!,
 };
 
@@ -324,6 +334,10 @@ export class TransformTool {
 
     const originalUpdateMatrixWorld = root.updateMatrixWorld.bind(root);
     root.updateMatrixWorld = (force?: boolean) => {
+      if (this.options.space === 'world' && root.parent) {
+        _q1.setFromRotationMatrix(root.parent.matrixWorld);
+        root.quaternion.copy(_q1).invert();
+      }
       originalUpdateMatrixWorld(force);
       this.inverseMatrixWorld.copy(root.matrixWorld).invert();
     };
@@ -795,7 +809,10 @@ export class TransformTool {
         const target = this.getTarget();
         startPosition.copy(target.position);
         startRotation.copy(target.quaternion);
-        startNormal.copy(axis).applyQuaternion(target.quaternion);
+        startNormal.copy(axis);
+        if (this.options.space === 'local') {
+          startNormal.applyQuaternion(target.quaternion);
+        }
         startPlane.setFromNormalAndCoplanarPoint(startNormal, intersection.point);
         startOffset.copy(target.getWorldPosition(_v1).sub(startOrigin));
       },

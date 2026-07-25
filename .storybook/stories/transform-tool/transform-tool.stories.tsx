@@ -97,6 +97,7 @@ interface TransformToolStoryProps {
   maxDistance?: number;
   disableTranslation?: 'none' | 'all' | 'x' | 'y' | 'z' | 'xy' | 'xz' | 'yz';
   disableRotation?: 'none' | 'all' | 'x' | 'y' | 'z' | 'xy' | 'xz' | 'yz';
+  space?: 'local' | 'world';
   meshType?: MeshType;
 }
 
@@ -110,6 +111,7 @@ const TransformToolStory = ({
   maxDistance,
   disableTranslation,
   disableRotation,
+  space,
   meshType = 'box',
 }: TransformToolStoryProps) => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -244,6 +246,7 @@ const TransformToolStory = ({
       maxDistance,
       disableTranslation: processedDisableTranslation,
       disableRotation: processedDisableRotation,
+      space,
       target: threeResources.mesh,
       onRequestRender: () => {
         threeResources.render();
@@ -273,6 +276,7 @@ const TransformToolStory = ({
     maxDistance,
     disableTranslation,
     disableRotation,
+    space,
   ]);
 
   return (
@@ -334,6 +338,11 @@ const meta: Meta<typeof TransformToolStory> = {
       options: ['none', 'all', 'x', 'y', 'z', 'xy', 'xz', 'yz'],
       description: 'Disable rotation actions',
     },
+    space: {
+      control: 'radio',
+      options: ['local', 'world'],
+      description: "Whether handles align with the object's local axes or the world axes",
+    },
     meshType: {
       control: 'select',
       options: ['box', 'sphere', 'torus', 'cone'],
@@ -362,6 +371,7 @@ export const Basic: Story = {
     enableMaxDistance: false,
     disableTranslation: 'none',
     disableRotation: 'none',
+    space: 'local',
   },
 };
 
@@ -388,6 +398,18 @@ export const TranslationDisabled: Story = {
   args: {
     ...Basic.args,
     disableTranslation: 'all',
+  },
+};
+
+/**
+ * TransformTool in world space mode.
+ * Handles always align with the world X/Y/Z axes regardless of the object's rotation.
+ * Rotate the object first, then observe that the handles stay world-aligned.
+ */
+export const WorldSpace: Story = {
+  args: {
+    ...Basic.args,
+    space: 'world',
   },
 };
 
