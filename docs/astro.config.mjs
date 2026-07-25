@@ -9,6 +9,7 @@ const gitRemote = 'https://github.com/gergely-ferenczy/three-bits';
 
 // https://astro.build/config
 export default defineConfig({
+  base: '/three-bits/',
   integrations: [
     UnoCSS(),
     Icons({
