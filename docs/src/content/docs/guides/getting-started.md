@@ -2,7 +2,7 @@
 title: Getting Started
 ---
 
-three-bits is a Three.js utility library that provides camera controls, a 3D event system, and many other useful bits and pieces. It is framework-agnostic. It works with vanilla Three.js and any JavaScript framework.
+three-bits is a Three.js utility library that provides camera controls, a 3D event system, and many other useful bits and pieces. It is framework-agnostic. This is a zero dependency library, so it works with vanilla Three.js without any JavaScript framework.
 
 ## Installation
 

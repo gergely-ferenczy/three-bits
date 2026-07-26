@@ -1,6 +1,14 @@
 # three-bits
 
-Three.js extensions and utilities.
+[![NPM Package][npm]][npm-url]
+[![Build Size][build-size]][build-size-url]
+[![NPM Downloads][npm-downloads]][npmtrends-url]
+
+[Changelog](CHANGELOG.md) |
+[Releases](https://github.com/gergely-ferenczy/three-bits/releases) |
+[Documentation](https://gergely-ferenczy.github.io/three-bits/)
+
+three-bits is a Three.js utility library that provides camera controls, a 3D event system, and many other useful bits and pieces. It is framework-agnostic. This is a zero dependency library, so it works with vanilla Three.js without any JavaScript framework.
 
 ## ⚠️ Alpha Warning
 
@@ -13,8 +21,9 @@ Three.js extensions and utilities.
 - Orbit, FPV and trackball controls with much more configurability than what is available in the Three.js examples.
 - Utility functions for handling typical 3D operations.
 
-## Install
-
-```
-npm install three-bits
-```
+[npm]: https://img.shields.io/npm/v/three-bits
+[npm-url]: https://www.npmjs.com/package/three-bits
+[build-size]: https://badgen.net/bundlephobia/minzip/three-bits
+[build-size-url]: https://bundlephobia.com/result?p=three-bits
+[npm-downloads]: https://img.shields.io/npm/dw/three-bits
+[npmtrends-url]: https://www.npmtrends.com/three-bits
