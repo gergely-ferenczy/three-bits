@@ -10,7 +10,7 @@ export default {
   },
   github: {
     release: true,
-    releaseName: 'Release v${version}',
+    releaseName: 'v${version}',
     web: true,
   },
   npm: {
