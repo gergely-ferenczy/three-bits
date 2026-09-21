@@ -27,6 +27,7 @@ const absoluteMaxVerticalAngle = Math.PI / 2 - 1e-8;
 
 const defaultRotationControlOptions: FixedUpRotationFragmentOptionsInternal = {
   enabled: true,
+  zoomCompensation: false,
   speed: 1,
   minHorizontalAngle: -Infinity,
   maxHorizontalAngle: Infinity,
@@ -43,6 +44,13 @@ export interface FixedUpRotationFragmentOptions {
    * @default true
    */
   enabled?: boolean;
+
+  /**
+   * Whether to compensate rotation sensitivity for camera zoom.
+   * When enabled, pointer rotation deltas are divided by `camera.zoom`.
+   * @default false
+   */
+  zoomCompensation?: boolean;
 
   /**
    * Speed multiplier for rotation motion.
@@ -234,8 +242,13 @@ export class FixedUpRotationFragment implements ControlFragment {
     const aspect = getCameraAspectRatio(camera);
     const deltaCoords = _v2.copy(activePointers[0].delta);
     deltaCoords.x *= aspect;
-    let horizontalAngleDelta = (deltaCoords.x * speed) / camera.zoom;
-    let verticalAngleDelta = (deltaCoords.y * speed) / camera.zoom;
+    let horizontalAngleDelta = deltaCoords.x * speed;
+    let verticalAngleDelta = deltaCoords.y * speed;
+
+    if (this.options.zoomCompensation) {
+      horizontalAngleDelta /= camera.zoom;
+      verticalAngleDelta /= camera.zoom;
+    }
 
     if (this.orbit) {
       if (invertHorizontal) {

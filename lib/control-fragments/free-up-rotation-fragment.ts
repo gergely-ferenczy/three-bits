@@ -20,6 +20,7 @@ const _raycaster = new THREE.Raycaster();
 
 const defaultRotationControlOptions: FreeUpRotationFragmentOptionsInternal = {
   enabled: true,
+  zoomCompensation: false,
   invertHorizontal: false,
   invertVertical: false,
   speed: 1,
@@ -32,6 +33,13 @@ export interface FreeUpRotationFragmentOptions {
    * @default true
    */
   enabled?: boolean;
+
+  /**
+   * Whether to compensate rotation sensitivity for camera zoom.
+   * When enabled, pointer rotation deltas are divided by `camera.zoom`.
+   * @default false
+   */
+  zoomCompensation?: boolean;
 
   /**
    * Speed multiplier for rotation motion.
@@ -142,8 +150,13 @@ export class FreeUpRotationFragment implements ControlFragment {
     const invertVertical = getOption(this.options.invertVertical, activePointers[0].type);
     const deltaCoords = getDeltaCoordsFromActivePointers(activePointers);
     deltaCoords.x *= aspect;
-    let horizontalAngleDelta = (deltaCoords.x * 2 * speed) / camera.zoom;
-    let verticalAngleDelta = (deltaCoords.y * 2 * speed) / camera.zoom;
+    let horizontalAngleDelta = deltaCoords.x * 2 * speed;
+    let verticalAngleDelta = deltaCoords.y * 2 * speed;
+
+    if (this.options.zoomCompensation) {
+      horizontalAngleDelta /= camera.zoom;
+      verticalAngleDelta /= camera.zoom;
+    }
 
     if (invertHorizontal) {
       horizontalAngleDelta *= -1;

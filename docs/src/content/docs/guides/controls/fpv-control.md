@@ -35,6 +35,15 @@ const control = new FpvControl(camera, {
     enabled?: boolean;
 
     /**
+     * Whether to compensate rotation sensitivity for camera zoom.
+     * When enabled, pointer rotation deltas are divided by `camera.zoom`.
+     * Useful for panoramic viewers where zooming should not change the
+     * apparent rotation speed.
+     * @default false
+     */
+    zoomCompensation?: boolean;
+
+    /**
      * Speed multiplier for rotation motion.
      * Can be a single number or an object specifying different speeds for each
      * input type.
@@ -268,6 +277,9 @@ In a standard panoramic viewer the camera sits at a fixed position inside a sphe
 
 ```ts
 const control = new FpvControl(camera, {
+  rotation: {
+    zoomCompensation: true, // keep look speed consistent while zoomed
+  },
   zoomOrDolly: {
     type: 'zoom', // adjust FOV, not camera position
     secondaryMotion: 'rotate', // rotate target around camera instead of trucking
@@ -285,6 +297,7 @@ This also pairs naturally with a locked horizontal or vertical range if the pano
 ```ts
 const control = new FpvControl(camera, {
   rotation: {
+    zoomCompensation: true,
     minHorizontalAngle: -Math.PI / 2,
     maxHorizontalAngle: Math.PI / 2,
     minVerticalAngle: -Math.PI / 4,

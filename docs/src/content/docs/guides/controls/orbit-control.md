@@ -34,6 +34,15 @@ const control = new OrbitControl(camera, {
     enabled?: boolean;
 
     /**
+     * Whether to compensate rotation sensitivity for camera zoom.
+     * When enabled, pointer rotation deltas are divided by `camera.zoom`.
+     * Useful when the control should maintain a consistent apparent rotation
+     * speed while zooming.
+     * @default false
+     */
+    zoomCompensation?: boolean;
+
+    /**
      * Speed multiplier for rotation motion.
      * Can be a single number or an object specifying different speeds for each
      * input type.

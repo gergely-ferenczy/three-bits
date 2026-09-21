@@ -105,6 +105,7 @@ const FpvControlStory = ({
 
     // Control
     const options: FpvControlOptions = {
+      rotation: { zoomCompensation: true },
       truck: { enabled: false },
       zoomOrDolly: { type: 'zoom', secondaryMotion: 'rotate', minZoom: 0.5, maxZoom: 5 },
     };
