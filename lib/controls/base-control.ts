@@ -173,6 +173,12 @@ export abstract class BaseControl implements Control {
       }
     }
     this.activeControls = new Set(activeControls);
+
+    if (this.activeControls.size === 0 && activeControls.size > 0) {
+      this.dispatchEvent('start');
+    } else if (this.activeControls.size > 0 && activeControls.size === 0) {
+      this.dispatchEvent('end');
+    }
   }
 
   private handleInputChange(activePointers: ActivePointer[]) {
