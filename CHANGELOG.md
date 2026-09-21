@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.14.0...v0.15.0) (2026-09-21)
+
+### Features
+
+- add event information for contol interaction listeners 86faf5e
+- make rotation zoom compensation optional db0142a
+
+### Bug Fixes
+
+- control event listener removal 9974475
+- control interaction start and end event triggers bafc546
+
 ## [0.14.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.13.1...v0.14.0) (2026-07-25)
 
 ### Features
