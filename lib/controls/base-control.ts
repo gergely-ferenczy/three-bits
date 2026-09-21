@@ -30,7 +30,7 @@ export abstract class BaseControl implements Control {
     target: THREE.Vector3;
   };
 
-  private listeners: { [key in ControlEventType]: ControlEventListener[] };
+  private listeners: { [key in ControlEventType]: Set<ControlEventListener> };
 
   protected camera: ControllableCamera;
 
@@ -46,9 +46,9 @@ export abstract class BaseControl implements Control {
     this.camera = camera;
     this.target = target;
     this.listeners = {
-      start: [],
-      end: [],
-      change: [],
+      start: new Set(),
+      end: new Set(),
+      change: new Set(),
     };
     this.start = {
       cameraPos: new THREE.Vector3(),
@@ -105,11 +105,11 @@ export abstract class BaseControl implements Control {
   }
 
   addEventListener(type: ControlEventType, listener: ControlEventListener) {
-    this.listeners[type].push(listener);
+    this.listeners[type].add(listener);
   }
 
   removeEventListener(type: ControlEventType, listener: ControlEventListener) {
-    this.listeners[type].filter((l) => l !== listener);
+    this.listeners[type].delete(listener);
   }
 
   getTarget() {
