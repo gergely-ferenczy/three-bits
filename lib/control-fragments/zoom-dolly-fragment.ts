@@ -294,6 +294,7 @@ export class ZoomDollyFragment implements ControlFragment {
     );
 
     this.zoomOrDolly(delta, camera);
+    camera.updateMatrixWorld();
 
     if (!intersectionA) return;
 
@@ -325,6 +326,7 @@ export class ZoomDollyFragment implements ControlFragment {
     this.raycaster.setFromCamera(startCoords, camera);
     const intersectionA = this.raycaster.ray.intersectSphere(this.state.sphere, _v3a);
     this.zoomOrDolly(delta, camera);
+    camera.updateMatrixWorld();
 
     if (!intersectionA) return;
 

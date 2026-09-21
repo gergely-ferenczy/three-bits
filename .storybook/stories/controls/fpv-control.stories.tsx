@@ -47,6 +47,7 @@ const Instructions = () => (
 
 interface FpvControlStoryProps {
   rotationSpeed: number;
+  cursorTracking: boolean;
   minVerticalAngle: number;
   maxVerticalAngle: number;
   enableHorizontalLimits: boolean;
@@ -56,6 +57,7 @@ interface FpvControlStoryProps {
 
 const FpvControlStory = ({
   rotationSpeed,
+  cursorTracking,
   minVerticalAngle,
   maxVerticalAngle,
   enableHorizontalLimits,
@@ -107,7 +109,12 @@ const FpvControlStory = ({
     const options: FpvControlOptions = {
       rotation: { zoomCompensation: true },
       truck: { enabled: false },
-      zoomOrDolly: { type: 'zoom', secondaryMotion: 'rotate', minZoom: 0.5, maxZoom: 5 },
+      zoomOrDolly: {
+        type: 'zoom',
+        secondaryMotion: 'rotate',
+        minZoom: 0.5,
+        maxZoom: 5,
+      },
     };
 
     const control = new FpvControl(camera, options);
@@ -173,8 +180,12 @@ const FpvControlStory = ({
           ? THREE.MathUtils.degToRad(maxHorizontalAngle)
           : Infinity,
       },
+      zoomOrDolly: {
+        secondaryMotion: cursorTracking ? 'rotate' : 'none',
+      },
     });
   }, [
+    cursorTracking,
     minVerticalAngle,
     maxVerticalAngle,
     minHorizontalAngle,
@@ -203,6 +214,10 @@ const meta: Meta<typeof FpvControlStory> = {
     rotationSpeed: {
       control: { type: 'range', min: 0.1, max: 5, step: 0.1 },
       description: 'Camera rotation speed',
+    },
+    cursorTracking: {
+      control: { type: 'boolean' },
+      description: 'Keep the point under the cursor fixed while zooming',
     },
     minVerticalAngle: {
       control: { type: 'range', min: -90, max: 90, step: 10 },
@@ -233,6 +248,7 @@ type Story = StoryObj<typeof FpvControlStory>;
 export const PanoramaDemo: Story = {
   args: {
     rotationSpeed: 1,
+    cursorTracking: true,
     minVerticalAngle: -90,
     maxVerticalAngle: 90,
     enableHorizontalLimits: false,

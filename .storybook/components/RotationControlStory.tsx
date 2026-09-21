@@ -14,7 +14,10 @@ export interface RotationControlUpdateOptions {
     dynamicOrigin?: { source: THREE.Object3D | THREE.Object3D[]; useInvisible?: boolean } | null;
   };
   truck?: { speed?: number };
-  zoomOrDolly?: { speed?: number };
+  zoomOrDolly?: {
+    speed?: number;
+    secondaryMotion?: 'none' | 'truck' | 'orbit' | 'rotate';
+  };
 }
 
 /**
@@ -28,6 +31,7 @@ export interface RotationControlStoryProps {
   rotationSpeed: number;
   truckSpeed: number;
   zoomDollySpeed: number;
+  cursorTracking: boolean;
   dynamicOrigin: boolean;
   createControl: (camera: THREE.PerspectiveCamera) => RotationLikeControl;
 }
@@ -48,6 +52,10 @@ export const rotationControlArgTypes = {
     control: { type: 'range', min: 0.1, max: 5, step: 0.1 },
     description: 'Zoom/dolly speed',
   },
+  cursorTracking: {
+    control: { type: 'boolean' },
+    description: 'Keep the point under the cursor fixed while zooming/dollying',
+  },
   dynamicOrigin: {
     control: { type: 'boolean' },
     description: 'Use the scene bounding sphere as the rotation origin source',
@@ -61,6 +69,7 @@ export const rotationControlDefaultArgs = {
   rotationSpeed: 1,
   truckSpeed: 1,
   zoomDollySpeed: 1,
+  cursorTracking: true,
   dynamicOrigin: true,
 };
 
@@ -72,6 +81,7 @@ export const RotationControlStory = ({
   rotationSpeed,
   truckSpeed,
   zoomDollySpeed,
+  cursorTracking,
   dynamicOrigin,
   createControl,
 }: RotationControlStoryProps) => {
@@ -211,9 +221,12 @@ export const RotationControlStory = ({
         dynamicOrigin: dynamicOrigin ? { source: scene } : null,
       },
       truck: { speed: truckSpeed },
-      zoomOrDolly: { speed: zoomDollySpeed },
+      zoomOrDolly: {
+        speed: zoomDollySpeed,
+        secondaryMotion: cursorTracking ? 'truck' : 'none',
+      },
     });
-  }, [dynamicOrigin, rotationSpeed, truckSpeed, zoomDollySpeed]);
+  }, [cursorTracking, dynamicOrigin, rotationSpeed, truckSpeed, zoomDollySpeed]);
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
