@@ -39,12 +39,18 @@ control.setCamera(newCamera);
 
 ### Events
 
-All controls fire `start`, `change`, and `end` events using simple listener callbacks, matching the three.js controls convention.
+All controls fire `start`, `change`, and `end` events, matching the three.js controls convention. Listeners receive the native `PointerEvent` or `WheelEvent` that triggered the event for pointer and wheel interactions.
+
+- `start` fires when an interaction starts.
+- `change` fires when the camera or target changes.
+- `end` fires when an interaction ends.
+
+These events also fire for manual changes made through methods such as `setTarget`, `setDistance`, `setZoom`, etc. Manual changes do not have a native event, so the listener parameter is `undefined` in those cases.
 
 ```ts
-control.addEventListener('start', () => console.log('interaction started'));
-control.addEventListener('change', () => renderer.render(scene, camera));
-control.addEventListener('end', () => console.log('interaction ended'));
+control.addEventListener('start', (event) => console.log('interaction started', event));
+control.addEventListener('change', (event) => renderer.render(scene, camera));
+control.addEventListener('end', (event) => console.log('interaction ended', event));
 
 control.removeEventListener('change', myListener);
 ```

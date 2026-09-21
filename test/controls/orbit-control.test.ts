@@ -30,53 +30,95 @@ describe('OrbitControl with PerspectiveCamera', () => {
     expect(control.getDistance()).toBe(13);
   });
 
-  test('dispatches `start` and `end` events for pointer interactions', () => {
+  test('passes the triggering native event to pointer interaction listeners', () => {
     const canvas = createCanvas();
     canvas.setPointerCapture = vi.fn();
     canvas.releasePointerCapture = vi.fn();
     camera.position.set(0, 0, 5);
 
     const control = new OrbitControl(camera);
-    const events: string[] = [];
-    control.addEventListener('start', () => events.push('start'));
-    control.addEventListener('change', () => events.push('change'));
-    control.addEventListener('end', () => events.push('end'));
+    let startEvent: Event | undefined;
+    const changeEvents: Array<Event | undefined> = [];
+    let endEvent: Event | undefined;
+    control.addEventListener('start', (event) => {
+      startEvent = event;
+    });
+    control.addEventListener('change', (event) => {
+      changeEvents.push(event);
+    });
+    control.addEventListener('end', (event) => {
+      endEvent = event;
+    });
     control.attach(canvas);
 
-    canvas.dispatchEvent(
-      new PointerEvent('pointerdown', {
-        bubbles: true,
-        buttons: 1,
-        clientX: 100,
-        clientY: 50,
-      }),
-    );
-    canvas.dispatchEvent(
-      new PointerEvent('pointermove', {
-        bubbles: true,
-        buttons: 1,
-        clientX: 110,
-        clientY: 50,
-      }),
-    );
-    canvas.dispatchEvent(
-      new PointerEvent('pointermove', {
-        bubbles: true,
-        buttons: 1,
-        clientX: 110,
-        clientY: 60,
-      }),
-    );
-    canvas.dispatchEvent(
-      new PointerEvent('pointerup', {
-        bubbles: true,
-        buttons: 0,
-        clientX: 110,
-        clientY: 60,
-      }),
-    );
+    const pointerDown = new PointerEvent('pointerdown', {
+      bubbles: true,
+      buttons: 1,
+      clientX: 100,
+      clientY: 50,
+    });
+    const pointerMove = new PointerEvent('pointermove', {
+      bubbles: true,
+      buttons: 1,
+      clientX: 110,
+      clientY: 50,
+    });
+    const secondPointerMove = new PointerEvent('pointermove', {
+      bubbles: true,
+      buttons: 1,
+      clientX: 110,
+      clientY: 60,
+    });
+    const pointerUp = new PointerEvent('pointerup', {
+      bubbles: true,
+      buttons: 0,
+      clientX: 110,
+      clientY: 60,
+    });
 
-    expect(events).toEqual(['start', 'change', 'change', 'end']);
+    canvas.dispatchEvent(pointerDown);
+    canvas.dispatchEvent(pointerMove);
+    canvas.dispatchEvent(secondPointerMove);
+    canvas.dispatchEvent(pointerUp);
+
+    expect(startEvent).toBe(pointerDown);
+    expect(changeEvents).toEqual([pointerMove, secondPointerMove]);
+    expect(endEvent).toBe(pointerUp);
     control.detach();
+  });
+
+  test('passes the triggering wheel event to all wheel lifecycle listeners', () => {
+    const canvas = createCanvas();
+    camera.position.set(0, 0, 5);
+
+    const control = new OrbitControl(camera);
+    const receivedEvents: Array<Event | undefined> = [];
+    control.addEventListener('start', (event) => receivedEvents.push(event));
+    control.addEventListener('change', (event) => receivedEvents.push(event));
+    control.addEventListener('end', (event) => receivedEvents.push(event));
+    control.attach(canvas);
+
+    const wheelEvent = new WheelEvent('wheel', {
+      bubbles: true,
+      deltaY: 10,
+      clientX: 100,
+      clientY: 50,
+    });
+    canvas.dispatchEvent(wheelEvent);
+
+    expect(receivedEvents).toEqual([wheelEvent, wheelEvent, wheelEvent]);
+    control.detach();
+  });
+
+  test('passes undefined to listeners for programmatic changes', () => {
+    const control = new OrbitControl(camera);
+    const receivedEvents: Array<Event | undefined> = [];
+    control.addEventListener('start', (event) => receivedEvents.push(event));
+    control.addEventListener('change', (event) => receivedEvents.push(event));
+    control.addEventListener('end', (event) => receivedEvents.push(event));
+
+    control.setZoom(2);
+
+    expect(receivedEvents).toEqual([undefined, undefined, undefined]);
   });
 });

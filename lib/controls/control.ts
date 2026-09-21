@@ -24,6 +24,20 @@ export interface Control {
 
   setCamera(camera: ControllableCamera): void;
 
+  /**
+   * Adds a listener for a control lifecycle event.
+   *
+   * Available event types are:
+   * - `start`: An interaction starts, or a manual change begins.
+   * - `change`: The camera or target changes during an interaction, or a
+   *   manual change is applied.
+   * - `end`: An interaction ends, or a manual change finishes.
+   *
+   * For pointer and wheel interactions, the listener receives the native event
+   * that triggered the control event. For manual changes made through methods
+   * such as `setTarget`, `setDistance`, `setZoom`, `setHorizontalAngle`, or
+   * `setVerticalAngle`, the event parameter is `undefined`.
+   */
   addEventListener(type: ControlEventType, listener: ControlEventListener): void;
 
   removeEventListener(type: ControlEventType, listener: ControlEventListener): void;

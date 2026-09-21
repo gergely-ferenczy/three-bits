@@ -12,6 +12,12 @@ export interface BaseControlOptions {
   pointerHandlerOptions?: PointerHandlerOptions;
 }
 
+/**
+ * Base implementation shared by the camera controls.
+ *
+ * Manages camera and target state, DOM input handlers, control fragments, and
+ * lifecycle event listeners.
+ */
 export abstract class BaseControl implements Control {
   private enabled: boolean;
 
@@ -67,52 +73,99 @@ export abstract class BaseControl implements Control {
     this.wheelHandler = new WheelHandler(this.handleWheelChange.bind(this));
   }
 
-  protected updateHandlerOptions(options: BaseControlOptions) {
-    if (options.pointerHandlerOptions) {
-      this.pointerHandler.updateOptions(options.pointerHandlerOptions);
-    }
-  }
-
-  getDistance() {
+  /**
+   * Returns the distance between the camera and the current target.
+   */
+  public getDistance(): number {
     return this.target.distanceTo(this.camera.position);
   }
 
-  setDistance(distance: number) {
+  /**
+   * Moves the camera to the specified distance from the current target and
+   * dispatches a manual lifecycle event sequence.
+   *
+   * @param distance The new distance between the camera and the target.
+   */
+  public setDistance(distance: number): void {
     const direction = this.camera.getWorldDirection(new THREE.Vector3());
     const newPosition = this.target.clone().sub(direction.multiplyScalar(distance));
     this.camera.position.copy(newPosition);
     this.dispatchAtomicEvent();
   }
 
-  getZoom() {
+  /**
+   * Returns the camera's current zoom value.
+   */
+  public getZoom(): number {
     return this.camera.zoom;
   }
 
-  setZoom(zoom: number) {
+  /**
+   * Sets the camera's zoom, updates its projection matrix, and dispatches a
+   * manual lifecycle event sequence.
+   *
+   * @param zoom The new camera zoom value.
+   */
+  public setZoom(zoom: number): void {
     this.camera.zoom = zoom;
     this.camera.updateProjectionMatrix();
     this.dispatchAtomicEvent();
   }
 
-  attach(domElement: HTMLElement) {
+  /**
+   * Attaches pointer and wheel input handling to a DOM element.
+   *
+   * @param domElement The element that receives control input events.
+   */
+  public attach(domElement: HTMLElement): void {
     this.pointerHandler.attach(domElement);
     this.wheelHandler.attach(domElement);
   }
 
-  detach(restoreTouchAction = true) {
+  /**
+   * Detaches pointer and wheel input handling from the attached DOM element.
+   *
+   * @param restoreTouchAction Whether to restore the element's previous
+   * `touch-action` style.
+   * @default true
+   */
+  public detach(restoreTouchAction = true): void {
     this.pointerHandler.detach(restoreTouchAction);
     this.wheelHandler.detach();
   }
 
-  addEventListener(type: ControlEventType, listener: ControlEventListener) {
+  /**
+   * Adds a listener for a control lifecycle event.
+   *
+   * Available event types are:
+   * - `start`: An interaction starts, or a manual change begins.
+   * - `change`: The camera or target changes during an interaction, or a
+   *   manual change is applied.
+   * - `end`: An interaction ends, or a manual change finishes.
+   *
+   * For pointer and wheel interactions, the listener receives the native event
+   * that triggered the control event. For manual changes made through methods
+   * such as `setTarget`, `setDistance`, `setZoom`, etc., the event parameter is
+   * `undefined`.
+   */
+  public addEventListener(type: ControlEventType, listener: ControlEventListener): void {
     this.listeners[type].add(listener);
   }
 
-  removeEventListener(type: ControlEventType, listener: ControlEventListener) {
+  /**
+   * Removes a previously registered control lifecycle event listener.
+   *
+   * @param type The lifecycle event type.
+   * @param listener The listener to remove.
+   */
+  public removeEventListener(type: ControlEventType, listener: ControlEventListener): void {
     this.listeners[type].delete(listener);
   }
 
-  getTarget() {
+  /**
+   * Returns a clone of the control's current target.
+   */
+  public getTarget(): THREE.Vector3 {
     return this.target.clone();
   }
 
@@ -124,7 +177,7 @@ export abstract class BaseControl implements Control {
    * @param keepRelativeCameraPos  Moves the camera so its position relative to
    *  the target remains unchanged. [default=false]
    */
-  setTarget(target: THREE.Vector3, keepRelativeCameraPos = false) {
+  public setTarget(target: THREE.Vector3, keepRelativeCameraPos = false): void {
     const newTarget = target.clone();
     if (keepRelativeCameraPos) {
       const relativeCameraPos = this.camera.position.clone().sub(this.target);
@@ -136,35 +189,63 @@ export abstract class BaseControl implements Control {
     this.dispatchAtomicEvent();
   }
 
-  getCamera() {
+  /**
+   * Returns the camera controlled by this control.
+   */
+  public getCamera(): ControllableCamera {
     return this.camera;
   }
 
-  setCamera(camera: ControllableCamera) {
+  /**
+   * Replaces the camera controlled by this control.
+   *
+   * @param camera The new camera to control.
+   */
+  public setCamera(camera: ControllableCamera): void {
     this.camera = camera;
   }
 
-  enable() {
+  /**
+   * Enables control input processing without attaching new DOM listeners.
+   */
+  public enable(): void {
     this.enabled = true;
   }
 
-  disable() {
+  /**
+   * Disables control input processing while leaving the DOM listeners
+   * attached.
+   */
+  public disable(): void {
     this.enabled = false;
   }
 
-  protected dispatchAtomicEvent() {
+  protected updateHandlerOptions(options: BaseControlOptions): void {
+    if (options.pointerHandlerOptions) {
+      this.pointerHandler.updateOptions(options.pointerHandlerOptions);
+    }
+  }
+
+  protected dispatchAtomicEvent(): void {
     this.dispatchEvent('start');
     this.dispatchEvent('change');
     this.dispatchEvent('end');
   }
 
-  protected dispatchEvent(type: ControlEventType) {
+  protected dispatchEvent(type: ControlEventType, event?: Event): void {
     for (const listener of this.listeners[type]) {
-      listener();
+      listener(event);
     }
   }
 
-  private handleActiveControlChange(activeControls: Set<string>, activePointers: ActivePointer[]) {
+  private handleActiveControlChange(
+    activeControls: Set<string>,
+    activePointers: ActivePointer[],
+    event: PointerEvent,
+  ): void {
+    const interactionStarted = this.activeControls.size === 0 && activeControls.size > 0;
+    const interactionEnded = this.activeControls.size > 0 && activeControls.size === 0;
+
     this.updateStartValues();
 
     for (const [controlId, controlFragment] of this.controlFragmentMap.entries()) {
@@ -174,14 +255,14 @@ export abstract class BaseControl implements Control {
     }
     this.activeControls = new Set(activeControls);
 
-    if (this.activeControls.size === 0 && activeControls.size > 0) {
-      this.dispatchEvent('start');
-    } else if (this.activeControls.size > 0 && activeControls.size === 0) {
-      this.dispatchEvent('end');
+    if (interactionStarted) {
+      this.dispatchEvent('start', event);
+    } else if (interactionEnded) {
+      this.dispatchEvent('end', event);
     }
   }
 
-  private handleInputChange(activePointers: ActivePointer[]) {
+  private handleInputChange(activePointers: ActivePointer[], event: PointerEvent): void {
     if (!this.enabled) return;
 
     for (const controlId of this.activeControls) {
@@ -193,13 +274,13 @@ export abstract class BaseControl implements Control {
       this.camera.updateProjectionMatrix();
     }
 
-    this.dispatchEvent('change');
+    this.dispatchEvent('change', event);
   }
 
-  private handleWheelChange(delta: number, activePointer: ActivePointer) {
+  private handleWheelChange(delta: number, activePointer: ActivePointer, event: WheelEvent): void {
     if (!this.enabled) return;
 
-    this.dispatchEvent('start');
+    this.dispatchEvent('start', event);
 
     for (const controlFragment of this.controlFragmentMap.values()) {
       if (!controlFragment.handleWheelInput) continue;
@@ -209,11 +290,11 @@ export abstract class BaseControl implements Control {
     this.camera.lookAt(this.target);
     this.camera.updateProjectionMatrix();
 
-    this.dispatchEvent('change');
-    this.dispatchEvent('end');
+    this.dispatchEvent('change', event);
+    this.dispatchEvent('end', event);
   }
 
-  protected updateStartValues() {
+  protected updateStartValues(): void {
     this.start.cameraPos.copy(this.camera.position);
     this.start.cameraZoom = this.camera.zoom;
     this.start.target.copy(this.target);

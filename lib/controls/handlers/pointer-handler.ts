@@ -15,9 +15,10 @@ export interface PointerHandlerOptions {
 export type ActiveControlChangeListener = (
   activeControls: Set<string>,
   activePointers: ActivePointer[],
+  event: PointerEvent,
 ) => void;
 
-export type InputChangeListener = (activePointers: ActivePointer[]) => void;
+export type InputChangeListener = (activePointers: ActivePointer[], event: PointerEvent) => void;
 
 export class PointerHandler {
   private previousTouchAction = 'auto';
@@ -113,7 +114,7 @@ export class PointerHandler {
       const newCoords = calculatePointerCoords(event, this.domElement);
       pointer.delta = newCoords.clone().sub(pointer.coords);
       pointer.coords.copy(newCoords);
-      this.onInputChange(this.activePointers);
+      this.onInputChange(this.activePointers, event);
     }
   }
 
@@ -177,7 +178,7 @@ export class PointerHandler {
       for (const pointer of this.activePointers) {
         pointer.startCoords = pointer.coords.clone();
       }
-      this.onActiveControlChange(this.activeControls, this.activePointers);
+      this.onActiveControlChange(this.activeControls, this.activePointers, event);
     }
   }
 }

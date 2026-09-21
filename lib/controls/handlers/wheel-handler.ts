@@ -4,7 +4,11 @@ import { calculatePointerCoords } from '../../utils/calculate-pointer-coords';
 
 export type WheelEventListener = (ev: WheelEvent) => void;
 
-export type WheelHandlerListener = (delta: number, activePointer: ActivePointer) => void;
+export type WheelHandlerListener = (
+  delta: number,
+  activePointer: ActivePointer,
+  event: WheelEvent,
+) => void;
 
 const zoomLogScaleFactorA = 1;
 
@@ -45,6 +49,6 @@ export class WheelHandler {
       delta: new Vector2(),
       type: 'pointer',
     };
-    this.onChange(wheelDelta, activePointer);
+    this.onChange(wheelDelta, activePointer, event);
   }
 }
