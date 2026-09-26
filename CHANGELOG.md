@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.17.0](https://github-home/gergely-ferenczy/three-bits/compare/v0.16.0...v0.17.0) (2026-09-26)
+
+### Features
+
+- **transform-tool:** configure materials transparent 4aebe73
+
 ## [0.16.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.15.0...v0.16.0) (2026-09-26)
 
 ### Features
