@@ -240,39 +240,48 @@ export class TransformTool {
     this.ed.addGlobalEventListener('pointerup', this.globalPointerReleaseHandler);
     this.ed.addGlobalEventListener('pointercancel', this.globalPointerReleaseHandler);
 
+    // We configure all materials transparent so they are ordered in the transparent
+    // render group, top avoid other transparent objects occluding the transform tool.
     this.innerMaterial = new LineMaterial({
       color: this.options.color,
       linewidth: this.options.lineWidth,
       depthTest: false,
+      transparent: true,
     });
     this.outerMaterial = new LineMaterial({
       color: this.options.outlineColor,
       linewidth: this.options.lineWidth + this.options.outlineLineWidth * 2,
       depthTest: false,
+      transparent: true,
     });
     this.highlightMaterial = new LineMaterial({
       color: this.options.highlightColor,
       linewidth: this.options.lineWidth,
       depthTest: false,
+      transparent: true,
     });
     this.hitboxLineMaterial = new LineMaterial({
       linewidth: 18 * this.options.scale + this.options.lineWidth,
       side: THREE.DoubleSide,
       depthTest: false,
       colorWrite: false,
+      transparent: true,
     });
     this.hitboxPlaneMaterial = new THREE.MeshBasicMaterial({
       side: THREE.DoubleSide,
       depthTest: false,
       colorWrite: false,
+      transparent: true,
     });
     this.hiddenLineMaterial = new LineMaterial({
       depthTest: false,
       colorWrite: false,
+      transparent: true,
     });
     this.hiddenPlaneMaterial = new THREE.MeshBasicMaterial({
       depthTest: false,
       colorWrite: false,
+      transparent: true,
     });
 
     const origin = this.createOrigin();
