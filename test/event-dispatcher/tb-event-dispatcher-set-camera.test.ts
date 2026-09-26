@@ -17,6 +17,20 @@ beforeEach(() => {
 });
 
 describe('setCamera updates raycasting camera', () => {
+  test('updates a dirty camera matrix before raycasting', () => {
+    const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    const listener = vi.fn().mockName('listener');
+    eventDispatcher.addEventListener(object, 'pointerover', listener);
+
+    const updateMatrixWorld = vi.spyOn(camera, 'updateMatrixWorld');
+    camera.matrixWorldNeedsUpdate = true;
+
+    canvas.dispatchEvent(createPointerEvent('pointermove'));
+
+    expect(updateMatrixWorld).toHaveBeenCalledOnce();
+    expect(listener).toHaveBeenCalledOnce();
+  });
+
   test('events fire correctly after camera change', () => {
     const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
     object.position.set(0, 0, 0);
