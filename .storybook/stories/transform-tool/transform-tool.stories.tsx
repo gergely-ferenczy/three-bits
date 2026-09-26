@@ -156,7 +156,7 @@ const TransformToolStory = ({
 
     const control = new OrbitControl(camera, {
       rotation: { speed: 2, dynamicOrigin: { source: scene } },
-      zoomOrDolly: { type: 'dolly' },
+      zoomOrDolly: { type: 'zoom' },
     });
     control.attach(renderer.domElement);
     control.addEventListener('change', render);
