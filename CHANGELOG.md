@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.16.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.15.0...v0.16.0) (2026-09-26)
+
+### Features
+
+- **contol:** add raycast params option for rotation control fragments fa0d2f1
+- **events:** introduce manual event objects as a replacement of full scene traversal 686d287
+- **transform-tool:** update target handling, remove unintuitive attach/detach functions 3e99179
+
+### Bug Fixes
+
+- **transform-tool:** highlight handling in pointer release 0881688
+
 ## [0.15.0](https://github.com/gergely-ferenczy/three-bits/compare/v0.14.0...v0.15.0) (2026-09-21)
 
 ### Features
