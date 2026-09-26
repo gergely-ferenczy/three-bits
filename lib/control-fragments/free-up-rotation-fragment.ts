@@ -10,14 +10,12 @@ import { getCameraAspectRatio } from '../utils/camera-aspect-ratio';
 
 type FreeUpRotationFragmentOptionsInternal = InternalOptions<
   FreeUpRotationFragmentOptions,
-  'dynamicOrigin'
+  'dynamicOrigin' | 'params'
 >;
 
 const _v3a = new THREE.Vector3();
 const _v3b = new THREE.Vector3();
 const _v3c = new THREE.Vector3();
-const _raycaster = new THREE.Raycaster();
-
 const defaultRotationControlOptions: FreeUpRotationFragmentOptionsInternal = {
   enabled: true,
   zoomCompensation: false,
@@ -86,6 +84,11 @@ export interface FreeUpRotationFragmentOptions {
   } | null;
 
   /**
+   * Parameters applied to the raycaster used for dynamic origin detection.
+   */
+  params?: THREE.RaycasterParameters;
+
+  /**
    * Whether to use the absolute world origin (0,0,0) as the rotation origin
    * when in orbit mode and no dynamic origin is detected.
    *
@@ -98,15 +101,22 @@ export interface FreeUpRotationFragmentOptions {
 export class FreeUpRotationFragment implements ControlFragment {
   private options: FreeUpRotationFragmentOptionsInternal;
   private origin = new THREE.Vector3();
+  private raycaster = new THREE.Raycaster();
 
   constructor(options?: FreeUpRotationFragmentOptions) {
     this.options = { ...defaultRotationControlOptions, ...options };
+    if (this.options.params) {
+      Object.assign(this.raycaster.params, this.options.params);
+    }
   }
 
   updateOptions(options: FreeUpRotationFragmentOptions) {
     for (const key in options) {
       const k = key as keyof FreeUpRotationFragmentOptions;
       (this.options[k] as any) = options[k];
+    }
+    if (options.params) {
+      Object.assign(this.raycaster.params, options.params);
     }
   }
 
@@ -120,8 +130,8 @@ export class FreeUpRotationFragment implements ControlFragment {
       const source = this.options.dynamicOrigin.source;
       const useInvisible = !!this.options.dynamicOrigin.useInvisible;
       const coords = activePointers[0].coords;
-      _raycaster.setFromCamera(coords, camera);
-      const dynamicOrigin = findDynamicTarget(_raycaster, source, useInvisible);
+      this.raycaster.setFromCamera(coords, camera);
+      const dynamicOrigin = findDynamicTarget(this.raycaster, source, useInvisible);
       if (dynamicOrigin) {
         this.origin = dynamicOrigin;
         originSet = true;
