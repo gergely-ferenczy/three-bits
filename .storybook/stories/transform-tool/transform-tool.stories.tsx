@@ -75,7 +75,7 @@ const createMeshGeometry = (meshType: MeshType): THREE.BufferGeometry => {
 interface SceneRefs {
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
-  camera: THREE.PerspectiveCamera;
+  camera: THREE.Camera;
   control: OrbitControl;
   eventDispatcher: TbEventDispatcher;
   mesh: THREE.Mesh;
@@ -134,7 +134,8 @@ const TransformToolStory = ({
     scene.background = new THREE.Color(0x222222);
 
     // Camera
-    const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight);
+    const camera = new THREE.OrthographicCamera();
+    camera.zoom = 0.2;
     camera.position.set(8, 6, 8);
     camera.lookAt(0, 0, 0);
 
@@ -154,7 +155,7 @@ const TransformToolStory = ({
     const eventDispatcher = new TbEventDispatcher(renderer.domElement, camera);
 
     const control = new OrbitControl(camera, {
-      rotation: { dynamicOrigin: { source: scene } },
+      rotation: { speed: 2, dynamicOrigin: { source: scene } },
       zoomOrDolly: { type: 'dolly' },
     });
     control.attach(renderer.domElement);
