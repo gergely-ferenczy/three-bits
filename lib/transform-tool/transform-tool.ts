@@ -202,7 +202,7 @@ export class TransformTool {
   private inverseMatrixWorld: THREE.Matrix4;
   private pointerActionsDisabled: boolean;
   private globalPointerDownHandler: TbEventListener<PointerEvent, 'global'>;
-  private globalPointerUpHandler: TbEventListener<PointerEvent, 'global'>;
+  private globalPointerReleaseHandler: TbEventListener<PointerEvent, 'global'>;
 
   private geometries: Set<THREE.BufferGeometry>;
 
@@ -233,11 +233,12 @@ export class TransformTool {
     this.globalPointerDownHandler = () => {
       this.pointerActionsDisabled = true;
     };
-    this.globalPointerUpHandler = () => {
+    this.globalPointerReleaseHandler = () => {
       this.pointerActionsDisabled = false;
     };
     this.ed.addGlobalEventListener('pointerdown', this.globalPointerDownHandler);
-    this.ed.addGlobalEventListener('pointerup', this.globalPointerUpHandler);
+    this.ed.addGlobalEventListener('pointerup', this.globalPointerReleaseHandler);
+    this.ed.addGlobalEventListener('pointercancel', this.globalPointerReleaseHandler);
 
     this.innerMaterial = new LineMaterial({
       color: this.options.color,
@@ -390,7 +391,8 @@ export class TransformTool {
   dispose() {
     this.root.removeFromParent();
     this.ed.removeGlobalEventListener('pointerdown', this.globalPointerDownHandler);
-    this.ed.removeGlobalEventListener('pointerup', this.globalPointerUpHandler);
+    this.ed.removeGlobalEventListener('pointerup', this.globalPointerReleaseHandler);
+    this.ed.removeGlobalEventListener('pointercancel', this.globalPointerReleaseHandler);
     this.innerMaterial.dispose();
     this.outerMaterial.dispose();
     this.highlightMaterial.dispose();
@@ -594,15 +596,16 @@ export class TransformTool {
       const delta = intersection.sub(intersectionStartPos).projectOnVector(startAxis);
       this.applyPositionChange(objectStartPos, delta);
     };
-    const pointerUpHandler = this.createPointerUpHandler(
+    const pointerReleaseHandler = this.createPointerReleaseHandler(
       'translate',
       arrowGroup,
       pointerMoveHandler,
+      innerLine,
     );
     const pointerDownHandler = this.createPointerDownHandler(
       'translate',
       arrowGroup,
-      pointerUpHandler,
+      pointerReleaseHandler,
       pointerMoveHandler,
       (event) => {
         const intersection = event.intersections.find((i) => i.object === hitbox);
@@ -765,11 +768,16 @@ export class TransformTool {
       const rotationDelta = new THREE.Quaternion().setFromAxisAngle(startNormal, angle);
       this.applyRotationChange(startPosition, startRotation, rotationDelta, startOffset);
     };
-    const pointerUpHandler = this.createPointerUpHandler('rotate', arrowGroup, pointerMoveHandler);
+    const pointerReleaseHandler = this.createPointerReleaseHandler(
+      'rotate',
+      arrowGroup,
+      pointerMoveHandler,
+      innerLine,
+    );
     const pointerDownHandler = this.createPointerDownHandler(
       'rotate',
       arrowGroup,
-      pointerUpHandler,
+      pointerReleaseHandler,
       pointerMoveHandler,
       (event) => {
         const intersection = event.intersections.find((i) => i.object === hitbox);
@@ -894,15 +902,16 @@ export class TransformTool {
       const delta = intersection.sub(intersectionStartPos);
       this.applyPositionChange(objectStartPos, delta);
     };
-    const pointerUpHandler = this.createPointerUpHandler(
+    const pointerReleaseHandler = this.createPointerReleaseHandler(
       'translate',
       sidePlaneGroup,
       pointerMoveHandler,
+      innerLine,
     );
     const pointerDownHandler = this.createPointerDownHandler(
       'translate',
       sidePlaneGroup,
-      pointerUpHandler,
+      pointerReleaseHandler,
       pointerMoveHandler,
       (event) => {
         const intersection = event.intersections.find((i) => i.object === hitbox);
@@ -928,7 +937,7 @@ export class TransformTool {
   private createPointerDownHandler(
     type: 'translate' | 'rotate',
     target: THREE.Object3D,
-    pointerUpHandler: (event: TbEvent<PointerEvent>) => void,
+    pointerReleaseHandler: (event: TbEvent<PointerEvent>) => void,
     pointerMoveHandler: (event: TbEvent<PointerEvent>) => void,
     onPointerDown: (event: TbEvent<PointerEvent>) => void,
   ) {
@@ -946,7 +955,8 @@ export class TransformTool {
 
       this.options.onTransformStart?.(type);
 
-      this.ed.addEventListener(target, 'pointerup', pointerUpHandler);
+      this.ed.addEventListener(target, 'pointerup', pointerReleaseHandler);
+      this.ed.addEventListener(target, 'pointercancel', pointerReleaseHandler);
       this.ed.addEventListener(target, 'pointermove', pointerMoveHandler);
       this.ed.setPointerCapture(target, event.nativeEvent.pointerId);
       onPointerDown(event);
@@ -955,23 +965,36 @@ export class TransformTool {
     return pointerDownHandler;
   }
 
-  private createPointerUpHandler(
+  private createPointerReleaseHandler(
     type: 'translate' | 'rotate',
     target: THREE.Object3D,
     pointerMoveHandler: (event: TbEvent<PointerEvent>) => void,
+    innerLine: THREE.Mesh,
   ) {
-    const pointerUpHandler = (event: TbEvent<PointerEvent>) => {
+    const pointerReleaseHandler = (event: TbEvent<PointerEvent>) => {
       this.pointerActionsDisabled = false;
       event.stopPropagation();
 
       this.options.onTransformEnd?.(type);
 
-      this.ed.removeEventListener(target, 'pointerup', pointerUpHandler);
+      const isPointerOverObject = event.intersections.some(
+        (intersection) => target.getObjectById(intersection.object.id) === intersection.object,
+      );
+
+      if (event.nativeEvent.type === 'pointercancel' || !isPointerOverObject) {
+        if (innerLine.material === this.highlightMaterial) {
+          innerLine.material = this.innerMaterial;
+          this.options.onRequestRender?.();
+        }
+      }
+
+      this.ed.removeEventListener(target, 'pointerup', pointerReleaseHandler);
+      this.ed.removeEventListener(target, 'pointercancel', pointerReleaseHandler);
       this.ed.removeEventListener(target, 'pointermove', pointerMoveHandler);
       this.ed.releasePointerCapture(target, event.nativeEvent.pointerId);
     };
 
-    return pointerUpHandler;
+    return pointerReleaseHandler;
   }
 
   private createHitboxPointerEnterHandler(innerLine: THREE.Mesh) {
