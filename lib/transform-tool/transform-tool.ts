@@ -4,7 +4,7 @@ import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
-import { MouseButtonValues, TbPointerEventType, ThreeBitUtils } from '..';
+import { MouseButtonValues, ThreeBitUtils } from '..';
 import { TbEvent } from '../event-dispatcher/tb-event';
 import { TbEventDispatcher } from '../event-dispatcher/tb-event-dispatcher';
 import { TbEventListener } from '../event-dispatcher/tb-event-listener';
@@ -57,7 +57,13 @@ export interface TransformToolOptions {
    */
   baseRenderOrder?: number;
 
-  /** An object you want to the tool to attach to. Default is `undefined`. */
+  /**
+   * Object whose position and rotation are changed by transformations when
+   * `autoUpdate` is `true`. If omitted, transformations are applied to the
+   * tool's `transformObject`. This does not change where the tool is placed in
+   * the scene; add `transformObject` to the desired parent separately.
+   * Default is `undefined`.
+   */
   target?: THREE.Object3D;
 
   /**
@@ -165,16 +171,6 @@ const DefaultOptions: TransformToolOptionsInternal = {
  * and planar controls for translation within planes. It automatically adjusts
  * its visual scale based on camera distance and hides elements that would be
  * hard to interact with from the current view angle.
- *
- * @example
- * ```typescript
- * const eventDispatcher = new TbEventDispatcher(scene, camera, renderer.domElement);
- * const transformTool = new TransformTool(eventDispatcher, {
- *   onRequestRender: () => renderer.render(scene, camera),
- *   target: myObject3D
- * });
- * transformTool.attach(myObject3D);
- * ```
  */
 export class TransformTool {
   /**
@@ -187,7 +183,7 @@ export class TransformTool {
   layers: THREE.Layers;
 
   private root: THREE.Group;
-  private eventDispatcher: TbEventDispatcher;
+  private ed: TbEventDispatcher;
   private options: TransformToolOptionsInternal;
   private parts: {
     xTranslateArrow: THREE.Object3D | null;
@@ -229,7 +225,7 @@ export class TransformTool {
 
     const root = new THREE.Group();
     root.name = TransformToolName;
-    this.eventDispatcher = eventDispatcher;
+    this.ed = eventDispatcher;
     this.options = { ...DefaultOptions, ...options };
 
     this.inverseMatrixWorld = root.matrixWorld.clone().invert();
@@ -240,8 +236,8 @@ export class TransformTool {
     this.globalPointerUpHandler = () => {
       this.pointerActionsDisabled = false;
     };
-    this.eventDispatcher.addGlobalEventListener('pointerdown', this.globalPointerDownHandler);
-    this.eventDispatcher.addGlobalEventListener('pointerup', this.globalPointerUpHandler);
+    this.ed.addGlobalEventListener('pointerdown', this.globalPointerDownHandler);
+    this.ed.addGlobalEventListener('pointerup', this.globalPointerUpHandler);
 
     this.innerMaterial = new LineMaterial({
       color: this.options.color,
@@ -382,41 +378,19 @@ export class TransformTool {
   }
 
   /**
-   * Attaches the transform tool to a 3D object.
-   *
-   * This adds the tool's visual representation as a child of the specified object.
-   * The tool will follow the object's transformations.
-   *
-   * @param object - The {@link THREE.Object3D} to attach the tool to
-   */
-  attach(object: THREE.Object3D) {
-    object.add(this.root);
-  }
-
-  /**
-   * Detaches the transform tool from its current parent.
-   *
-   * This removes the tool's visual representation from the scene graph.
-   * The tool can be reattached later using the `attach` method.
-   */
-  detach() {
-    this.root.removeFromParent();
-  }
-
-  /**
    * Disposes of the transform tool and cleans up all resources.
    *
    * This method:
-   * - Detaches the tool from its parent
+   * - Removes the tool from its parent
    * - Removes all event listeners
    * - Disposes of all materials and geometries
    *
    * After calling this method, the tool instance cannot be used anymore.
    */
   dispose() {
-    this.detach();
-    this.eventDispatcher.removeGlobalEventListener('pointerdown', this.globalPointerDownHandler);
-    this.eventDispatcher.removeGlobalEventListener('pointerup', this.globalPointerUpHandler);
+    this.root.removeFromParent();
+    this.ed.removeGlobalEventListener('pointerdown', this.globalPointerDownHandler);
+    this.ed.removeGlobalEventListener('pointerup', this.globalPointerUpHandler);
     this.innerMaterial.dispose();
     this.outerMaterial.dispose();
     this.highlightMaterial.dispose();
@@ -425,7 +399,7 @@ export class TransformTool {
     this.hiddenLineMaterial.dispose();
     this.hiddenPlaneMaterial.dispose();
     this.root.traverse((object) => {
-      this.eventDispatcher.removeAllEventListeners(object);
+      this.ed.removeAllEventListeners(object);
     });
 
     for (const geometry of this.geometries) {
@@ -554,12 +528,12 @@ export class TransformTool {
     hitbox.renderOrder = this.options.baseRenderOrder + RenderOrders.hitbox;
     hitbox.name = 'hitbox';
     arrowGroup.add(hitbox);
-    this.addEventListener(
+    this.ed.addEventListener(
       arrowGroup,
       'pointerenter',
       this.createHitboxPointerEnterHandler(innerLine),
     );
-    this.addEventListener(
+    this.ed.addEventListener(
       arrowGroup,
       'pointerleave',
       this.createHitboxPointerLeaveHandler(innerLine),
@@ -648,7 +622,7 @@ export class TransformTool {
         startPlane.setFromNormalAndCoplanarPoint(startNormal, intersectionStartPos);
       },
     );
-    this.addEventListener(arrowGroup, 'pointerdown', pointerDownHandler);
+    this.ed.addEventListener(arrowGroup, 'pointerdown', pointerDownHandler);
 
     return arrowGroup;
   }
@@ -737,12 +711,12 @@ export class TransformTool {
     hitbox.renderOrder = this.options.baseRenderOrder + RenderOrders.hitbox;
     hitbox.name = 'hitbox';
     arrowGroup.add(hitbox);
-    this.addEventListener(
+    this.ed.addEventListener(
       arrowGroup,
       'pointerenter',
       this.createHitboxPointerEnterHandler(innerLine),
     );
-    this.addEventListener(
+    this.ed.addEventListener(
       arrowGroup,
       'pointerleave',
       this.createHitboxPointerLeaveHandler(innerLine),
@@ -817,7 +791,7 @@ export class TransformTool {
         startOffset.copy(target.getWorldPosition(_v1).sub(startOrigin));
       },
     );
-    this.addEventListener(arrowGroup, 'pointerdown', pointerDownHandler);
+    this.ed.addEventListener(arrowGroup, 'pointerdown', pointerDownHandler);
 
     return arrowGroup;
   }
@@ -868,12 +842,12 @@ export class TransformTool {
     hitbox.name = 'hitbox';
     hitbox.renderOrder = this.options.baseRenderOrder + RenderOrders.hitbox;
     sidePlaneGroup.add(hitbox);
-    this.addEventListener(
+    this.ed.addEventListener(
       sidePlaneGroup,
       'pointerenter',
       this.createHitboxPointerEnterHandler(innerLine),
     );
-    this.addEventListener(
+    this.ed.addEventListener(
       sidePlaneGroup,
       'pointerleave',
       this.createHitboxPointerLeaveHandler(innerLine),
@@ -946,7 +920,7 @@ export class TransformTool {
       },
     );
 
-    this.addEventListener(sidePlaneGroup, 'pointerdown', pointerDownHandler);
+    this.ed.addEventListener(sidePlaneGroup, 'pointerdown', pointerDownHandler);
 
     return sidePlaneGroup;
   }
@@ -972,9 +946,9 @@ export class TransformTool {
 
       this.options.onTransformStart?.(type);
 
-      this.addEventListener(target, 'pointerup', pointerUpHandler);
-      this.addEventListener(target, 'pointermove', pointerMoveHandler);
-      this.eventDispatcher.setPointerCapture(target, event.nativeEvent.pointerId);
+      this.ed.addEventListener(target, 'pointerup', pointerUpHandler);
+      this.ed.addEventListener(target, 'pointermove', pointerMoveHandler);
+      this.ed.setPointerCapture(target, event.nativeEvent.pointerId);
       onPointerDown(event);
     };
 
@@ -992,9 +966,9 @@ export class TransformTool {
 
       this.options.onTransformEnd?.(type);
 
-      this.removeEventListener(target, 'pointerup', pointerUpHandler);
-      this.removeEventListener(target, 'pointermove', pointerMoveHandler);
-      this.eventDispatcher.releasePointerCapture(target, event.nativeEvent.pointerId);
+      this.ed.removeEventListener(target, 'pointerup', pointerUpHandler);
+      this.ed.removeEventListener(target, 'pointermove', pointerMoveHandler);
+      this.ed.releasePointerCapture(target, event.nativeEvent.pointerId);
     };
 
     return pointerUpHandler;
@@ -1079,22 +1053,6 @@ export class TransformTool {
       innerLine.material = this.innerMaterial;
       hitbox.visible = true;
     }
-  }
-
-  private addEventListener(
-    object: THREE.Object3D,
-    eventType: TbPointerEventType,
-    listener: TbEventListener<PointerEvent>,
-  ) {
-    this.eventDispatcher.addEventListener(object, eventType, listener);
-  }
-
-  private removeEventListener(
-    object: THREE.Object3D,
-    eventType: TbPointerEventType,
-    listener: TbEventListener<PointerEvent>,
-  ) {
-    this.eventDispatcher.removeEventListener(object, eventType, listener);
   }
 
   private isAxisEnabled(

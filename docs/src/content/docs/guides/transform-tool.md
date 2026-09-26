@@ -16,23 +16,28 @@ import { TbEventDispatcher, TransformTool } from 'three-bits';
 
 const dispatcher = new TbEventDispatcher(renderer.domElement, camera);
 
+const mesh = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.MeshBasicMaterial({ color: 0x44aa88 }),
+);
+scene.add(mesh);
+
 const tool = new TransformTool(dispatcher, {
   onRequestRender: () => renderer.render(scene, camera),
+  target: mesh,
 });
 
-// Add the gizmo visuals to the scene
-scene.add(tool.transformObject);
-
-// Attach to an object - the gizmo will follow it
-tool.attach(mesh);
+// Add the gizmo visuals to the scene. This controls where the gizmo is placed.
+mesh.add(tool.transformObject);
 ```
 
 `onRequestRender` is the only required option. It is called whenever the tool's appearance changes and a new render is needed.
 
-When done, detach the tool and dispose of its resources:
+`target` controls which object is transformed when `autoUpdate` is enabled. It does not attach the gizmo to that object. The gizmo's scene placement is controlled independently by adding `transformObject` to the desired parent. If `target` is omitted, transformations are applied to `transformObject` itself.
+
+When done, dispose of the tool's resources:
 
 ```ts
-tool.detach();
 tool.dispose();
 ```
 
@@ -77,7 +82,7 @@ const tool = new TransformTool(dispatcher, {
 
 ## Manual update mode
 
-By default (`autoUpdate: true`) the tool moves and rotates the attached object directly. Set `autoUpdate: false` to take full control - the callbacks still fire with the delta values, but the tool and its target are not moved automatically:
+By default (`autoUpdate: true`) the tool moves and rotates the object specified by `target` directly. If no target is specified, it moves and rotates `transformObject`. Set `autoUpdate: false` to take full control - the callbacks still fire with the delta values, but the tool and its target are not moved automatically:
 
 ```ts
 const tool = new TransformTool(dispatcher, {

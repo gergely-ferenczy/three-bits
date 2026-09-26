@@ -260,7 +260,7 @@ const TransformToolStory = ({
     };
 
     const tool = new TransformTool(threeResources.eventDispatcher, options);
-    tool.attach(threeResources.mesh);
+    threeResources.mesh.add(tool.transformObject);
     threeResources.render();
 
     return () => {
