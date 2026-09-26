@@ -60,6 +60,7 @@ export class TbEventDispatcher {
   private targetIntersections = new Array<THREE.Intersection>();
   private targetObjects = new Set<THREE.Object3D>();
   private eventObjects = new Array<THREE.Object3D>();
+  private manualEventObjects = new Set<THREE.Object3D>();
   private eventMap = new Map<THREE.Object3D, ObjectEventState>();
   private globalListeners: TbEventListenerEntry<'global'>[] = [];
   private pointerCaptures = new Map<number, THREE.Object3D>();
@@ -307,6 +308,48 @@ export class TbEventDispatcher {
     this.globalListeners = this.globalListeners.filter(
       (s) => !(s.type === type && s.listener === listener && s.options === options),
     );
+  }
+
+  /**
+   * Adds an object to the set of objects tested by the raycaster.
+   *
+   * Objects with event listeners are added automatically. Use this method for
+   * objects that do not have event listeners but must still be detected because
+   * they can occlude interactive objects behind them.
+   *
+   * @param object Object to include in raycast hit testing.
+   */
+  addManualEventObject(object: THREE.Object3D): void {
+    this.manualEventObjects.add(object);
+    this.updateEventObjects();
+  }
+
+  /**
+   * Removes an object previously added with {@link addManualEventObject} from
+   * raycaster hit testing.
+   *
+   * @param object Object to remove from raycast hit testing.
+   */
+  removeManualEventObject(object: THREE.Object3D): void {
+    this.manualEventObjects.delete(object);
+    this.updateEventObjects();
+  }
+
+  /**
+   * Removes all manually registered objects from raycaster hit testing.
+   */
+  clearManualEventObjects(): void {
+    this.manualEventObjects.clear();
+    this.updateEventObjects();
+  }
+
+  /**
+   * Returns the objects manually registered for raycaster hit testing.
+   *
+   * @returns A read-only set of manually registered objects.
+   */
+  getManualEventObjects(): ReadonlySet<THREE.Object3D> {
+    return new Set(this.manualEventObjects);
   }
 
   /**
@@ -833,15 +876,7 @@ export class TbEventDispatcher {
   }
 
   private updateEventObjects() {
-    const eventObjectSet = new Set<THREE.Object3D>();
-    for (const object of this.eventMap.keys()) {
-      let current = object;
-      while (current.parent) {
-        current = current.parent;
-      }
-      eventObjectSet.add(current);
-    }
-    this.eventObjects = [...eventObjectSet];
+    this.eventObjects = [...new Set([...this.eventMap.keys(), ...this.manualEventObjects])];
 
     const enterLeaveRelatedObjects = this.eventMap
       .entries()

@@ -126,6 +126,7 @@ describe('object visibility changes under pointer', () => {
       objectB.visible = occludingObject === 'visible';
       objectB.position.x = -0.1;
       objectB.updateMatrixWorld(true);
+      eventDispatcher.addManualEventObject(objectB);
 
       const scene = new THREE.Scene();
       scene.add(objectA);

@@ -123,6 +123,57 @@ describe('event handlers can be added/removed', () => {
   });
 });
 
+describe('manual event objects', () => {
+  test('are added and removed from raycast hit testing immediately', () => {
+    const target = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    const occluder = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    occluder.position.x = -1;
+    occluder.updateMatrixWorld(true);
+
+    const over = vi.fn();
+    eventDispatcher.addEventListener(target, 'pointerover', over);
+    eventDispatcher.addManualEventObject(occluder);
+
+    canvas.dispatchEvent(createPointerEvent('pointermove'));
+    expect(over).not.toHaveBeenCalled();
+
+    eventDispatcher.removeManualEventObject(occluder);
+    canvas.dispatchEvent(createPointerEvent('pointermove'));
+    expect(over).toHaveBeenCalledOnce();
+  });
+
+  test('does not raycast the same object twice when it has listeners', () => {
+    const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    const raycaster = new THREE.Raycaster();
+    const intersectObjects = vi.spyOn(raycaster, 'intersectObjects');
+    eventDispatcher = new TbEventDispatcher(canvas, camera, raycaster);
+
+    eventDispatcher.addEventListener(object, 'pointerover', () => {});
+    eventDispatcher.addManualEventObject(object);
+    canvas.dispatchEvent(createPointerEvent('pointermove'));
+
+    expect(intersectObjects).toHaveBeenCalledWith([object]);
+  });
+
+  test('returns manually registered objects', () => {
+    const objectA = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    const objectB = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    eventDispatcher.addManualEventObject(objectA);
+    eventDispatcher.addManualEventObject(objectB);
+
+    expect(eventDispatcher.getManualEventObjects()).toEqual(new Set([objectA, objectB]));
+  });
+
+  test('clears manually registered objects', () => {
+    const object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    eventDispatcher.addManualEventObject(object);
+
+    eventDispatcher.clearManualEventObjects();
+
+    expect(eventDispatcher.getManualEventObjects()).toEqual(new Set());
+  });
+});
+
 describe('event handlers fire on 3D object', () => {
   test.each<{ type: TbEventType }>([
     { type: 'click' },

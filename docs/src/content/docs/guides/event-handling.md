@@ -96,6 +96,54 @@ The `event` object contains:
 | `nativeEvent`   | The original DOM `PointerEvent`, `MouseEvent`, or `WheelEvent` |
 | `eventPhase`    | `CAPTURING_PHASE`, `AT_TARGET`, or `BUBBLING_PHASE`            |
 
+### Objects that occlude event targets
+
+The dispatcher raycasts only against objects that have event listeners. This keeps
+hit testing efficient, especially when the scene contains large numbers of
+non-interactive objects. An object with an event listener is therefore detected
+automatically, but an object without listeners is not considered an occluder by
+default.
+
+If a non-interactive object or group must block events for objects behind it, register it
+explicitly with `addManualEventObject`:
+
+```ts
+const interactiveMesh = new THREE.Mesh(interactiveGeometry, interactiveMaterial);
+const occluderMesh = new THREE.Mesh(occluderGeometry, occluderMaterial);
+
+scene.add(interactiveMesh, occluderMesh);
+dispatcher.addEventListener(interactiveMesh, 'click', handleClick);
+dispatcher.addManualEventObject(occluderMesh);
+```
+
+Remove it when it no longer needs to participate in hit testing:
+
+```ts
+dispatcher.removeManualEventObject(occluderMesh);
+```
+
+You can inspect or remove all manually registered objects when managing a scene:
+
+```ts
+const manualObjects = dispatcher.getManualEventObjects();
+dispatcher.clearManualEventObjects();
+```
+
+Register only objects that can affect event targeting. Objects with event
+listeners do not need to be registered manually, and manually registering every
+scene object would remove the performance benefit of the optimized raycast set.
+
+For a simple scene, if you prefer not to register occluding objects individually,
+you can register the scene root instead. Raycasting is recursive, so this includes
+all objects in the scene:
+
+```ts
+dispatcher.addManualEventObject(scene);
+```
+
+This is convenient, but for complex scenes it brings back the cost of testing the
+whole scene and is less efficient than registering only the relevant occluders.
+
 ## Global listeners
 
 `addGlobalEventListener` fires on every event of that type regardless of which object (if any) was hit. This is equivalent to R3F's `onPointerMissed` but more general - it fires for all events, not only misses.
